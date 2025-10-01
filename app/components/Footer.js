@@ -7,9 +7,9 @@ export default function Footer() {
   const { toggleTheme, isDark, colors } = useTheme();
 
   return (
-    <View style={[styles.footer, { backgroundColor: colors.card }]}>
+    <View style={[styles.footer, { backgroundColor: colors.background }]}>
       <View style={styles.iconRow}>
-        {/* Botão de tema */}
+        {/* botão de tema */}
         <TouchableOpacity
           style={[styles.button, { backgroundColor: "rgba(128,128,128,0.5)" }]}
           onPress={toggleTheme}
@@ -21,7 +21,7 @@ export default function Footer() {
           )}
         </TouchableOpacity>
 
-        {/* Botão de adicionar */}
+        {/* botão de adicionar */}
         <TouchableOpacity
           style={[styles.button, { backgroundColor: colors.primary }]} 
           onPress={() => alert("Adicionar ação")}
@@ -38,14 +38,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 15, // espaço entre os botões (ou usar marginRight se versão antiga RN)
+    gap: 15,
   },
   
   footer: {
-    position: "absolute",
-    bottom: 25,
-    left: 25,
-    right: 25,
+    margin: 25,
     padding: 5,
     borderRadius: 50,
     alignItems: "center",

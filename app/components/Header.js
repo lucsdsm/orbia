@@ -1,24 +1,41 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, StatusBar, Platform } from 'react-native';
+import { useTheme } from '../ThemeContext';
 
 export default function Header() {
+  const { colors, isDark } = useTheme();
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}> Orbia </Text>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <StatusBar 
+        backgroundColor={colors.background} 
+        barStyle={isDark ? "light-content" : "dark-content"} 
+      />
+      <View style={[styles.semiCircle, { backgroundColor: colors.primary }]}>
+        <Text style={[styles.title, { color: colors.text }]}>Orbia</Text>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#6200EE', // cor roxa minimalista
-    paddingTop: 50, // para o notch do celular
-    paddingBottom: 15,
-    alignItems: 'center', // centraliza horizontalmente
+    alignItems: "center",
+    paddingTop: StatusBar.currentHeight + 20, 
+    marginTop: Platform.OS === 'ios' ? 40 : 0,
+  },
+  semiCircle: {
+    width: 150,        
+    height: 50,     
+    borderBottomLeftRadius: 100,  
+    borderBottomRightRadius: 100, 
+    borderTopLeftRadius: 100,
+    borderTopRightRadius: 100,
+    justifyContent: "center",
+    alignItems: "center",
   },
   title: {
-    color: '#FFFFFF',
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: 22,
+    fontWeight: "bold",
   },
 });

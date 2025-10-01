@@ -10,7 +10,7 @@ export function ThemeProvider({ children }) {
     const theme = {
         isDark,
         colors: {
-            background: isDark ? "#121212" : "#f2f2f2",
+            background: isDark ? "#121212" : "#ffffffff",
             text: isDark ? "#ffffff" : "#000000",
             primary: "#6200ee",
             secondary: "#3700b3",

@@ -3,13 +3,15 @@ import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useTheme } from "../ThemeContext";
 
+import Actions from "./Actions";
+
 export default function Footer() {
   const { toggleTheme, isDark, colors } = useTheme();
 
   return (
     <View style={[styles.footer, { backgroundColor: colors.background }]}>
       <View style={styles.iconRow}>
-        {/* botão de tema */}
+        {/* Botão de tema */}
         <TouchableOpacity
           style={[styles.button, { backgroundColor: "rgba(128,128,128,0.5)" }]}
           onPress={toggleTheme}
@@ -21,13 +23,8 @@ export default function Footer() {
           )}
         </TouchableOpacity>
 
-        {/* botão de adicionar */}
-        <TouchableOpacity
-          style={[styles.button, { backgroundColor: colors.primary }]} 
-          onPress={() => alert("Adicionar ação")}
-        >
-          <Feather name="plus" size={28} color="#fff" />
-        </TouchableOpacity>
+        {/* Botão de ações (menu de receita/despesa) */}
+        <Actions colors={colors} />
       </View>
     </View>
   );

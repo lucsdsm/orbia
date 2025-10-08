@@ -11,8 +11,8 @@ export default function Header() {
         backgroundColor={colors.background} 
         barStyle={isDark ? "light-content" : "dark-content"} 
       />
-      <View style={[styles.semiCircle, { backgroundColor: colors.primary }]}>
-        <Text style={[styles.title, { color: colors.text }]}>Orbia</Text>
+      <View style={[styles.semiCircle, { backgroundColor: colors.text }]}>
+        <Text style={[styles.title, { color: colors.background }]}>Orbia</Text>
       </View>
     </View>
   );

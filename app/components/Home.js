@@ -4,7 +4,7 @@ import { Feather } from "@expo/vector-icons";
 import { useTheme } from "../ThemeContext";
 import Saldo from "./Saldo";
 
-export default function Home() {
+export default function Home( { navigation } ) {
     const { colors } = useTheme();
 
     return (

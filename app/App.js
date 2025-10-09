@@ -1,7 +1,9 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
+
 import { NavigationContainer } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { createNativeStackNavigator, CardStyleInterpolators } from "@react-navigation/native-stack";
+
 import { ThemeProvider, useTheme } from "./ThemeContext";
 
 import Header from "./components/Header";
@@ -27,7 +29,13 @@ export default function App() {
   return (
     <ThemeProvider>
       <NavigationContainer>
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Navigator 
+          screenOptions={{
+            headerShown: false,
+            presentation: 'modal',
+            animation: 'slide_from_bottom', 
+          }}
+        >
           <Stack.Screen name="Home" component={HomeScreen} />
           <Stack.Screen name="ItemAdd" component={ItemAdd} />
         </Stack.Navigator>

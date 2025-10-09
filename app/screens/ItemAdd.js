@@ -14,8 +14,8 @@ export default function CadastroScreen({ route, navigation }) {
   const [emoji, setEmoji] = useState("");
 
   const handleSalvar = () => {
-    if (!descricao || !valor) {
-      alert("Preencha a descrição e o valor!");
+    if (!descricao || !emoji || !valor || !cartao || !data || !parcelas) {
+      alert("Preencha todos os campos!");
       return;
     }
 
@@ -23,6 +23,40 @@ export default function CadastroScreen({ route, navigation }) {
     console.log({ descricao, valor, cartao, data, parcelas, tipo });
     alert(`${tipo === "receita" ? "Receita" : "Despesa"} cadastrada com sucesso!`);
     navigation.goBack();
+  };
+
+  const valorChange = (texto) => {
+    // permite apenas números e ponto
+    const novoValor = texto.replace(/[^0-9.]/g, "");
+
+    // evita múltiplos pontos
+    if (novoValor.split(".").length > 2) return;
+
+    setValor(novoValor);
+  };
+
+  const valorSubmit = () => {
+    let valorNumerico = parseFloat(valor);
+    if (isNaN(valorNumerico) || valorNumerico < 0) {
+      valorNumerico = 0;
+    }
+    setValor(valorNumerico.toFixed(2));
+  };
+
+  const dateChange = (texto) => {
+    let novoTexto = texto.replace(/[^0-9]/g, "");
+
+    if (novoTexto.length > 8) novoTexto = novoTexto.slice(0, 8);
+
+    if (novoTexto.length > 2) {
+      novoTexto = novoTexto.slice(0, 2) + "/" + novoTexto.slice(2);
+    }
+
+    if (novoTexto.length > 5) {
+      novoTexto = novoTexto.slice(0, 5) + "/" + novoTexto.slice(5);
+    }
+
+    setData(novoTexto);
   };
 
   return (
@@ -47,11 +81,13 @@ export default function CadastroScreen({ route, navigation }) {
       />
       <TextInput
         style={[styles.input, { borderColor: colors.text, color: colors.text }]}
-        placeholder="Valor"
+        placeholder="Valor em R$"
         placeholderTextColor="#888"
         keyboardType="numeric"
         value={valor}
-        onChangeText={setValor}
+        onChangeText={valorChange}
+        onBlur={valorSubmit}
+        onSubmitEditing={valorSubmit}
       />
       <TextInput
         style={[styles.input, { borderColor: colors.text, color: colors.text }]}
@@ -65,7 +101,8 @@ export default function CadastroScreen({ route, navigation }) {
         placeholder="Data da compra"
         placeholderTextColor="#888"
         value={data}
-        onChangeText={setData}
+        keyboardType="numeric"
+        onChangeText={dateChange}
       />
       <TextInput
         style={[styles.input, { borderColor: colors.text, color: colors.text }]}
@@ -97,7 +134,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    justifyContent: "center",
+    justifyContent: "flex-start",
+    marginBlockStart: 60,
+    borderRadius: 20,
   },
   title: {
     fontSize: 22,
@@ -105,9 +144,9 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   input: {
-    borderWidth: 1,
+    borderWidth: 0,
     borderRadius: 10,
-    padding: 10,
+    padding: 20,
     marginBottom: 15,
   },
   button: {

@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
 import { useTheme } from "../ThemeContext";
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 export default function CadastroScreen({ route, navigation }) {
   const { colors } = useTheme();
   const { tipo } = route.params; // "receita" ou "despesa"
@@ -13,16 +15,39 @@ export default function CadastroScreen({ route, navigation }) {
   const [parcelas, setParcelas] = useState("");
   const [emoji, setEmoji] = useState("");
 
-  const handleSalvar = () => {
+  const handleSalvar = async () => {
     if (!descricao || !emoji || !valor || !cartao || !data || !parcelas) {
       alert("Preencha todos os campos!");
       return;
     }
 
-    // Aqui você salvaria no banco futuramente
-    console.log({ descricao, valor, cartao, data, parcelas, tipo });
-    alert(`${tipo === "receita" ? "Receita" : "Despesa"} cadastrada com sucesso!`);
-    navigation.goBack();
+    try{
+      const itensExistentes = await AsyncStorage.getItem("itens");
+      const itens = itensExistentes ? JSON.parse(itensExistentes) : [];
+
+      const novoItem = {
+        id: Date.now().toString(),
+        tipo,
+        descricao,
+        emoji,
+        valor: parseFloat(valor),
+        cartao,
+        data,
+        parcelas: parseInt(parcelas),
+      };
+
+      await AsyncStorage.setItem("itens", JSON.stringify([...itens, novoItem]));
+
+      alert("Item salvo com sucesso!");
+      navigation.goBack();
+      
+    } 
+    
+    catch (error) {
+      alert("Erro ao salvar o item.");
+      console.error(error);
+    }
+
   };
 
   const valorChange = (texto) => {

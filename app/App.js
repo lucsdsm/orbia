@@ -9,6 +9,8 @@ import { ThemeProvider, useTheme } from "./ThemeContext";
 import Header from "./components/Header";
 import Saldo from "./components/Saldo";
 import Footer from "./components/Footer";
+import Itens from "./components/Itens";
+
 import ItemAdd from "./screens/ItemAdd";
 
 const Stack = createNativeStackNavigator();
@@ -20,12 +22,14 @@ function HomeScreen() {
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Header />
       <Saldo />
+      <Itens />
       <Footer />
     </View>
   );
 }
 
 export default function App() {
+
   return (
     <ThemeProvider>
       <NavigationContainer>

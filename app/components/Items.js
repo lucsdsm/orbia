@@ -4,6 +4,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { useTheme } from "../ThemeContext";
 
+import { useNavigation } from "@react-navigation/native";
+
 import Toast from "react-native-toast-message";
 
 import { MaterialIcons } from "@expo/vector-icons";
@@ -11,6 +13,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 export default function Itens() {
   const { colors, isDark } = useTheme();
   const [itens, setItens] = useState([]);
+  const navigation = useNavigation();
 
   // Carrega os itens do AsyncStorage ao montar o componente
   useEffect(() => {
@@ -47,29 +50,47 @@ export default function Itens() {
           {item.natureza === "Receita" ? "+" : "-"} R$ {item.valor}
         </Text>
       </View>
-      
-      {/* botão de lixeira */}
-      <TouchableOpacity
-        onPress={() => {
-          Toast.show({
-            type: "error",
-            text1: "Excluir item?",
-            text2: "Toque novamente para confirmar.",
-            position: "top",
-            visibilityTime: 2500,
-            // também remover o toast se o usuário tocar nele
-            onPress: () => {
-              removerItem(index);
-              Toast.hide();
-            },
-          });
-        }}
-        style={{ alignItems: "center", justifyContent: "center" }}
-      >
-        <MaterialIcons name="delete" size={28} color={colors.background} />
-      </TouchableOpacity>
+
+      {/* botões */}
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 15 }}>
+        {/* botão de editar */}
+        <TouchableOpacity
+          onPress={() => navigation.navigate("ItemEdit", {
+            item,
+            onEdit: (itemEditado) => {
+              // Atualiza o estado local diretamente
+              const novosItens = itens.map(i => i.id === itemEditado.id ? itemEditado : i);
+              setItens(novosItens);
+            }
+          })}
+          style={{ marginRight: 10 }}
+        >
+          <MaterialIcons name="edit" size={28} color={colors.background} />
+        </TouchableOpacity>
+        
+        {/* botão de lixeira */}
+        <TouchableOpacity
+          onPress={() => {
+            Toast.show({
+              type: "error",
+              text1: "Excluir item?",
+              text2: "Toque novamente para confirmar.",
+              position: "top",
+              visibilityTime: 2500,
+              // também remover o toast se o usuário tocar nele
+              onPress: () => {
+                removerItem(index);
+                Toast.hide();
+              },
+            });
+          }}
+          style={{ alignItems: "center", justifyContent: "center" }}
+        >
+          <MaterialIcons name="delete" size={28} color={colors.background} />
+        </TouchableOpacity>
+      </View>
+
     </View>
-    
   );
 
   return (
@@ -89,7 +110,7 @@ export default function Itens() {
 
 const styles = StyleSheet.create({
   container: {
-    width: "90%",
+    width: "100%",
     marginVertical: 20,
   },
   item: {

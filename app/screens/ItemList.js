@@ -1,6 +1,6 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
-import Itens from "../components/Itens";
+import Itens from "../components/Items";
 import { useTheme } from "../ThemeContext";
 
 export default function ItensScreen() {

@@ -85,83 +85,90 @@ export default function CadastroScreen({ route, navigation }) {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <Text style={[styles.title, { color: colors.text }]}>
-        + {tipo === "receita" ? "Receita" : "Despesa"}
-      </Text>
-
-      <TextInput
-        style={[styles.input, { borderColor: colors.text, color: colors.text }]}
-        placeholder="Descrição"
-        placeholderTextColor="#888"
-        value={descricao}
-        onChangeText={setDescricao}
-      />
-      <TextInput
-        style={[styles.input, { borderColor: colors.text, color: colors.text }]}
-        placeholder="Emoji"
-        placeholderTextColor="#888"
-        value={emoji}
-        onChangeText={setEmoji}
-      />
-      <TextInput
-        style={[styles.input, { borderColor: colors.text, color: colors.text }]}
-        placeholder="Valor em R$"
-        placeholderTextColor="#888"
-        keyboardType="numeric"
-        value={valor}
-        onChangeText={valorChange}
-        onBlur={valorSubmit}
-        onSubmitEditing={valorSubmit}
-      />
-      <TextInput
-        style={[styles.input, { borderColor: colors.text, color: colors.text }]}
-        placeholder="Cartão"
-        placeholderTextColor="#888"
-        value={cartao}
-        onChangeText={setCartao}
-      />
-      <TextInput
-        style={[styles.input, { borderColor: colors.text, color: colors.text }]}
-        placeholder="Data da compra"
-        placeholderTextColor="#888"
-        value={data}
-        keyboardType="numeric"
-        onChangeText={dateChange}
-      />
-      <TextInput
-        style={[styles.input, { borderColor: colors.text, color: colors.text }]}
-        placeholder="Nº de parcelas"
-        placeholderTextColor="#888"
-        keyboardType="numeric"
-        value={parcelas}
-        onChangeText={setParcelas}
-      />
-
-      <TouchableOpacity
-        style={[styles.button, { backgroundColor: colors.text }]}
-        onPress={handleSalvar}
-      >
-        <Text style={{ color: colors.background, fontWeight: "bold" }}>
-          Salvar
+    <View style={[styles.wrapper, { backgroundColor: colors.secondBackground }]}>
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
+        <Text style={[styles.title, { color: colors.text }]}>
+          + {tipo === "receita" ? "Receita" : "Despesa"}
         </Text>
-      </TouchableOpacity>
 
-      {/* botão para voltar */}
-      <TouchableOpacity onPress={() => navigation.goBack()} style={[styles.button, { backgroundColor: colors.text, marginTop: 10 }]}>
-        <Text style={{ color: colors.background, fontWeight: "bold" }}> Voltar </Text>
-      </TouchableOpacity>
+        <TextInput
+          style={[styles.input, { borderColor: colors.text, color: colors.text }]}
+          placeholder="Descrição"
+          placeholderTextColor="#888"
+          value={descricao}
+          onChangeText={setDescricao}
+        />
+        <TextInput
+          style={[styles.input, { borderColor: colors.text, color: colors.text }]}
+          placeholder="Emoji"
+          placeholderTextColor="#888"
+          value={emoji}
+          onChangeText={setEmoji}
+        />
+        <TextInput
+          style={[styles.input, { borderColor: colors.text, color: colors.text }]}
+          placeholder="Valor em R$"
+          placeholderTextColor="#888"
+          keyboardType="numeric"
+          value={valor}
+          onChangeText={valorChange}
+          onBlur={valorSubmit}
+          onSubmitEditing={valorSubmit}
+        />
+        <TextInput
+          style={[styles.input, { borderColor: colors.text, color: colors.text }]}
+          placeholder="Cartão"
+          placeholderTextColor="#888"
+          value={cartao}
+          onChangeText={setCartao}
+        />
+        <TextInput
+          style={[styles.input, { borderColor: colors.text, color: colors.text }]}
+          placeholder="Data da compra"
+          placeholderTextColor="#888"
+          value={data}
+          keyboardType="numeric"
+          onChangeText={dateChange}
+        />
+        <TextInput
+          style={[styles.input, { borderColor: colors.text, color: colors.text }]}
+          placeholder="Nº de parcelas"
+          placeholderTextColor="#888"
+          keyboardType="numeric"
+          value={parcelas}
+          onChangeText={setParcelas}
+        />
+
+        <TouchableOpacity
+          style={[styles.button, { backgroundColor: colors.text }]}
+          onPress={handleSalvar}
+        >
+          <Text style={{ color: colors.background, fontWeight: "bold" }}>
+            Salvar
+          </Text>
+        </TouchableOpacity>
+
+        {/* botão para voltar */}
+        <TouchableOpacity onPress={() => navigation.goBack()} style={[styles.button, { backgroundColor: colors.text, marginTop: 10 }]}>
+          <Text style={{ color: colors.background, fontWeight: "bold" }}> Voltar </Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  wrapper: {
+    flex: 1,
+    justifyContent: "flex-end", // empurra o container pra baixo
+  },
   container: {
     flex: 1,
     padding: 20,
     justifyContent: "flex-start",
     marginBlockStart: 60,
-    borderRadius: 20,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
   },
   title: {
     fontSize: 22,

@@ -2,18 +2,18 @@ import React from "react";
 import { View, StyleSheet } from "react-native";
 
 import { NavigationContainer } from "@react-navigation/native";
-import { createNativeStackNavigator, CardStyleInterpolators } from "@react-navigation/native-stack";
+import { createStackNavigator, CardStyleInterpolators } from "@react-navigation/stack"; // ✅ De @react-navigation/stack!
 
 import { ThemeProvider, useTheme } from "./ThemeContext";
 
 import Header from "./components/Header";
 import Saldo from "./components/Saldo";
 import Footer from "./components/Footer";
-import Itens from "./components/Itens";
 
 import ItemAdd from "./screens/ItemAdd";
+import ItemList from "./screens/ItemList";
 
-const Stack = createNativeStackNavigator();
+const Stack = createStackNavigator();
 
 function HomeScreen() {
   const { colors } = useTheme();
@@ -22,26 +22,30 @@ function HomeScreen() {
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Header />
       <Saldo />
-      <Itens />
       <Footer />
     </View>
   );
 }
 
 export default function App() {
-
   return (
     <ThemeProvider>
       <NavigationContainer>
-        <Stack.Navigator 
+        <Stack.Navigator
           screenOptions={{
             headerShown: false,
-            presentation: 'modal',
-            animation: 'slide_from_bottom', 
-          }}
-        >
+            gestureEnabled: true,
+            cardStyleInterpolator: CardStyleInterpolators.forVerticalIOS,
+          }}>
           <Stack.Screen name="Home" component={HomeScreen} />
-          <Stack.Screen name="ItemAdd" component={ItemAdd} />
+          <Stack.Screen 
+            name="ItemAdd" 
+            component={ItemAdd}
+          />
+          <Stack.Screen 
+            name="ItemList" 
+            component={ItemList}
+          />
         </Stack.Navigator>
       </NavigationContainer>
     </ThemeProvider>

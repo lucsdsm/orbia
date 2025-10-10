@@ -57,7 +57,7 @@ export default function Itens() {
   return (
     <View style={styles.container}>
       {itens.length === 0 ? (
-        <Text style={styles.vazio}>Nenhum item cadastrado</Text>
+        <Text style={styles.vazio}>Nenhum item cadastrado, ainda 😄.</Text>
       ) : (
         <FlatList
           data={itens}

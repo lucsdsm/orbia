@@ -12,8 +12,7 @@ export function ThemeProvider({ children }) {
         colors: {
             background: isDark ? "#121212" : "#ffffffff",
             text: isDark ? "#ffffff" : "#000000",
-            primary: "#6200ee",
-            secondary: "#3700b3",
+            secondBackground: isDark ? "#1e1e1e" : "#f0f0f0",
         },
         toggleTheme,
     };

@@ -1,12 +1,16 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Feather } from "@expo/vector-icons";
+
 import { useTheme } from "../ThemeContext";
+
+import { useNavigation } from "@react-navigation/native";
 
 import Actions from "./Actions";
 
 export default function Footer() {
   const { toggleTheme, isDark, colors } = useTheme();
+  const navigation = useNavigation();
 
   return (
     <View style={[styles.footer, { backgroundColor: colors.background }]}>
@@ -23,8 +27,21 @@ export default function Footer() {
           )}
         </TouchableOpacity>
 
-        {/* Botão de ações (menu de receita/despesa) */}
+        {/* Botão de ações (adição de receita/despesa) */}
         <Actions colors={colors} />
+
+        {/* Botão para tela de lista de receitas/despesas */}
+        <TouchableOpacity
+          style={[styles.button, { backgroundColor: colors.text }]}
+          onPress={() => {
+            navigation.navigate("ItemList");
+          }}>
+          <Feather
+            name={"list"}
+            size={24}
+            color={colors.background}
+            style={colors.text}/>
+        </TouchableOpacity>
       </View>
     </View>
   );

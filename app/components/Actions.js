@@ -21,12 +21,12 @@ export default function Actions({ colors }) {
 
   const translateReceita = animacao.interpolate({
     inputRange: [0, 1],
-    outputRange: [0, -30],
+    outputRange: [0, -90],
   });
 
   const translateDespesa = animacao.interpolate({
     inputRange: [0, 1],
-    outputRange: [0, -90],
+    outputRange: [0, -30],
   });
 
   const opacity = animacao;
@@ -49,7 +49,7 @@ export default function Actions({ colors }) {
             style={[styles.botaoAcao, { backgroundColor: "#4CAF50" }]}
             onPress={() => {
               setAberto(false);
-              navigation.navigate("ItemAdd", { tipo: "receita" }); // 👈 navega pra tela de cadastro
+              navigation.navigate("ItemAdd", { natureza: "receita" }); // 👈 navega pra tela de cadastro
             }}
           >
             <Feather name="arrow-up-circle" size={20} color="#fff" />
@@ -74,7 +74,7 @@ export default function Actions({ colors }) {
             style={[styles.botaoAcao, { backgroundColor: "#F44336" }]}
             onPress={() => {
               setAberto(false);
-              navigation.navigate("ItemAdd", { tipo: "despesa" }); // 👈 navega pra tela de cadastro
+              navigation.navigate("ItemAdd", { natureza: "despesa" }); // 👈 navega pra tela de cadastro
             }}
           >
             <Feather name="arrow-down-circle" size={20} color="#fff" />

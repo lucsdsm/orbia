@@ -6,6 +6,8 @@ import { createStackNavigator, CardStyleInterpolators } from "@react-navigation/
 
 import { ThemeProvider, useTheme } from "./ThemeContext";
 
+import Toast from "react-native-toast-message";
+
 import Header from "./components/Header";
 import Saldo from "./components/Saldo";
 import Footer from "./components/Footer";
@@ -47,6 +49,7 @@ export default function App() {
             component={ItemList}
           />
         </Stack.Navigator>
+        <Toast />
       </NavigationContainer>
     </ThemeProvider>
   );

@@ -4,6 +4,10 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { useTheme } from "../ThemeContext";
 
+import Toast from "react-native-toast-message";
+
+import { MaterialIcons } from "@expo/vector-icons";
+
 export default function Itens() {
   const { colors, isDark } = useTheme();
   const [itens, setItens] = useState([]);
@@ -36,19 +40,33 @@ export default function Itens() {
 
   // Renderiza cada item da lista
   const renderItem = ({ item, index }) => (
-    <View style={[styles.item, { backgroundColor: colors.text }]}>
+    <View style={[styles.item, { backgroundColor: colors.text, borderLeftColor: item.natureza === "receita" ? "#4CAF50" : "#F44336" }]}>
       <View>
         <Text style={[styles.descricao, { color: colors.background }]}>{item.descricao}</Text>
         <Text style={[styles.valor, { color: colors.background }]}>
-          {item.tipo === "receita" ? "+" : "-"} R$ {item.valor}
+          {item.natureza === "receita" ? "+" : "-"} R$ {item.valor}
         </Text>
       </View>
       
-      {/* Botão de lixeira */}
-      <TouchableOpacity onPress={() => removerItem(index)} style={{ alignContent: "center", justifyContent: "center" }}>
-        <Text style={{ fontSize: 24 }}>
-          🗑️
-        </Text>
+      {/* botão de lixeira */}
+      <TouchableOpacity
+        onPress={() => {
+          Toast.show({
+            type: "error",
+            text1: "Excluir item?",
+            text2: "Toque novamente para confirmar.",
+            position: "top",
+            visibilityTime: 2500,
+            // também remover o toast se o usuário tocar nele
+            onPress: () => {
+              removerItem(index);
+              Toast.hide();
+            },
+          });
+        }}
+        style={{ alignItems: "center", justifyContent: "center" }}
+      >
+        <MaterialIcons name="delete" size={28} color={colors.background} />
       </TouchableOpacity>
     </View>
     
@@ -80,6 +98,7 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 10,
     marginBottom: 10,
+    borderLeftWidth: 5,
   },
   descricao: {
     fontWeight: "bold",

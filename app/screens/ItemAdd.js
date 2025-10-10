@@ -2,22 +2,33 @@ import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
 import { useTheme } from "../ThemeContext";
 
+import Toast from "react-native-toast-message";
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import { Picker } from "@react-native-picker/picker";
 
 export default function CadastroScreen({ route, navigation }) {
   const { colors } = useTheme();
-  const { tipo } = route.params; // "receita" ou "despesa"
+  const { natureza } = route.params; // "receita" ou "despesa"
 
   const [descricao, setDescricao] = useState("");
+  const [emoji, setEmoji] = useState("");
   const [valor, setValor] = useState("");
+  const [tipo, setTipo] = useState("Fixa");
   const [cartao, setCartao] = useState("");
   const [data, setData] = useState("");
   const [parcelas, setParcelas] = useState("");
-  const [emoji, setEmoji] = useState("");
-
+  
   const handleSalvar = async () => {
-    if (!descricao || !emoji || !valor || !cartao || !data || !parcelas) {
-      alert("Preencha todos os campos!");
+    if (!descricao || !emoji || !valor) {
+      Toast.show({
+        type: "error",
+        text1: "Campos obrigatórios!",
+        text2: "Preencha todos os campos antes de salvar.",
+        position: "top",
+        visibilityTime: 3000,
+    });
       return;
     }
 
@@ -27,10 +38,11 @@ export default function CadastroScreen({ route, navigation }) {
 
       const novoItem = {
         id: Date.now().toString(),
-        tipo,
+        natureza,
         descricao,
         emoji,
         valor: parseFloat(valor),
+        tipo,
         cartao,
         data,
         parcelas: parseInt(parcelas),
@@ -38,13 +50,22 @@ export default function CadastroScreen({ route, navigation }) {
 
       await AsyncStorage.setItem("itens", JSON.stringify([...itens, novoItem]));
 
-      alert("Item salvo com sucesso!");
+      Toast.show({
+        type: "success",
+        text1: "Item salvo com sucesso!",
+        position: "top",
+        visibilityTime: 3000,
+      });
       navigation.goBack();
-      
     } 
     
     catch (error) {
-      alert("Erro ao salvar o item.");
+      Toast.show({
+        type: "error",
+        text1: "Erro ao salvar o item.",
+        position: "top",
+        visibilityTime: 3000,
+      });
       console.error(error);
     }
 
@@ -88,26 +109,31 @@ export default function CadastroScreen({ route, navigation }) {
     <View style={[styles.wrapper, { backgroundColor: colors.secondBackground }]}>
       <View style={[styles.container, { backgroundColor: colors.background }]}>
         <Text style={[styles.title, { color: colors.text }]}>
-          + {tipo === "receita" ? "Receita" : "Despesa"}
+          + {natureza === "receita" ? "Receita" : "Despesa"}
         </Text>
 
+        {/* descrição */}
         <TextInput
           style={[styles.input, { borderColor: colors.text, color: colors.text }]}
-          placeholder="Descrição"
+          placeholder="Descrição (*)"
           placeholderTextColor="#888"
           value={descricao}
           onChangeText={setDescricao}
         />
+
+        {/* emoji */}
         <TextInput
           style={[styles.input, { borderColor: colors.text, color: colors.text }]}
-          placeholder="Emoji"
+          placeholder="Emoji (*)"
           placeholderTextColor="#888"
           value={emoji}
           onChangeText={setEmoji}
         />
+
+        {/* valor */}
         <TextInput
           style={[styles.input, { borderColor: colors.text, color: colors.text }]}
-          placeholder="Valor em R$"
+          placeholder="Valor em R$ (*)"
           placeholderTextColor="#888"
           keyboardType="numeric"
           value={valor}
@@ -115,13 +141,35 @@ export default function CadastroScreen({ route, navigation }) {
           onBlur={valorSubmit}
           onSubmitEditing={valorSubmit}
         />
-        <TextInput
-          style={[styles.input, { borderColor: colors.text, color: colors.text }]}
-          placeholder="Cartão"
-          placeholderTextColor="#888"
-          value={cartao}
-          onChangeText={setCartao}
-        />
+
+        {/*  tipo */}
+        {natureza === "despesa" && (
+        <View style={[styles.pickerContainer, { borderColor: colors.text }]}>
+          <Picker
+            selectedValue={tipo}
+            onValueChange={(itemValue) => setTipo(itemValue)}
+            dropdownIconColor={colors.text}
+            style={[styles.picker, { color: colors.text }]}
+          >
+            <Picker.Item label="Fixa" value="Fixa" />
+            <Picker.Item label="Parcelada" value="Parcelada" />
+          </Picker>
+        </View>
+        )}
+
+        {/* cartão */}
+        {tipo === "Parcelada" && (
+          <TextInput
+            style={[styles.input, { borderColor: colors.text, color: colors.text }]}
+            placeholder="Cartão (*)"
+            placeholderTextColor="#888"
+            value={cartao}
+            onChangeText={setCartao}
+          />
+        )}
+
+        {/* data */}
+        {natureza === "despesa" && tipo === "Parcelada" && (
         <TextInput
           style={[styles.input, { borderColor: colors.text, color: colors.text }]}
           placeholder="Data da compra"
@@ -130,6 +178,10 @@ export default function CadastroScreen({ route, navigation }) {
           keyboardType="numeric"
           onChangeText={dateChange}
         />
+        )}
+
+        {/* parcelas */}
+        {tipo === "Parcelada" && (
         <TextInput
           style={[styles.input, { borderColor: colors.text, color: colors.text }]}
           placeholder="Nº de parcelas"
@@ -138,11 +190,12 @@ export default function CadastroScreen({ route, navigation }) {
           value={parcelas}
           onChangeText={setParcelas}
         />
+        )}
 
+        {/* botão salvar */}
         <TouchableOpacity
           style={[styles.button, { backgroundColor: colors.text }]}
-          onPress={handleSalvar}
-        >
+          onPress={handleSalvar}>
           <Text style={{ color: colors.background, fontWeight: "bold" }}>
             Salvar
           </Text>
@@ -185,5 +238,14 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 10,
     alignItems: "center",
+  },
+  picker: {
+    height: 60,
+    borderWidth: 0,
+    borderRadius: 10,
+    marginBottom: 15,
+    borderRadius: 50,
+    marginLeft: 10,
+    marginRight: 10,
   },
 });

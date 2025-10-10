@@ -10,7 +10,7 @@ import { Picker } from "@react-native-picker/picker";
 
 export default function CadastroScreen({ route, navigation }) {
   const { colors } = useTheme();
-  const { natureza } = route.params; // "receita" ou "despesa"
+  const { natureza, onAdd } = route.params; // ✅ Adicionar onAdd dos params
 
   const [descricao, setDescricao] = useState("");
   const [emoji, setEmoji] = useState("");
@@ -45,7 +45,7 @@ export default function CadastroScreen({ route, navigation }) {
         tipo,
         cartao,
         data,
-        parcelas: parseInt(parcelas),
+        parcelas: parseInt(parcelas) || 0,
       };
 
       await AsyncStorage.setItem("itens", JSON.stringify([...itens, novoItem]));
@@ -56,6 +56,12 @@ export default function CadastroScreen({ route, navigation }) {
         position: "top",
         visibilityTime: 3000,
       });
+
+      // ✅ Usar onAdd dos params ao invés de onNovoItem
+      if (onAdd) {
+        onAdd(novoItem);
+      }
+      
       navigation.goBack();
     } 
     
@@ -109,7 +115,7 @@ export default function CadastroScreen({ route, navigation }) {
     <View style={[styles.wrapper, { backgroundColor: colors.secondBackground }]}>
       <View style={[styles.container, { backgroundColor: colors.background }]}>
         <Text style={[styles.title, { color: colors.text }]}>
-          + {natureza === "receita" ? "Receita" : "Despesa"}
+          + {natureza === "Receita" ? "Receita" : "Despesa"}
         </Text>
 
         {/* descrição */}
@@ -143,7 +149,7 @@ export default function CadastroScreen({ route, navigation }) {
         />
 
         {/*  tipo */}
-        {natureza === "despesa" && (
+        {natureza === "Despesa" && (
         <View style={[styles.pickerContainer, { borderColor: colors.text }]}>
           <Picker
             selectedValue={tipo}
@@ -169,7 +175,7 @@ export default function CadastroScreen({ route, navigation }) {
         )}
 
         {/* data */}
-        {natureza === "despesa" && tipo === "Parcelada" && (
+        {natureza === "Despesa" && tipo === "Parcelada" && (
         <TextInput
           style={[styles.input, { borderColor: colors.text, color: colors.text }]}
           placeholder="Data da compra"
@@ -213,7 +219,7 @@ export default function CadastroScreen({ route, navigation }) {
 const styles = StyleSheet.create({
   wrapper: {
     flex: 1,
-    justifyContent: "flex-end", // empurra o container pra baixo
+    justifyContent: "flex-end",
   },
   container: {
     flex: 1,

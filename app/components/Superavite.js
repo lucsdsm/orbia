@@ -1,0 +1,50 @@
+import React, { useMemo } from "react";
+import { View, Text, StyleSheet } from "react-native";
+import { useTheme } from "../ThemeContext";
+
+export default function Superavite({ itens = [] }) { 
+  const { colors } = useTheme();
+
+  const saldoDoMes = useMemo(() => {
+    let receita = 0;
+    let despesa = 0;
+
+    if (!Array.isArray(itens)) return "0.00";
+
+    itens.forEach(item => {
+      const valor = Number(item.valor) || 0;
+      if (item.natureza === "Receita") receita += valor;
+      else if (item.natureza === "Despesa") despesa += valor;
+    });
+
+    const resultado = receita - despesa;
+    return resultado.toFixed(2);
+  }, [itens]);
+
+  const positivo = parseFloat(saldoDoMes) >= 0;
+
+  return (
+    <View style={styles.container}>
+      <Text style={[styles.label, { color: colors.text }]}> {positivo ? "Superávite" : "Déficit"} </Text>
+      <Text style={[styles.valor, { color: positivo ? "#4CAF50" : "#F44336" }]}>
+      {positivo ? "+ " : "- "} {"R$ " + saldoDoMes}
+      </Text>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    marginVertical: 20,
+    alignItems: "center",
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  valor: {
+    fontSize: 28,
+    fontWeight: "bold",
+    marginTop: 5,
+  },
+});

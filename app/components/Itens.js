@@ -40,11 +40,11 @@ export default function Itens() {
 
   // Renderiza cada item da lista
   const renderItem = ({ item, index }) => (
-    <View style={[styles.item, { backgroundColor: colors.text, borderLeftColor: item.natureza === "receita" ? "#4CAF50" : "#F44336" }]}>
+    <View style={[styles.item, { backgroundColor: colors.text, borderLeftColor: item.natureza === "Receita" ? "#4CAF50" : "#F44336" }]}>
       <View>
         <Text style={[styles.descricao, { color: colors.background }]}>{item.descricao}</Text>
         <Text style={[styles.valor, { color: colors.background }]}>
-          {item.natureza === "receita" ? "+" : "-"} R$ {item.valor}
+          {item.natureza === "Receita" ? "+" : "-"} R$ {item.valor}
         </Text>
       </View>
       

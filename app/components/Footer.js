@@ -8,7 +8,7 @@ import { useNavigation } from "@react-navigation/native";
 
 import Actions from "./Actions";
 
-export default function Footer() {
+export default function Footer( { onNovoItem } ) {
   const { toggleTheme, isDark, colors } = useTheme();
   const navigation = useNavigation();
 
@@ -28,7 +28,7 @@ export default function Footer() {
         </TouchableOpacity>
 
         {/* Botão de ações (adição de receita/despesa) */}
-        <Actions colors={colors} />
+        <Actions colors={colors} onNovoItem={onNovoItem}/>
 
         {/* Botão para tela de lista de receitas/despesas */}
         <TouchableOpacity

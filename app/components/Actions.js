@@ -1,22 +1,45 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Animated } from "react-native";
+import { View, Text, StyleSheet, Animated, Pressable } from "react-native";
 import { Feather } from "@expo/vector-icons";
 
-import { useNavigation } from "@react-navigation/native";
-
-export default function Actions({ colors }) {
+export default function Actions({ colors, onNovoItem }) {
   const [aberto, setAberto] = useState(false);
   const animacao = useState(new Animated.Value(0))[0];
-  const navigation = useNavigation();
 
   const toggleMenu = () => {
     const toValue = aberto ? 0 : 1;
-    setAberto(!aberto);
+    
+    if (!aberto) {
+      // Abrindo: primeiro mostra, depois anima
+      setAberto(true);
+      Animated.spring(animacao, {
+        toValue,
+        useNativeDriver: true,
+        friction: 6,
+        tension: 40,
+      }).start();
+    } else {
+      // Fechando: primeiro anima, depois esconde
+      Animated.spring(animacao, {
+        toValue,
+        useNativeDriver: true,
+        friction: 6,
+        tension: 40,
+      }).start(() => {
+        setAberto(false);
+      });
+    }
+  };
+
+  const handleAction = (tipo) => {
     Animated.spring(animacao, {
-      toValue,
+      toValue: 0,
       useNativeDriver: true,
       friction: 6,
-    }).start();
+    }).start(() => {
+      setAberto(false);
+      if (onNovoItem) onNovoItem(tipo);
+    });
   };
 
   const translateReceita = animacao.interpolate({
@@ -30,62 +53,79 @@ export default function Actions({ colors }) {
   });
 
   const opacity = animacao;
+  const scale = animacao;
 
   return (
     <View style={styles.container}>
-      {/* Botão Receita */}
+      {/* Botão Receita - só renderiza quando aberto */}
       {aberto && (
         <Animated.View
           style={[
             styles.acao,
             {
-              transform: [{ translateY: translateReceita }],
+              transform: [
+                { translateY: translateReceita },
+                { scale },
+              ],
               opacity,
             },
           ]}
-          pointerEvents={aberto ? "auto" : "none"}
         >
-          <TouchableOpacity
-            style={[styles.botaoAcao, { backgroundColor: "#4CAF50" }]}
-            onPress={() => {
-              setAberto(false);
-              navigation.navigate("ItemAdd", { natureza: "receita" }); // 👈 navega pra tela de cadastro
-            }}
+          <Pressable
+            style={({ pressed }) => [
+              styles.botaoAcao,
+              { 
+                backgroundColor: "#4CAF50",
+                opacity: pressed ? 0.8 : 1, 
+              }
+            ]}
+            onPress={() => handleAction("Receita")}
           >
             <Feather name="arrow-up-circle" size={20} color="#fff" />
             <Text style={styles.textoAcao}>Receita</Text>
-          </TouchableOpacity>
+          </Pressable>
         </Animated.View>
       )}
 
-      {/* Botão Despesa */}
+      {/* Botão Despesa - só renderiza quando aberto */}
       {aberto && (
         <Animated.View
           style={[
             styles.acao,
             {
-              transform: [{ translateY: translateDespesa }],
+              transform: [
+                { translateY: translateDespesa },
+                { scale },
+              ],
               opacity,
             },
           ]}
-          pointerEvents={aberto ? "auto" : "none"}
         >
-          <TouchableOpacity
-            style={[styles.botaoAcao, { backgroundColor: "#F44336" }]}
-            onPress={() => {
-              setAberto(false);
-              navigation.navigate("ItemAdd", { natureza: "despesa" }); // 👈 navega pra tela de cadastro
-            }}
+          <Pressable
+            style={({ pressed }) => [
+              styles.botaoAcao,
+              { 
+                backgroundColor: "#F44336",
+                opacity: pressed ? 0.8 : 1, 
+              }
+            ]}
+            onPress={() => handleAction("Despesa")}
           >
             <Feather name="arrow-down-circle" size={20} color="#fff" />
             <Text style={styles.textoAcao}>Despesa</Text>
-          </TouchableOpacity>
+          </Pressable>
         </Animated.View>
       )}
 
       {/* Botão principal (+) */}
-      <TouchableOpacity
-        style={[styles.botaoPrincipal, { backgroundColor: colors.text }]}
+      <Pressable
+        style={({ pressed }) => [
+          styles.botaoPrincipal,
+          { 
+            backgroundColor: colors.text,
+            transform: [{ scale: pressed ? 0.95 : 1 }], 
+          }
+        ]}
         onPress={toggleMenu}
       >
         <Feather
@@ -93,7 +133,7 @@ export default function Actions({ colors }) {
           size={24}
           color={colors.background}
         />
-      </TouchableOpacity>
+      </Pressable>
     </View>
   );
 }

@@ -74,7 +74,7 @@ orbia/
 1. **Clone o repositório**
 ```bash
 git clone https://github.com/seu-usuario/orbia.git
-cd orbia
+cd orbia/app
 ```
 
 2. **Instale as dependências**

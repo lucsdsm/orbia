@@ -18,15 +18,12 @@ export default function ItensScreen() {
 const styles = StyleSheet.create({
   wrapper: {
     flex: 1,
-    justifyContent: "flex-end", 
+    justifyContent: "flex-center", 
   },
   container: {
     flex: 1,
     alignItems: "center",
     padding: 20,
     justifyContent: "center",
-    marginTop: 60, 
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
   },
 });

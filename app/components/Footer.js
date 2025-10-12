@@ -6,8 +6,6 @@ import { useTheme } from "../ThemeContext";
 
 import { useNavigation } from "@react-navigation/native";
 
-import Actions from "./Actions";
-
 export default function Footer( { onNovoItem } ) {
   const { toggleTheme, isDark, colors } = useTheme();
   const navigation = useNavigation();
@@ -27,21 +25,22 @@ export default function Footer( { onNovoItem } ) {
           )}
         </TouchableOpacity>
 
-        {/* Botão de ações (adição de receita/despesa) */}
-        <Actions colors={colors} onNovoItem={onNovoItem}/>
-
-        {/* Botão para tela de lista de receitas/despesas */}
+        {/* Botão de adicionar Receita */}
         <TouchableOpacity
-          style={[styles.button, { backgroundColor: colors.text }]}
-          onPress={() => {
-            navigation.navigate("ItemList");
-          }}>
-          <Feather
-            name={"list"}
-            size={24}
-            color={colors.background}
-            style={colors.text}/>
+          style={[styles.button, { backgroundColor: "#4CAF50" }]}
+          onPress={() => onNovoItem("Receita")}
+        >
+          <Feather name="arrow-up-circle" size={28} color="#fff" />
         </TouchableOpacity>
+
+        {/* Botão de adicionar Despesa */}
+        <TouchableOpacity
+          style={[styles.button, { backgroundColor: "#F44336" }]}
+          onPress={() => onNovoItem("Despesa")}
+        >
+          <Feather name="arrow-down-circle" size={28} color="#fff" />
+        </TouchableOpacity>
+
       </View>
     </View>
   );

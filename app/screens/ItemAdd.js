@@ -10,7 +10,7 @@ import { Picker } from "@react-native-picker/picker";
 
 export default function CadastroScreen({ route, navigation }) {
   const { colors } = useTheme();
-  const { natureza, onAdd } = route.params; // ✅ Adicionar onAdd dos params
+  const { natureza } = route.params; 
 
   const [descricao, setDescricao] = useState("");
   const [emoji, setEmoji] = useState("");
@@ -28,11 +28,11 @@ export default function CadastroScreen({ route, navigation }) {
         text2: "Preencha todos os campos antes de salvar.",
         position: "top",
         visibilityTime: 3000,
-    });
+      });
       return;
     }
 
-    try{
+    try {
       const itensExistentes = await AsyncStorage.getItem("itens");
       const itens = itensExistentes ? JSON.parse(itensExistentes) : [];
 
@@ -48,7 +48,8 @@ export default function CadastroScreen({ route, navigation }) {
         parcelas: parseInt(parcelas) || 0,
       };
 
-      await AsyncStorage.setItem("itens", JSON.stringify([...itens, novoItem]));
+      const novosItens = [...itens, novoItem];
+      await AsyncStorage.setItem("itens", JSON.stringify(novosItens));
 
       Toast.show({
         type: "success",
@@ -57,14 +58,10 @@ export default function CadastroScreen({ route, navigation }) {
         visibilityTime: 3000,
       });
 
-      // ✅ Usar onAdd dos params ao invés de onNovoItem
-      if (onAdd) {
-        onAdd(novoItem);
-      }
-      
-      navigation.goBack();
-    } 
-    
+      setTimeout(() => {
+        navigation.goBack();
+      }, 300);
+    }
     catch (error) {
       Toast.show({
         type: "error",
@@ -74,16 +71,11 @@ export default function CadastroScreen({ route, navigation }) {
       });
       console.error(error);
     }
-
   };
 
   const valorChange = (texto) => {
-    // permite apenas números e ponto
     const novoValor = texto.replace(/[^0-9.]/g, "");
-
-    // evita múltiplos pontos
     if (novoValor.split(".").length > 2) return;
-
     setValor(novoValor);
   };
 
@@ -118,7 +110,6 @@ export default function CadastroScreen({ route, navigation }) {
           + {natureza === "Receita" ? "Receita" : "Despesa"}
         </Text>
 
-        {/* descrição */}
         <TextInput
           style={[styles.input, { borderColor: colors.text, color: colors.text }]}
           placeholder="Descrição (*)"
@@ -127,7 +118,6 @@ export default function CadastroScreen({ route, navigation }) {
           onChangeText={setDescricao}
         />
 
-        {/* emoji */}
         <TextInput
           style={[styles.input, { borderColor: colors.text, color: colors.text }]}
           placeholder="Emoji (*)"
@@ -136,7 +126,6 @@ export default function CadastroScreen({ route, navigation }) {
           onChangeText={setEmoji}
         />
 
-        {/* valor */}
         <TextInput
           style={[styles.input, { borderColor: colors.text, color: colors.text }]}
           placeholder="Valor em R$ (*)"
@@ -148,22 +137,20 @@ export default function CadastroScreen({ route, navigation }) {
           onSubmitEditing={valorSubmit}
         />
 
-        {/*  tipo */}
         {natureza === "Despesa" && (
-        <View style={[styles.pickerContainer, { borderColor: colors.text }]}>
-          <Picker
-            selectedValue={tipo}
-            onValueChange={(itemValue) => setTipo(itemValue)}
-            dropdownIconColor={colors.text}
-            style={[styles.picker, { color: colors.text }]}
-          >
-            <Picker.Item label="Fixa" value="Fixa" />
-            <Picker.Item label="Parcelada" value="Parcelada" />
-          </Picker>
-        </View>
+          <View style={[styles.pickerContainer, { borderColor: colors.text }]}>
+            <Picker
+              selectedValue={tipo}
+              onValueChange={(itemValue) => setTipo(itemValue)}
+              dropdownIconColor={colors.text}
+              style={[styles.picker, { color: colors.text }]}
+            >
+              <Picker.Item label="Fixa" value="Fixa" />
+              <Picker.Item label="Parcelada" value="Parcelada" />
+            </Picker>
+          </View>
         )}
 
-        {/* cartão */}
         {tipo === "Parcelada" && (
           <TextInput
             style={[styles.input, { borderColor: colors.text, color: colors.text }]}
@@ -174,42 +161,42 @@ export default function CadastroScreen({ route, navigation }) {
           />
         )}
 
-        {/* data */}
         {natureza === "Despesa" && tipo === "Parcelada" && (
-        <TextInput
-          style={[styles.input, { borderColor: colors.text, color: colors.text }]}
-          placeholder="Data da compra"
-          placeholderTextColor="#888"
-          value={data}
-          keyboardType="numeric"
-          onChangeText={dateChange}
-        />
+          <TextInput
+            style={[styles.input, { borderColor: colors.text, color: colors.text }]}
+            placeholder="Data da compra"
+            placeholderTextColor="#888"
+            value={data}
+            keyboardType="numeric"
+            onChangeText={dateChange}
+          />
         )}
 
-        {/* parcelas */}
         {tipo === "Parcelada" && (
-        <TextInput
-          style={[styles.input, { borderColor: colors.text, color: colors.text }]}
-          placeholder="Nº de parcelas"
-          placeholderTextColor="#888"
-          keyboardType="numeric"
-          value={parcelas}
-          onChangeText={setParcelas}
-        />
+          <TextInput
+            style={[styles.input, { borderColor: colors.text, color: colors.text }]}
+            placeholder="Nº de parcelas"
+            placeholderTextColor="#888"
+            keyboardType="numeric"
+            value={parcelas}
+            onChangeText={setParcelas}
+          />
         )}
 
-        {/* botão salvar */}
         <TouchableOpacity
           style={[styles.button, { backgroundColor: colors.text }]}
-          onPress={handleSalvar}>
+          onPress={handleSalvar}
+        >
           <Text style={{ color: colors.background, fontWeight: "bold" }}>
             Salvar
           </Text>
         </TouchableOpacity>
 
-        {/* botão para voltar */}
-        <TouchableOpacity onPress={() => navigation.goBack()} style={[styles.button, { backgroundColor: colors.text, marginTop: 10 }]}>
-          <Text style={{ color: colors.background, fontWeight: "bold" }}> Voltar </Text>
+        <TouchableOpacity 
+          onPress={() => navigation.goBack()} 
+          style={[styles.button, { backgroundColor: colors.text, marginTop: 10 }]}
+        >
+          <Text style={{ color: colors.background, fontWeight: "bold" }}>Voltar</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -250,8 +237,11 @@ const styles = StyleSheet.create({
     borderWidth: 0,
     borderRadius: 10,
     marginBottom: 15,
-    borderRadius: 50,
     marginLeft: 10,
     marginRight: 10,
+  },
+  pickerContainer: {
+    borderRadius: 10,
+    marginBottom: 15,
   },
 });

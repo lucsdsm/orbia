@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, TextComponent  } from "react-native";
+import { View, Text, FlatList, StyleSheet, TouchableOpacity } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { useTheme } from "../ThemeContext";
 
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 
 import Toast from "react-native-toast-message";
 
@@ -15,39 +15,49 @@ export default function Itens() {
   const [itens, setItens] = useState([]);
   const navigation = useNavigation();
 
-  // Carrega os itens do AsyncStorage ao montar o componente
-  useEffect(() => {
-    const carregarItens = async () => {
-      try {
-        const itensExistentes = await AsyncStorage.getItem("itens");
-        setItens(itensExistentes ? JSON.parse(itensExistentes) : []);
-      } catch (error) {
-        console.log("Erro ao carregar itens:", error);
-      }
-    };
+  const carregarItens = async () => {
+    try {
+      const itensExistentes = await AsyncStorage.getItem("itens");
+      const itensCarregados = itensExistentes ? JSON.parse(itensExistentes) : [];
+      setItens(itensCarregados);
+    } catch (error) {
+      console.log("Erro ao carregar itens:", error);
+    }
+  };
 
-    carregarItens();
-  }, []);
+  // recarrega sempre que a tela receber foco
+  useFocusEffect(
+    React.useCallback(() => {
+      carregarItens();
+    }, [])
+  );
 
-  // Função para remover item
+  // função para remover item
   const removerItem = async (index) => {
     try {
       const novosItens = [...itens];
-      novosItens.splice(index, 1); // remove o item do array
-      await AsyncStorage.setItem("itens", JSON.stringify(novosItens)); // salva no AsyncStorage
-      setItens(novosItens); // atualiza state
+      novosItens.splice(index, 1);
+      await AsyncStorage.setItem("itens", JSON.stringify(novosItens));
+      setItens(novosItens);
+      
+      Toast.show({
+        type: "success",
+        text1: "Item removido!",
+        position: "top",
+        visibilityTime: 2000,
+      });
     } catch (error) {
       console.log("Erro ao remover item:", error);
     }
   };
 
-  // Renderiza cada item da lista
+  // renderiza cada item da lista
   const renderItem = ({ item, index }) => (
     <View style={[styles.item, { backgroundColor: colors.text, borderLeftColor: item.natureza === "Receita" ? "#4CAF50" : "#F44336" }]}>
       <View>
         <Text style={[styles.descricao, { color: colors.background }]}>{item.descricao}</Text>
         <Text style={[styles.valor, { color: colors.background }]}>
-          {item.natureza === "Receita" ? "+" : "-"} R$ {item.valor}
+          {item.natureza === "Receita" ? "+" : "-"} R$ {item.valor.toFixed(2)}
         </Text>
       </View>
 
@@ -57,10 +67,14 @@ export default function Itens() {
         <TouchableOpacity
           onPress={() => navigation.navigate("ItemEdit", {
             item,
-            onEdit: (itemEditado) => {
-              // Atualiza o estado local diretamente
-              const novosItens = itens.map(i => i.id === itemEditado.id ? itemEditado : i);
-              setItens(novosItens);
+            onEdit: async (itemEditado) => {
+              try {
+                const itensAtualizados = itens.map(i => i.id === itemEditado.id ? itemEditado : i);
+                await AsyncStorage.setItem("itens", JSON.stringify(itensAtualizados));
+                setItens(itensAtualizados);
+              } catch (error) {
+                console.log("Erro ao atualizar item:", error);
+              }
             }
           })}
           style={{ marginRight: 10 }}
@@ -77,7 +91,6 @@ export default function Itens() {
               text2: "Toque novamente para confirmar.",
               position: "top",
               visibilityTime: 2500,
-              // também remover o toast se o usuário tocar nele
               onPress: () => {
                 removerItem(index);
                 Toast.hide();
@@ -89,18 +102,17 @@ export default function Itens() {
           <MaterialIcons name="delete" size={28} color={colors.background} />
         </TouchableOpacity>
       </View>
-
     </View>
   );
 
   return (
     <View style={styles.container}>
       {itens.length === 0 ? (
-        <Text style={styles.vazio}>Nenhum item cadastrado, ainda 😄.</Text>
+        <Text style={[styles.vazio, { color: colors.text }]}>Nenhum item cadastrado, ainda 😄.</Text>
       ) : (
         <FlatList
           data={itens}
-          keyExtractor={(item, index) => index.toString()}
+          keyExtractor={(item) => item.id} 
           renderItem={renderItem}
         />
       )}
@@ -110,8 +122,9 @@ export default function Itens() {
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     width: "100%",
-    marginVertical: 20,
+    padding: 20,
   },
   item: {
     flexDirection: "row",
@@ -134,6 +147,7 @@ const styles = StyleSheet.create({
   },
   vazio: {
     textAlign: "center",
-    color: "#999",
+    marginTop: 50,
+    fontSize: 16,
   },
 });

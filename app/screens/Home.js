@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { View, StyleSheet } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useTheme } from "../ThemeContext";
+import { useFocusEffect } from "@react-navigation/native";
 
 import Superavite from "../components/Superavite";
 import Balance from "../components/Balance";
@@ -16,24 +17,23 @@ export default function Home({ navigation }) {
     try {
       const itensExistentes = await AsyncStorage.getItem("itens");
       if (itensExistentes) {
-        setItens(JSON.parse(itensExistentes));
+        const itensCarregados = JSON.parse(itensExistentes);
+        console.log("Itens carregados:", itensCarregados.length);
+        setItens(itensCarregados);
+      } else {
+        setItens([]);
       }
     } catch (error) {
       console.error("Erro ao carregar itens:", error);
     }
   }, []);
 
-  useEffect(() => {
-    carregarItens();
-  }, [carregarItens]);
-
-  useEffect(() => {
-    const unsubscribe = navigation.addListener("focus", () => {
+  useFocusEffect(
+    useCallback(() => {
+      console.log("Home recebeu foco - recarregando itens...");
       carregarItens();
-    });
-
-    return unsubscribe;
-  }, [navigation, carregarItens]);
+    }, [carregarItens])
+  );
 
   const superavite = useMemo(() => {
     let receita = 0;

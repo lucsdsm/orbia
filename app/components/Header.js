@@ -2,7 +2,9 @@ import React from 'react';
 import { View, Text, StyleSheet, StatusBar, Platform } from 'react-native';
 import { useTheme } from '../ThemeContext';
 
-export default function Header() {
+import Indicator from './Indicator';
+
+export default function Header({ scrollX, totalPages }) {
   const { colors, isDark } = useTheme();
 
   return (
@@ -12,8 +14,13 @@ export default function Header() {
         barStyle={isDark ? "light-content" : "dark-content"} 
       />
       <View style={[styles.container, { backgroundColor: colors.background }]}>
-        <Text style={[styles.title, { color: colors.text }]}> versão 0.1 </Text>
-      </View>
+        <Text style={[styles.title, { color: colors.text }]}>Orbia</Text>
+        <Text style={[styles.version, { color: colors.text, opacity: 0.6 }]}>versão 0.1</Text>
+
+        {scrollX && totalPages && (
+          <Indicator scrollX={scrollX} totalPages={totalPages} />
+        )}
+      </View>  
     </View>
   );
 }
@@ -22,7 +29,7 @@ const styles = StyleSheet.create({
   wrapper: {
     alignItems: "center",
     paddingTop: StatusBar.currentHeight, 
-    marginTop: Platform.OS === 'ios' ? 20 : 0,
+    marginTop: Platform.OS === 'ios' ? 20 : 5,
   },
   container: {
     width: 150,        
@@ -31,7 +38,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   title: {
-    fontSize: 12,
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  version: {
+    fontSize: 10,
     fontStyle: "italic",
+    marginTop: 2,
   },
 });

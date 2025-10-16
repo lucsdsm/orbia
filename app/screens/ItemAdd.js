@@ -6,7 +6,9 @@ import Toast from "react-native-toast-message";
 import { Picker } from "@react-native-picker/picker";
 import ActualDateInput from "../components/ActualDateInput";
 
-import { StorageService } from "../services/storage"; // ✅ Import do service
+import { CARTOES } from "../constants";
+
+import { StorageService } from "../services/storage";
 
 export default function ItemAdd({ route, navigation }) {
   const { colors } = useTheme();
@@ -202,8 +204,13 @@ export default function ItemAdd({ route, navigation }) {
                 color: colors.text,
               }}
             >
-              <Picker.Item label="Nubank 🔮" value="nubank" />
-              <Picker.Item label="Inter 🦊" value="inter" />
+              {CARTOES.map((cartao) => (
+                <Picker.Item
+                  key={cartao.value}
+                  label={cartao.label}
+                  value={cartao.value} 
+                />
+              ))}
             </Picker>
           </View>
         )}

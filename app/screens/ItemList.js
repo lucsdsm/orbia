@@ -7,7 +7,7 @@ import Toast from "react-native-toast-message";
 import { MaterialIcons } from "@expo/vector-icons";
 
 import ParcelProgress from "../components/ParcelProgress";
-import { StorageService } from "../services/storage"; 
+import { StorageService } from "../services/storage";
 
 export default function ItemList() {
   const { colors } = useTheme();
@@ -119,7 +119,6 @@ export default function ItemList() {
   );
 
   return (
-    <View style={[styles.wrapper, { backgroundColor: colors.secondBackground }]}>
       <View style={[styles.container, { backgroundColor: colors.background }]}>
         {itensOrdenados.length === 0 ? (
           <Text style={[styles.vazio, { color: colors.text }]}>
@@ -134,19 +133,12 @@ export default function ItemList() {
           />
         )}
       </View>
-    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  wrapper: {
-    flex: 1,
-  },
   container: {
     flex: 1,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    marginTop: 20,
   },
   listContent: {
     padding: 20,

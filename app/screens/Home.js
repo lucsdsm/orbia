@@ -1,40 +1,58 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { View, StyleSheet } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useTheme } from "../ThemeContext";
 import { useFocusEffect } from "@react-navigation/native";
 
-import { useTheme } from "../ThemeContext";
-import Balance from "../components/Balance";
 import Superavite from "../components/Superavite";
+import Balance from "../components/Balance";
 import NextBalance from "../components/NextBalance";
 
-import { StorageService } from "../services/storage"; 
-
-export default function Home() {
+export default function Home({ navigation }) {
   const { colors } = useTheme();
   const [itens, setItens] = useState([]);
+  const [diferenca, setDiferenca] = useState(0);
 
-  const carregarItens = async () => {
+  const carregarItens = useCallback(async () => {
     try {
-      const itensCarregados = await StorageService.getItems();
-      setItens(itensCarregados);
+      const itensExistentes = await AsyncStorage.getItem("itens");
+      if (itensExistentes) {
+        const itensCarregados = JSON.parse(itensExistentes);
+        setItens(itensCarregados);
+      } else {
+        setItens([]);
+      }
     } catch (error) {
-      console.log("Erro ao carregar itens:", error);
+      console.error("Erro ao carregar itens:", error);
     }
-  };
+  }, []);
 
   useFocusEffect(
-    React.useCallback(() => {
+    useCallback(() => {
       carregarItens();
-    }, [])
+    }, [carregarItens])
   );
 
+  const superavite = useMemo(() => {
+    let receita = 0;
+    let despesa = 0;
+
+    if (!Array.isArray(itens)) return 0;
+
+    itens.forEach((item) => {
+      const valor = Number(item.valor) || 0;
+      if (item.natureza === "Receita") receita += valor;
+      else if (item.natureza === "Despesa") despesa += valor;
+    });
+
+    return receita - despesa;
+  }, [itens]);
+
   return (
-    <View style={[styles.container, { backgroundColor: colors.secondBackground }]}>
-      <View style={[styles.content, { backgroundColor: colors.background }]}>
-        <Balance itens={itens} />
-        <Superavite itens={itens} />
-        <NextBalance itens={itens} />
-      </View>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <Superavite itens={itens} />
+      <Balance itens={itens} diferenca={diferenca} setDiferenca={setDiferenca} />
+      <NextBalance saldoAtual={diferenca} superavite={superavite} />
     </View>
   );
 }
@@ -42,12 +60,7 @@ export default function Home() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  content: {
-    flex: 1,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    marginTop: 20,
-    padding: 20,
+    alignItems: "center",
+    justifyContent: "space-around",
   },
 });

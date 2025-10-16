@@ -1,16 +1,13 @@
 import React, { useState, useMemo } from "react";
 import { View, Text, FlatList, StyleSheet, TouchableOpacity } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { useTheme } from "../ThemeContext";
-
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
-
 import Toast from "react-native-toast-message";
-
 import { MaterialIcons } from "@expo/vector-icons";
 
 import ParcelProgress from "../components/ParcelProgress";
+import { StorageService } from "../services/storage"; 
 
 export default function ItemList() {
   const { colors } = useTheme();
@@ -19,15 +16,13 @@ export default function ItemList() {
 
   const carregarItens = async () => {
     try {
-      const itensExistentes = await AsyncStorage.getItem("itens");
-      const itensCarregados = itensExistentes ? JSON.parse(itensExistentes) : [];
+      const itensCarregados = await StorageService.getItems();
       setItens(itensCarregados);
     } catch (error) {
       console.log("Erro ao carregar itens:", error);
     }
   };
 
-  // ordena itens por valor (maior para menor)
   const itensOrdenados = useMemo(() => {
     return [...itens].sort((a, b) => {
       const valorA = parseFloat(a.valor) || 0;
@@ -36,19 +31,16 @@ export default function ItemList() {
     });
   }, [itens]);
 
-  // recarrega sempre que a tela receber foco
   useFocusEffect(
     React.useCallback(() => {
       carregarItens();
     }, [])
   );
 
-  // função para remover item
   const removerItem = async (id) => {
     try {
-      const novosItens = itens.filter(item => item.id !== id);
-      await AsyncStorage.setItem("itens", JSON.stringify(novosItens));
-      setItens(novosItens);
+      await StorageService.deleteItem(id);
+      await carregarItens(); // Recarrega a lista
       
       Toast.show({
         type: "success",
@@ -58,10 +50,14 @@ export default function ItemList() {
       });
     } catch (error) {
       console.log("Erro ao remover item:", error);
+      Toast.show({
+        type: "error",
+        text1: "Erro ao remover item.",
+        position: "top",
+      });
     }
   };
 
-  // renderiza cada item da lista
   const renderItem = ({ item }) => (
     <View style={[styles.item, { backgroundColor: colors.text, borderLeftColor: item.natureza === "receita" ? "#4CAF50" : "#F44336" }]}>
       <View style={{ flex: 1 }}>
@@ -76,7 +72,6 @@ export default function ItemList() {
             <Text style={styles.emoji}>📌</Text>
           )}
           
-          {/* progresso para despesa parcelada */}
           {item.natureza === "despesa" && item.tipo === "parcelada" && item.data && item.parcelas && (
             <ParcelProgress 
               dataCompra={item.data}
@@ -84,29 +79,16 @@ export default function ItemList() {
               cor={colors.background}
             />
           )}
-          {/* cartão */}
-          {item.natureza === "despesa" && item.tipo === "parcelada" && item.cartao && (
-            <Text style={[styles.emoji, { color: colors.background }]}>
-              {item.cartao === "nubank" ? "Nubank 🔮" : item.cartao === "inter" ? "Inter 🦊" : "💳"}
-            </Text>
-          )}
         </View>
       </View>
 
-      {/* botões */}
       <View style={{ flexDirection: "row", alignItems: "center", gap: 15 }}>
-        {/* botão de editar */}
         <TouchableOpacity
           onPress={() => navigation.navigate("ItemEdit", {
             item,
             onEdit: async (itemEditado) => {
-              try {
-                const itensAtualizados = itens.map(i => i.id === itemEditado.id ? itemEditado : i);
-                await AsyncStorage.setItem("itens", JSON.stringify(itensAtualizados));
-                setItens(itensAtualizados);
-              } catch (error) {
-                console.log("Erro ao atualizar item:", error);
-              }
+              await StorageService.updateItem(itemEditado.id, itemEditado);
+              await carregarItens();
             }
           })}
           style={{ marginRight: 10 }}
@@ -114,7 +96,6 @@ export default function ItemList() {
           <MaterialIcons name="edit" size={28} color={colors.background} />
         </TouchableOpacity>
         
-        {/* botão de lixeira */}
         <TouchableOpacity
           onPress={() => {
             Toast.show({
@@ -138,26 +119,34 @@ export default function ItemList() {
   );
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      {itensOrdenados.length === 0 ? (
-        <Text style={[styles.vazio, { color: colors.text }]}>
-          Nenhum item cadastrado, ainda 😄.
-        </Text>
-      ) : (
-        <FlatList
-          data={itensOrdenados}
-          keyExtractor={(item) => item.id}
-          renderItem={renderItem}
-          contentContainerStyle={styles.listContent}
-        />
-      )}
+    <View style={[styles.wrapper, { backgroundColor: colors.secondBackground }]}>
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
+        {itensOrdenados.length === 0 ? (
+          <Text style={[styles.vazio, { color: colors.text }]}>
+            Nenhum item cadastrado, ainda 😄.
+          </Text>
+        ) : (
+          <FlatList
+            data={itensOrdenados}
+            keyExtractor={(item) => item.id} 
+            renderItem={renderItem}
+            contentContainerStyle={styles.listContent}
+          />
+        )}
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  wrapper: {
+    flex: 1,
+  },
   container: {
     flex: 1,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    marginTop: 20,
   },
   listContent: {
     padding: 20,

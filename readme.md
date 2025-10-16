@@ -102,9 +102,9 @@ npx expo start
 
 2. **Adicionar Transação**
    - Toque no botão `+` no rodapé
-   - Escolha entre Receita ou Despesa
+   - Escolha entre receita ou despesa
    - Preencha os detalhes (descrição, emoji, valor, etc.)
-   - Para despesas: escolha entre Fixa ou Parcelada
+   - Para despesas: escolha entre fixa ou parcelada
 
 3. **Gerenciar Saldo**
    - Toque no saldo atual para editá-lo

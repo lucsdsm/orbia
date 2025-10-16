@@ -1,15 +1,15 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
 import { useTheme } from "../ThemeContext";
 import Toast from "react-native-toast-message";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Picker } from "@react-native-picker/picker";
+
+import { StorageService } from "../services/storage"; //
 
 export default function ItemEdit({ route, navigation }) {
   const { colors } = useTheme();
   const { item, onEdit } = route.params;
 
-  // Preencher estados com dados existentes
   const [descricao, setDescricao] = useState(item.descricao);
   const [emoji, setEmoji] = useState(item.emoji);
   const [valor, setValor] = useState(item.valor.toString());
@@ -29,55 +29,50 @@ export default function ItemEdit({ route, navigation }) {
     }
 
     try {
-        const itemEditado = {
-            ...item,          
-            descricao,
-            emoji,
-            valor: parseFloat(valor),
-            tipo,
-            cartao,
-            data,
-            parcelas: parseInt(parcelas) || 0,
-        };
+      const itemEditado = {
+        ...item,          
+        descricao,
+        emoji,
+        valor: parseFloat(valor),
+        tipo,
+        cartao,
+        data,
+        parcelas: parseInt(parcelas) || 0,
+      };
 
-        const itensExistentes = await AsyncStorage.getItem("itens");
-        const itens = itensExistentes ? JSON.parse(itensExistentes) : [];
-        const itensAtualizados = itens.map(i => i.id === itemEditado.id ? itemEditado : i);
-        await AsyncStorage.setItem("itens", JSON.stringify(itensAtualizados));
+      await StorageService.updateItem(itemEditado.id, itemEditado);
 
-        if (onEdit) onEdit(itemEditado);
+      if (onEdit) onEdit(itemEditado);
 
-        Toast.show({
-            type: "success",
-            text1: "Item atualizado!",
-        });
+      Toast.show({
+        type: "success",
+        text1: "Item atualizado!",
+      });
 
-        navigation.goBack();
+      navigation.goBack();
+    } 
+    catch (error) {
+      console.error(error);
+      Toast.show({
+        type: "error",
+        text1: "Erro ao salvar item.",
+      });
+    }
+  };
 
-        } 
-        
-        catch (error) {
-            console.error(error);
-            Toast.show({
-                type: "error",
-                text1: "Erro ao salvar item.",
-            });
-        }
-    };
+  const valorChange = texto => {
+    const novoValor = texto.replace(/[^0-9.]/g, "");
+    if (novoValor.split(".").length > 2) return;
+    setValor(novoValor);
+  };
 
-    const valorChange = texto => {
-        const novoValor = texto.replace(/[^0-9.]/g, "");
-        if (novoValor.split(".").length > 2) return;
-        setValor(novoValor);
-    };
-
-    const valorSubmit = () => {
-        let valorNumerico = parseFloat(valor);
-        if (isNaN(valorNumerico) || valorNumerico < 0) {
-            valorNumerico = 0;
-        }
-        setValor(valorNumerico.toFixed(2));
-    };
+  const valorSubmit = () => {
+    let valorNumerico = parseFloat(valor);
+    if (isNaN(valorNumerico) || valorNumerico < 0) {
+      valorNumerico = 0;
+    }
+    setValor(valorNumerico.toFixed(2));
+  };
 
   const dateChange = texto => {
     let novoTexto = texto.replace(/[^0-9]/g, "");
@@ -108,9 +103,24 @@ export default function ItemEdit({ route, navigation }) {
           onChangeText={setEmoji}
         />
 
+        {item.natureza === "despesa" && (
+          <View style={[styles.pickerContainer, { borderColor: colors.text, backgroundColor: colors.background }]}>
+            <Picker
+              selectedValue={tipo}
+              onValueChange={setTipo}
+              dropdownIconColor={colors.text}
+              style={[styles.picker, { color: colors.text }]}
+              itemStyle={{ color: colors.text }}
+            >
+              <Picker.Item label="Fixa" value="fixa" />
+              <Picker.Item label="Parcelada" value="parcelada" />
+            </Picker>
+          </View>
+        )}
+
         <TextInput
           style={[styles.input, { borderColor: colors.text, color: colors.text }]}
-          placeholder="Valor (*)"
+          placeholder={tipo === "fixa" ? "Valor (*)" : "Valor da parcela (*)"}
           placeholderTextColor="#888"
           keyboardType="numeric"
           value={valor}
@@ -119,40 +129,21 @@ export default function ItemEdit({ route, navigation }) {
           onSubmitEditing={valorSubmit}
         />
 
-        {item.natureza === "despesa" && (
-          <View style={[styles.pickerContainer, { borderColor: colors.text }]}>
-            <Picker
-              selectedValue={tipo}
-              onValueChange={setTipo}
-              dropdownIconColor={colors.text}
-              style={[styles.picker, { color: colors.text }]}
-            >
-              <Picker.Item label="Fixa" value="fixa" />
-              <Picker.Item label="Parcelada" value="parcelada" />
-            </Picker>
-          </View>
-        )}
-
         {tipo === "parcelada" && (
           <>
-            <View style={styles.pickerContainer}>
+            <View style={[styles.pickerContainer, { borderColor: colors.text, backgroundColor: colors.background }]}>
               <Picker
                 selectedValue={cartao}
                 onValueChange={(itemValue) => setCartao(itemValue)}
-                style={[
-                  styles.picker,
-                  {
-                    color: colors.text,
-                  },
-                ]}
-                itemStyle={{
-                  color: colors.text,
-                }}
+                dropdownIconColor={colors.text}
+                style={[styles.picker, { color: colors.text }]}
+                itemStyle={{ color: colors.text }}
               >
                 <Picker.Item label="Nubank 🔮" value="nubank" />
                 <Picker.Item label="Inter 🦊" value="inter" />
               </Picker>
             </View>
+
             {item.natureza === "despesa" && (
               <TextInput
                 style={[styles.input, { borderColor: colors.text, color: colors.text }]}
@@ -163,6 +154,7 @@ export default function ItemEdit({ route, navigation }) {
                 onChangeText={dateChange}
               />
             )}
+            
             <TextInput
               style={[styles.input, { borderColor: colors.text, color: colors.text }]}
               placeholder="Nº de parcelas"

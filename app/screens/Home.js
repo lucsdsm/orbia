@@ -1,58 +1,40 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState } from "react";
 import { View, StyleSheet } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useTheme } from "../ThemeContext";
 import { useFocusEffect } from "@react-navigation/native";
 
-import Superavite from "../components/Superavite";
+import { useTheme } from "../ThemeContext";
 import Balance from "../components/Balance";
+import Superavite from "../components/Superavite";
 import NextBalance from "../components/NextBalance";
 
-export default function Home({ navigation }) {
+import { StorageService } from "../services/storage"; 
+
+export default function Home() {
   const { colors } = useTheme();
   const [itens, setItens] = useState([]);
-  const [diferenca, setDiferenca] = useState(0);
 
-  const carregarItens = useCallback(async () => {
+  const carregarItens = async () => {
     try {
-      const itensExistentes = await AsyncStorage.getItem("itens");
-      if (itensExistentes) {
-        const itensCarregados = JSON.parse(itensExistentes);
-        setItens(itensCarregados);
-      } else {
-        setItens([]);
-      }
+      const itensCarregados = await StorageService.getItems();
+      setItens(itensCarregados);
     } catch (error) {
-      console.error("Erro ao carregar itens:", error);
+      console.log("Erro ao carregar itens:", error);
     }
-  }, []);
+  };
 
   useFocusEffect(
-    useCallback(() => {
+    React.useCallback(() => {
       carregarItens();
-    }, [carregarItens])
+    }, [])
   );
 
-  const superavite = useMemo(() => {
-    let receita = 0;
-    let despesa = 0;
-
-    if (!Array.isArray(itens)) return 0;
-
-    itens.forEach((item) => {
-      const valor = Number(item.valor) || 0;
-      if (item.natureza === "receita") receita += valor;
-      else if (item.natureza === "despesa") despesa += valor;
-    });
-
-    return receita - despesa;
-  }, [itens]);
-
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <Superavite itens={itens} />
-      <Balance itens={itens} diferenca={diferenca} setDiferenca={setDiferenca} />
-      <NextBalance saldoAtual={diferenca} superavite={superavite} />
+    <View style={[styles.container, { backgroundColor: colors.secondBackground }]}>
+      <View style={[styles.content, { backgroundColor: colors.background }]}>
+        <Balance itens={itens} />
+        <Superavite itens={itens} />
+        <NextBalance itens={itens} />
+      </View>
     </View>
   );
 }
@@ -60,7 +42,12 @@ export default function Home({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "space-around",
+  },
+  content: {
+    flex: 1,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    marginTop: 20,
+    padding: 20,
   },
 });

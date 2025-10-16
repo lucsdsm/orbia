@@ -1,17 +1,13 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
 import { useTheme } from "../ThemeContext";
-import { Feather } from "expo-vector-icons";
 
 import Toast from "react-native-toast-message";
-
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
 import { Picker } from "@react-native-picker/picker";
-
 import ActualDateInput from "../components/ActualDateInput";
 
-// função para adicionar novo item (receita ou despesa)
+import { StorageService } from "../services/storage"; // ✅ Import do service
+
 export default function ItemAdd({ route, navigation }) {
   const { colors } = useTheme();
   const { natureza } = route.params; 
@@ -19,7 +15,7 @@ export default function ItemAdd({ route, navigation }) {
   const [descricao, setDescricao] = useState("");
   const [emoji, setEmoji] = useState("");
   const [valor, setValor] = useState("");
-  const [tipo, setTipo] = useState("fixa"); 
+  const [tipo, setTipo] = useState("fixa");
   const [cartao, setCartao] = useState("");
   const [data, setData] = useState("");
   const [parcelas, setParcelas] = useState("");
@@ -36,7 +32,6 @@ export default function ItemAdd({ route, navigation }) {
       return;
     }
 
-    // ✅ Validação para despesa parcelada
     if (natureza === "despesa" && tipo === "parcelada") {
       if (!data || !parcelas || !cartao) {
         Toast.show({
@@ -51,12 +46,9 @@ export default function ItemAdd({ route, navigation }) {
     }
 
     try {
-      const itensExistentes = await AsyncStorage.getItem("itens");
-      const itens = itensExistentes ? JSON.parse(itensExistentes) : [];
-
       const novoItem = {
         id: Date.now().toString(),
-        natureza: natureza.toLowerCase(), 
+        natureza: natureza.toLowerCase(),
         descricao,
         emoji,
         valor: parseFloat(valor),
@@ -66,8 +58,7 @@ export default function ItemAdd({ route, navigation }) {
         parcelas: parseInt(parcelas) || 0,
       };
 
-      const novosItens = [...itens, novoItem];
-      await AsyncStorage.setItem("itens", JSON.stringify(novosItens));
+      await StorageService.saveItem(novoItem);
 
       console.log("Item salvo:", novoItem);
 

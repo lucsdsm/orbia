@@ -18,7 +18,8 @@ export default function ItemAdd({ route, navigation }) {
   const [emoji, setEmoji] = useState("");
   const [valor, setValor] = useState("");
   const [tipo, setTipo] = useState("fixa");
-  const [cartao, setCartao] = useState("nubank");
+  // se o tipo for parcelado, o cartão será nubank por padrão
+  const [cartao, setCartao] = useState(""); 
   const [data, setData] = useState("");
   const [parcelas, setParcelas] = useState("");
   
@@ -151,7 +152,19 @@ export default function ItemAdd({ route, navigation }) {
           >
             <Picker
               selectedValue={tipo}
-              onValueChange={(itemValue) => setTipo(itemValue)}
+              onValueChange={(itemValue) => {
+                setTipo(itemValue);
+                if (itemValue === "parcelada") {
+                  setCartao("nubank");
+                } else {
+                  setCartao("");
+                }
+              }}
+              // quando o picker for carregado, o valor inicial será vazio
+              onLayout={() => {
+                setCartao("");
+              }}
+
               dropdownIconColor={colors.text}
               style={[
                 styles.picker,

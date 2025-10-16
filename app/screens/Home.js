@@ -41,8 +41,8 @@ export default function Home({ navigation }) {
 
     itens.forEach((item) => {
       const valor = Number(item.valor) || 0;
-      if (item.natureza === "Receita") receita += valor;
-      else if (item.natureza === "Despesa") despesa += valor;
+      if (item.natureza === "receita") receita += valor;
+      else if (item.natureza === "despesa") despesa += valor;
     });
 
     return receita - despesa;

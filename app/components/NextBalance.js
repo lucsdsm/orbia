@@ -5,7 +5,6 @@ import { useTheme } from "../ThemeContext";
 export default function NextBalance({ saldoAtual = 0, superavite = 0 }) {
   const { colors } = useTheme();
 
-  // ✅ Simplesmente soma saldo atual + superávite
   const saldoProximoMes = saldoAtual + superavite;
   const positivo = saldoProximoMes >= 0;
 

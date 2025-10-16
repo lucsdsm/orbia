@@ -9,16 +9,15 @@ export default function Superavite({ itens = [] }) {
     let receita = 0;
     let despesa = 0;
 
-    if (!Array.isArray(itens)) return "0.00";
+    if (!Array.isArray(itens)) return 0;
 
     itens.forEach(item => {
       const valor = Number(item.valor) || 0;
-      if (item.natureza === "Receita") receita += valor;
-      else if (item.natureza === "Despesa") despesa += valor;
+      if (item.natureza === "receita") receita += valor;
+      else if (item.natureza === "despesa") despesa += valor;
     });
 
-    const resultado = receita - despesa;
-    return resultado.toFixed(2);
+    return receita - despesa;
   }, [itens]);
 
   const positivo = parseFloat(saldoDoMes) >= 0;

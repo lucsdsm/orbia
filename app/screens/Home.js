@@ -18,7 +18,6 @@ export default function Home({ navigation }) {
       const itensExistentes = await AsyncStorage.getItem("itens");
       if (itensExistentes) {
         const itensCarregados = JSON.parse(itensExistentes);
-        console.log("Itens carregados:", itensCarregados.length);
         setItens(itensCarregados);
       } else {
         setItens([]);
@@ -30,7 +29,6 @@ export default function Home({ navigation }) {
 
   useFocusEffect(
     useCallback(() => {
-      console.log("Home recebeu foco - recarregando itens...");
       carregarItens();
     }, [carregarItens])
   );
@@ -43,8 +41,8 @@ export default function Home({ navigation }) {
 
     itens.forEach((item) => {
       const valor = Number(item.valor) || 0;
-      if (item.natureza === "Receita") receita += valor;
-      else if (item.natureza === "Despesa") despesa += valor;
+      if (item.natureza === "receita") receita += valor;
+      else if (item.natureza === "despesa") despesa += valor;
     });
 
     return receita - despesa;

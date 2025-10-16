@@ -13,7 +13,7 @@ export default function ItemEdit({ route, navigation }) {
   const [descricao, setDescricao] = useState(item.descricao);
   const [emoji, setEmoji] = useState(item.emoji);
   const [valor, setValor] = useState(item.valor.toString());
-  const [tipo, setTipo] = useState(item.tipo || "Fixa");
+  const [tipo, setTipo] = useState(item.tipo || "fixa");
   const [cartao, setCartao] = useState(item.cartao || "");
   const [data, setData] = useState(item.data || "");
   const [parcelas, setParcelas] = useState(item.parcelas?.toString() || "");
@@ -119,7 +119,7 @@ export default function ItemEdit({ route, navigation }) {
           onSubmitEditing={valorSubmit}
         />
 
-        {item.natureza === "Despesa" && (
+        {item.natureza === "despesa" && (
           <View style={[styles.pickerContainer, { borderColor: colors.text }]}>
             <Picker
               selectedValue={tipo}
@@ -127,22 +127,33 @@ export default function ItemEdit({ route, navigation }) {
               dropdownIconColor={colors.text}
               style={[styles.picker, { color: colors.text }]}
             >
-              <Picker.Item label="Fixa" value="Fixa" />
-              <Picker.Item label="Parcelada" value="Parcelada" />
+              <Picker.Item label="Fixa" value="fixa" />
+              <Picker.Item label="Parcelada" value="parcelada" />
             </Picker>
           </View>
         )}
 
-        {tipo === "Parcelada" && (
+        {tipo === "parcelada" && (
           <>
-            <TextInput
-              style={[styles.input, { borderColor: colors.text, color: colors.text }]}
-              placeholder="Cartão"
-              placeholderTextColor="#888"
-              value={cartao}
-              onChangeText={setCartao}
-            />
-            {item.natureza === "Despesa" && (
+            <View style={styles.pickerContainer}>
+              <Picker
+                selectedValue={cartao}
+                onValueChange={(itemValue) => setCartao(itemValue)}
+                style={[
+                  styles.picker,
+                  {
+                    color: colors.text,
+                  },
+                ]}
+                itemStyle={{
+                  color: colors.text,
+                }}
+              >
+                <Picker.Item label="Nubank 🔮" value="nubank" />
+                <Picker.Item label="Inter 🦊" value="inter" />
+              </Picker>
+            </View>
+            {item.natureza === "despesa" && (
               <TextInput
                 style={[styles.input, { borderColor: colors.text, color: colors.text }]}
                 placeholder="Data da compra"
@@ -213,9 +224,12 @@ const styles = StyleSheet.create({
   picker: {
     height: 60,
     borderWidth: 0,
-    borderRadius: 50,
-    marginLeft: 10,
+    borderRadius: 10,
+    marginLeft: 12,
     marginRight: 10,
+  },
+  pickerContainer: {
+    borderRadius: 10,
     marginBottom: 15,
   },
 });

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
 import { useTheme } from "../ThemeContext";
+import { Feather } from "expo-vector-icons";
 
 import Toast from "react-native-toast-message";
 
@@ -8,19 +9,22 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { Picker } from "@react-native-picker/picker";
 
-export default function CadastroScreen({ route, navigation }) {
+import ActualDateInput from "../components/ActualDateInput";
+
+// função para adicionar novo item (receita ou despesa)
+export default function ItemAdd({ route, navigation }) {
   const { colors } = useTheme();
   const { natureza } = route.params; 
 
   const [descricao, setDescricao] = useState("");
   const [emoji, setEmoji] = useState("");
   const [valor, setValor] = useState("");
-  const [tipo, setTipo] = useState("Fixa");
+  const [tipo, setTipo] = useState("fixa"); 
   const [cartao, setCartao] = useState("");
   const [data, setData] = useState("");
   const [parcelas, setParcelas] = useState("");
   
-  const handleSalvar = async () => {
+  const handleSalvar = async () => { 
     if (!descricao || !emoji || !valor) {
       Toast.show({
         type: "error",
@@ -32,13 +36,27 @@ export default function CadastroScreen({ route, navigation }) {
       return;
     }
 
+    // ✅ Validação para despesa parcelada
+    if (natureza === "despesa" && tipo === "parcelada") {
+      if (!data || !parcelas || !cartao) {
+        Toast.show({
+          type: "error",
+          text1: "Preencha todos os campos!",
+          text2: "Data, cartão e parcelas são obrigatórios.",
+          position: "top",
+          visibilityTime: 3000,
+        });
+        return;
+      }
+    }
+
     try {
       const itensExistentes = await AsyncStorage.getItem("itens");
       const itens = itensExistentes ? JSON.parse(itensExistentes) : [];
 
       const novoItem = {
         id: Date.now().toString(),
-        natureza,
+        natureza: natureza.toLowerCase(), 
         descricao,
         emoji,
         valor: parseFloat(valor),
@@ -50,6 +68,8 @@ export default function CadastroScreen({ route, navigation }) {
 
       const novosItens = [...itens, novoItem];
       await AsyncStorage.setItem("itens", JSON.stringify(novosItens));
+
+      console.log("Item salvo:", novoItem);
 
       Toast.show({
         type: "success",
@@ -107,7 +127,7 @@ export default function CadastroScreen({ route, navigation }) {
     <View style={[styles.wrapper, { backgroundColor: colors.secondBackground }]}>
       <View style={[styles.container, { backgroundColor: colors.background }]}>
         <Text style={[styles.title, { color: colors.text }]}>
-          + {natureza === "Receita" ? "Receita" : "Despesa"}
+          + {natureza === "receita" ? "receita" : "despesa"}
         </Text>
 
         <TextInput
@@ -126,9 +146,39 @@ export default function CadastroScreen({ route, navigation }) {
           onChangeText={setEmoji}
         />
 
+        {natureza === "despesa" && (
+          <View
+            style={[
+              styles.pickerContainer,
+              {
+                borderColor: colors.text,
+                backgroundColor: colors.background
+              },
+            ]}
+          >
+            <Picker
+              selectedValue={tipo}
+              onValueChange={(itemValue) => setTipo(itemValue)}
+              dropdownIconColor={colors.text}
+              style={[
+                styles.picker,
+                {
+                  color: colors.text,
+                },
+              ]}
+              itemStyle={{
+                color: colors.text,
+              }}
+            >
+              <Picker.Item label="Fixa" value="fixa" />
+              <Picker.Item label="Parcelada" value="parcelada" />
+            </Picker>
+          </View>
+        )}
+
         <TextInput
           style={[styles.input, { borderColor: colors.text, color: colors.text }]}
-          placeholder="Valor em R$ (*)"
+          placeholder={tipo === "fixa" ? "Valor (*)" : "Valor da parcela (*)"}
           placeholderTextColor="#888"
           keyboardType="numeric"
           value={valor}
@@ -137,45 +187,50 @@ export default function CadastroScreen({ route, navigation }) {
           onSubmitEditing={valorSubmit}
         />
 
-        {natureza === "Despesa" && (
-          <View style={[styles.pickerContainer, { borderColor: colors.text }]}>
+        {tipo === "parcelada" && (
+          <View
+            style={[
+              styles.pickerContainer,
+              {
+                borderColor: colors.text,
+                backgroundColor: colors.background
+              },
+            ]}
+          >
             <Picker
-              selectedValue={tipo}
-              onValueChange={(itemValue) => setTipo(itemValue)}
+              selectedValue={cartao}
+              onValueChange={(itemValue) => setCartao(itemValue)}
               dropdownIconColor={colors.text}
-              style={[styles.picker, { color: colors.text }]}
+              style={[
+                styles.picker,
+                {
+                  color: colors.text,
+                },
+              ]}
+              itemStyle={{
+                color: colors.text,
+              }}
             >
-              <Picker.Item label="Fixa" value="Fixa" />
-              <Picker.Item label="Parcelada" value="Parcelada" />
+              <Picker.Item label="Nubank 🔮" value="nubank" />
+              <Picker.Item label="Inter 🦊" value="inter" />
             </Picker>
           </View>
         )}
 
-        {tipo === "Parcelada" && (
-          <TextInput
-            style={[styles.input, { borderColor: colors.text, color: colors.text }]}
-            placeholder="Cartão (*)"
-            placeholderTextColor="#888"
-            value={cartao}
-            onChangeText={setCartao}
+        {natureza === "despesa" && tipo === "parcelada" && (
+          <ActualDateInput
+            data={data}
+            setData={setData}
+            dateChange={dateChange}
+            natureza={natureza}
+            tipo={tipo}
           />
         )}
 
-        {natureza === "Despesa" && tipo === "Parcelada" && (
+        {tipo === "parcelada" && (
           <TextInput
             style={[styles.input, { borderColor: colors.text, color: colors.text }]}
-            placeholder="Data da compra"
-            placeholderTextColor="#888"
-            value={data}
-            keyboardType="numeric"
-            onChangeText={dateChange}
-          />
-        )}
-
-        {tipo === "Parcelada" && (
-          <TextInput
-            style={[styles.input, { borderColor: colors.text, color: colors.text }]}
-            placeholder="Nº de parcelas"
+            placeholder="Nº de parcelas (*)"
             placeholderTextColor="#888"
             keyboardType="numeric"
             value={parcelas}
@@ -236,8 +291,7 @@ const styles = StyleSheet.create({
     height: 60,
     borderWidth: 0,
     borderRadius: 10,
-    marginBottom: 15,
-    marginLeft: 10,
+    marginLeft: 12,
     marginRight: 10,
   },
   pickerContainer: {

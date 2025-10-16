@@ -25,18 +25,18 @@ export default function Footer( { onNovoItem } ) {
           )}
         </TouchableOpacity>
 
-        {/* Botão de adicionar Receita */}
+        {/* Botão de adicionar receita */}
         <TouchableOpacity
           style={[styles.button, { backgroundColor: "#4CAF50" }]}
-          onPress={() => onNovoItem("Receita")}
+          onPress={() => onNovoItem("receita")}
         >
           <Feather name="arrow-up-circle" size={28} color="#fff" />
         </TouchableOpacity>
 
-        {/* Botão de adicionar Despesa */}
+        {/* Botão de adicionar despesa */}
         <TouchableOpacity
           style={[styles.button, { backgroundColor: "#F44336" }]}
-          onPress={() => onNovoItem("Despesa")}
+          onPress={() => onNovoItem("despesa")}
         >
           <Feather name="arrow-down-circle" size={28} color="#fff" />
         </TouchableOpacity>

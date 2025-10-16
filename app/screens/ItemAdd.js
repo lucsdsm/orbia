@@ -18,7 +18,7 @@ export default function ItemAdd({ route, navigation }) {
   const [emoji, setEmoji] = useState("");
   const [valor, setValor] = useState("");
   const [tipo, setTipo] = useState("fixa");
-  const [cartao, setCartao] = useState("");
+  const [cartao, setCartao] = useState("nubank");
   const [data, setData] = useState("");
   const [parcelas, setParcelas] = useState("");
   

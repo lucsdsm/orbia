@@ -1,4 +1,4 @@
 export const CARTOES = [
-  { label: "Nubank 🔮", value: "nubank" },
-  { label: "Inter 🦊", value: "inter" },
+  { label: "Nubank 🔮", value: "nubank", color: "purple"},
+  { label: "Inter 🦊", value: "inter" , color: "orange"},
 ];

@@ -25,9 +25,20 @@ export default function ItemList() {
 
   const itensOrdenados = useMemo(() => {
     return [...itens].sort((a, b) => {
+      // 1º critério: receitas primeiro, depois despesas
+      if (a.natureza !== b.natureza) {
+        return a.natureza === "receita" ? -1 : 1;
+      }
+
+      // 2º critério: se ambos forem despesas, fixas primeiro
+      if (a.natureza === "despesa" && a.tipo !== b.tipo) {
+        return a.tipo === "fixa" ? -1 : 1;
+      }
+
+      // 3º critério: maior valor primeiro
       const valorA = parseFloat(a.valor) || 0;
       const valorB = parseFloat(b.valor) || 0;
-      return valorB - valorA; 
+      return valorB - valorA;
     });
   }, [itens]);
 
@@ -61,7 +72,8 @@ export default function ItemList() {
   const renderItem = ({ item }) => (
     <View style={[styles.item, { backgroundColor: colors.text, borderLeftColor: item.natureza === "receita" ? "#4CAF50" : "#F44336" }]}>
       <View style={{ flex: 1 }}>
-        <Text style={[styles.descricao, { color: colors.background }]}>{item.descricao}</Text>
+        {/* emoji */}
+        <Text style={[styles.descricao, { color: colors.background }]}>{item.emoji} {item.descricao}</Text>
         
         <View style={styles.valorRow}>
           <Text style={[styles.valor, { color: colors.background }]}>
@@ -78,6 +90,21 @@ export default function ItemList() {
               totalParcelas={item.parcelas}
               cor={colors.background}
             />
+          )}
+
+          {/* cartão */}
+          {item.cartao && (
+            <View style={{
+              backgroundColor: item.cartao === "nubank" ? "#8A05BE" : "#FF7A00",
+              paddingHorizontal: 8,
+              paddingVertical: 4,
+              borderRadius: 15,
+              marginLeft: 8,
+            }}>
+              <Text style={{ color: "#FFFFFF", fontSize: 11, fontWeight: "600" }}>
+                {item.cartao === "nubank" ? "Nubank" : "Inter"}
+              </Text>
+            </View>
           )}
         </View>
       </View>

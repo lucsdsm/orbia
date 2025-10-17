@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Orbia",
-    "slug": "orbia",
+    "slug": "app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -35,6 +35,7 @@
       "eas": {
         "projectId": "a2b39e16-f8ae-4ddd-95f1-7619f8b78201"
       }
-    }
+    },
+    "owner": "lucsdsm"
   }
 }

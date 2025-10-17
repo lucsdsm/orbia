@@ -41,6 +41,7 @@ Aplicativo de controle financeiro pessoal minimalista e intuitivo, desenvolvido 
 ## Próximas etapas
 
 - **Adição de cartões personalizados**
+- **Modais personalizados**
 - **...**
 
 ## 📦 Instalação

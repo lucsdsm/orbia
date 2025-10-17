@@ -7,6 +7,8 @@ import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import Toast from "react-native-toast-message";
 import { MaterialIcons } from "@expo/vector-icons";
 
+import { CARDS } from "../constants";
+
 import ParcelProgress from "../components/ParcelProgress";
 import { StorageService } from "../services/storage";
 
@@ -87,14 +89,15 @@ const ItemList = React.memo(() => {
           {/* cartão */}
           {item.cartao && (
             <View style={{
-              backgroundColor: item.cartao === "nubank" ? "#8A05BE" : "#FF7A00",
+              // retornar cor do cartão conforme constante
+              backgroundColor: CARDS.find(c => c.value === item.cartao)?.color || "gray",
               paddingHorizontal: 8,
               paddingVertical: 4,
               borderRadius: 15,
               marginLeft: 8,
             }}>
               <Text style={{ color: "#FFFFFF", fontSize: 11, fontWeight: "600" }}>
-                {item.cartao === "nubank" ? "Nubank" : "Inter"}
+                {CARDS.find(c => c.value === item.cartao)?.label || "Cartão Desconhecido"}
               </Text>
             </View>
           )}

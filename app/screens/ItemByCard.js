@@ -151,7 +151,7 @@ const ItemByCard = React.memo(() => {
       <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
         <View
           style={{
-            backgroundColor: cartao === "nubank" ? "#8A05BE" : "#FF7A00",
+            backgroundColor: CARDS.find(c => c.value === cartao)?.color || "gray",
             paddingHorizontal: 12,
             paddingVertical: 6,
             borderRadius: 20,

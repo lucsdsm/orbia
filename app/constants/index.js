@@ -1,6 +1,18 @@
 export const CARDS = [
-  { label: "Nubank 🔮", value: "nubank", color: "purple"},
-  { label: "Inter 🦊", value: "inter" , color: "orange"},
+  { label: "Nubank 🔮", value: "nubank", color: "#820AD1" },
+  { label: "Inter 🦊", value: "inter", color: "#FF7300" },
+  { label: "Itaú 🦁", value: "itau", color: "#FF6200" },
+  { label: "Bradesco 🐴", value: "bradesco", color: "#FF0000" },
+  { label: "Santander 🏦", value: "santander", color: "#C50000" },
+  { label: "Caixa 🏛️", value: "caixa", color: "#00A2FF" },
+  { label: "Banco do Brasil 🦅", value: "bb", color: "#FFDD00" },
+  { label: "C6 Bank 💜", value: "c6bank", color: "#4D4D4D" },
+  { label: "PicPay 💚", value: "picpay", color: "#21C25E" },
+  { label: "BTG Pactual 💼", value: "btg", color: "#002776" },
+  { label: "Neon 💙", value: "neon", color: "#00FFFF" },
+  { label: "Pan 💠", value: "pan", color: "#0073CF" },
+  { label: "Mercado Pago 💳", value: "mercadopago", color: "#009EE3" },
+  { label: "Next 🚀", value: "next", color: "#1b9a30ff" },
 ];
 
 export const MONTHS = [

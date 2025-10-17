@@ -8,6 +8,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 
 import ParcelProgress from "../components/ParcelProgress";
 import { StorageService } from "../services/storage";
+import { CARDS } from "../constants";
 import { MONTHS } from "../constants";
 
 const ItemByMonth = React.memo(() => {
@@ -125,7 +126,7 @@ const ItemByMonth = React.memo(() => {
           {item.cartao && (
             <View
               style={{
-                backgroundColor: item.cartao === "nubank" ? "#8A05BE" : "#FF7A00",
+                backgroundColor: CARDS.find(c => c.value === item.cartao)?.color || "gray",
                 paddingHorizontal: 8,
                 paddingVertical: 4,
                 borderRadius: 15,
@@ -133,7 +134,7 @@ const ItemByMonth = React.memo(() => {
               }}
             >
               <Text style={{ color: "#FFFFFF", fontSize: 11, fontWeight: "600" }}>
-                {item.cartao === "nubank" ? "Nubank" : "Inter"}
+                {CARDS.find(c => c.value === item.cartao)?.label || "Cartão Desconhecido"}
               </Text>
             </View>
           )}

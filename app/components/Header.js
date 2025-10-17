@@ -15,7 +15,7 @@ export default function Header({ scrollX, totalPages }) {
       />
       <View style={[styles.container, { backgroundColor: colors.background }]}>
         <Text style={[styles.title, { color: colors.text }]}>Orbia</Text>
-        <Text style={[styles.version, { color: colors.text, opacity: 0.6 }]}>versão 0.1</Text>
+        <Text style={[styles.version, { color: colors.text, opacity: 0.6 }]}>versão 1.0</Text>
 
         {scrollX && totalPages && (
           <Indicator scrollX={scrollX} totalPages={totalPages} />
@@ -43,7 +43,6 @@ const styles = StyleSheet.create({
   },
   version: {
     fontSize: 10,
-    fontStyle: "italic",
     marginTop: 2,
   },
 });

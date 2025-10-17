@@ -10,7 +10,7 @@ import ParcelProgress from "../components/ParcelProgress";
 import { StorageService } from "../services/storage";
 import { CARDS } from "../constants";
 
-export default function ItemByCard() {
+const ItemByCard = React.memo(() => {
   const { colors } = useTheme();
   const navigation = useNavigation();
   const { itens, recarregarItens } = useItens();
@@ -21,7 +21,7 @@ export default function ItemByCard() {
     }, [recarregarItens])
   );
 
-  const removerItem = async (id) => {
+  const removerItem = useCallback(async (id) => {
     try {
       await StorageService.deleteItem(id);
       await recarregarItens();
@@ -40,16 +40,16 @@ export default function ItemByCard() {
         position: "top",
       });
     }
-  };
+  }, [recarregarItens]);
 
-  // Agrupa despesas parceladas por cartão
+  // agrupa despesas parceladas por cartão
   const itensPorCartao = useMemo(() => {
-    // Filtra apenas despesas parceladas que têm cartão
+    // filtra apenas despesas parceladas que têm cartão
     const despesasParceladas = itens.filter(
       (item) => item.natureza === "despesa" && item.tipo === "parcelada" && item.cartao
     );
 
-    // Agrupa por cartão
+    // agrupa por cartão
     const grupos = {};
 
     despesasParceladas.forEach((item) => {
@@ -67,7 +67,7 @@ export default function ItemByCard() {
       grupos[cartao].total += parseFloat(item.valor) || 0;
     });
 
-    // Converte para array e ordena por total (maior primeiro)
+    // converte para array e ordena por total (maior primeiro)
     const sections = Object.values(grupos)
       .sort((a, b) => b.total - a.total)
       .map((grupo) => {
@@ -88,7 +88,7 @@ export default function ItemByCard() {
     return sections;
   }, [itens]);
 
-  const renderItem = ({ item }) => (
+  const renderItem = useCallback(({ item }) => (
     <View style={[styles.item, { backgroundColor: colors.text }]}>
       <View style={{ flex: 1 }}>
         <Text style={[styles.descricao, { color: colors.background }]}>
@@ -144,9 +144,9 @@ export default function ItemByCard() {
         </TouchableOpacity>
       </View>
     </View>
-  );
+  ), [colors, navigation, recarregarItens, removerItem]);
 
-  const renderSectionHeader = ({ section: { title, total, cartao } }) => (
+  const renderSectionHeader = useCallback(({ section: { title, total, cartao } }) => (
     <View style={[styles.sectionHeader, { backgroundColor: colors.background }]}>
       <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
         <View
@@ -166,7 +166,9 @@ export default function ItemByCard() {
         </Text>
       </View>
     </View>
-  );
+  ), [colors]);
+
+  const keyExtractor = useCallback((item) => item.id, []);
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -179,16 +181,22 @@ export default function ItemByCard() {
       ) : (
         <SectionList
           sections={itensPorCartao}
-          keyExtractor={(item) => item.id}
+          keyExtractor={keyExtractor}
           renderItem={renderItem}
           renderSectionHeader={renderSectionHeader}
           contentContainerStyle={styles.listContent}
-          stickySectionHeadersEnabled={true}
+          stickySectionHeadersEnabled={false}
+          initialNumToRender={10}
+          maxToRenderPerBatch={10}
+          windowSize={5}
+          removeClippedSubviews={true}
         />
       )}
     </View>
   );
-}
+});
+
+export default ItemByCard;
 
 const styles = StyleSheet.create({
   container: {
@@ -196,6 +204,7 @@ const styles = StyleSheet.create({
   },
   listContent: {
     padding: 20,
+    
   },
   sectionHeader: {
     paddingVertical: 12,

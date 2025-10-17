@@ -10,7 +10,7 @@ import ParcelProgress from "../components/ParcelProgress";
 import { StorageService } from "../services/storage";
 import { MONTHS } from "../constants";
 
-export default function ItemByMonth() {
+const ItemByMonth = React.memo(() => {
   const { colors } = useTheme();
   const navigation = useNavigation();
   const { itens, recarregarItens } = useItens();
@@ -21,7 +21,7 @@ export default function ItemByMonth() {
     }, [recarregarItens])
   );
 
-  const removerItem = async (id) => {
+  const removerItem = useCallback(async (id) => {
     try {
       await StorageService.deleteItem(id);
       await recarregarItens();
@@ -40,7 +40,7 @@ export default function ItemByMonth() {
         position: "top",
       });
     }
-  };
+  }, [recarregarItens]);
 
   // Calcula o mês/ano final de uma parcela
   const calcularMesFinal = (dataCompra, totalParcelas) => {
@@ -103,7 +103,7 @@ export default function ItemByMonth() {
     return sections;
   }, [itens]);
 
-  const renderItem = ({ item }) => (
+  const renderItem = useCallback(({ item }) => (
     <View style={[styles.item, { backgroundColor: colors.text }]}>
       <View style={{ flex: 1 }}>
         <Text style={[styles.descricao, { color: colors.background }]}>
@@ -174,13 +174,15 @@ export default function ItemByMonth() {
         </TouchableOpacity>
       </View>
     </View>
-  );
+  ), [colors, navigation, recarregarItens, removerItem]);
 
-  const renderSectionHeader = ({ section: { title } }) => (
+  const renderSectionHeader = useCallback(({ section: { title } }) => (
     <View style={[styles.sectionHeader, { backgroundColor: colors.background }]}>
       <Text style={[styles.sectionTitle, { color: colors.text }]}>{title}</Text>
     </View>
-  );
+  ), [colors]);
+
+  const keyExtractor = useCallback((item) => item.id, []);
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -193,16 +195,22 @@ export default function ItemByMonth() {
       ) : (
         <SectionList
           sections={itensPorMes}
-          keyExtractor={(item) => item.id}
+          keyExtractor={keyExtractor}
           renderItem={renderItem}
           renderSectionHeader={renderSectionHeader}
           contentContainerStyle={styles.listContent}
-          stickySectionHeadersEnabled={true}
+          stickySectionHeadersEnabled={false}
+          initialNumToRender={10}
+          maxToRenderPerBatch={10}
+          windowSize={5}
+          removeClippedSubviews={true}
         />
       )}
     </View>
   );
-}
+});
+
+export default ItemByMonth;
 
 const styles = StyleSheet.create({
   container: {
@@ -210,12 +218,12 @@ const styles = StyleSheet.create({
   },
   listContent: {
     padding: 20,
+    
   },
   sectionHeader: {
     paddingVertical: 12,
     paddingHorizontal: 5,
     marginBottom: 0,
-    borderRadius: 8,
   },
   sectionTitle: {
     fontSize: 18,

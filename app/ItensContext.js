@@ -8,6 +8,9 @@ export function ItensProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   const carregarItens = async () => {
+    const startTime = Date.now();
+    const minLoadingTime = 1500; // 1.5 segundos mínimo
+    
     try {
       const itensExistentes = await AsyncStorage.getItem("itens");
       if (itensExistentes) {
@@ -20,11 +23,17 @@ export function ItensProvider({ children }) {
       console.error("Erro ao carregar itens:", error);
       setItens([]);
     } finally {
-      setLoading(false);
+      // garante que a tela de loading fique visível por pelo menos 1.5s
+      const elapsedTime = Date.now() - startTime;
+      const remainingTime = Math.max(0, minLoadingTime - elapsedTime);
+      
+      setTimeout(() => {
+        setLoading(false);
+      }, remainingTime);
     }
   };
 
-  // Carrega os itens ao iniciar o app
+  // carrega os itens ao iniciar o app
   useEffect(() => {
     carregarItens();
   }, []);

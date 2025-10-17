@@ -2,16 +2,24 @@ import React, { useState, useEffect } from "react";
 import { View, Text, TextInput, StyleSheet, TouchableOpacity } from "react-native";
 import { useTheme } from "../ThemeContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useFocusEffect } from "@react-navigation/native";
 
 export default function Balance() {
   const { colors } = useTheme();
   const [saldo, setSaldo] = useState("0.00");
   const [editando, setEditando] = useState(false);
 
-  // Carrega o saldo ao montar o componente
+  // carrega o saldo ao montar o componente
   useEffect(() => {
     carregarSaldo();
   }, []);
+
+  // recarrega o saldo quando a tela ganhar foco
+  useFocusEffect(
+    React.useCallback(() => {
+      carregarSaldo();
+    }, [])
+  );
 
   const carregarSaldo = async () => {
     try {

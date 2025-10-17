@@ -1,11 +1,43 @@
-import React, { createContext, useState, useContext } from "react";
+import React, { createContext, useState, useContext, useEffect } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const ThemeContext = createContext();
 
 export function ThemeProvider({ children }) {
     const [isDark, setIsDark] = useState(false);
+    const [loading, setLoading] = useState(true);
 
-    const toggleTheme = () => setIsDark(!isDark);
+    // Carrega o tema salvo ao iniciar
+    useEffect(() => {
+        carregarTema();
+    }, []);
+
+    const carregarTema = async () => {
+        try {
+            const temaSalvo = await AsyncStorage.getItem("@orbia:tema");
+            if (temaSalvo !== null) {
+                setIsDark(temaSalvo === "dark");
+            }
+        } catch (error) {
+            console.error("Erro ao carregar tema:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const salvarTema = async (isDarkMode) => {
+        try {
+            await AsyncStorage.setItem("@orbia:tema", isDarkMode ? "dark" : "light");
+        } catch (error) {
+            console.error("Erro ao salvar tema:", error);
+        }
+    };
+
+    const toggleTheme = () => {
+        const novoTema = !isDark;
+        setIsDark(novoTema);
+        salvarTema(novoTema);
+    };
 
     const theme = {
         isDark,
@@ -16,6 +48,7 @@ export function ThemeProvider({ children }) {
             secondText: isDark ? "#444444ff" : "#bbbbbbff",
         },
         toggleTheme,
+        loading,
     };
 
     return (

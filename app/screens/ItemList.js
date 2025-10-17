@@ -10,7 +10,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import ParcelProgress from "../components/ParcelProgress";
 import { StorageService } from "../services/storage";
 
-export default function ItemList() {
+const ItemList = React.memo(() => {
   const { colors } = useTheme();
   const { itens, recarregarItens } = useItens();
   const navigation = useNavigation();
@@ -40,7 +40,7 @@ export default function ItemList() {
     });
   }, [itens]);
 
-  const removerItem = async (id) => {
+  const removerItem = useCallback(async (id) => {
     try {
       await StorageService.deleteItem(id);
       await recarregarItens(); // Recarrega a lista
@@ -59,9 +59,9 @@ export default function ItemList() {
         position: "top",
       });
     }
-  };
+  }, [recarregarItens]);
 
-  const renderItem = ({ item }) => (
+  const renderItem = useCallback(({ item }) => (
     <View style={[styles.item, { backgroundColor: colors.text, borderLeftColor: item.natureza === "receita" ? "#4CAF50" : "#F44336" }]}>
       <View style={{ flex: 1 }}>
         {/* emoji */}
@@ -135,11 +135,13 @@ export default function ItemList() {
         </TouchableOpacity>
       </View>
     </View>
-  );
+  ), [colors, navigation, recarregarItens, removerItem]);
+
+  const keyExtractor = useCallback((item) => item.id, []);
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      {itens.length === 0 ? (
+      {itensOrdenados.length === 0 ? (
         <View style={styles.vazioContainer}>
           <Text style={[styles.vazio, { color: colors.text }]}>
             Nenhum item cadastrado, por enquanto 😲.
@@ -148,21 +150,30 @@ export default function ItemList() {
         ) : (
           <FlatList
             data={itensOrdenados}
-            keyExtractor={(item) => item.id} 
+            keyExtractor={keyExtractor}
             renderItem={renderItem}
             contentContainerStyle={styles.listContent}
+            initialNumToRender={10}
+            maxToRenderPerBatch={10}
+            windowSize={5}
+            removeClippedSubviews={true}
+            updateCellsBatchingPeriod={50}
           />
         )}
       </View>
   );
-}
+});
+
+export default ItemList;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    
   },
   listContent: {
     padding: 20,
+    
   },
   item: {
     flexDirection: "row",

@@ -5,7 +5,7 @@ import { useTheme } from "../ThemeContext";
 export default function Indicator({ scrollX, totalPages }) {
   const { colors } = useTheme();
   
-  // Largura fixa da barra (150px como no Header)
+  // largura fixa da barra (150px como no Header)
   const containerWidth = 150;
   const indicatorWidth = containerWidth / totalPages;
 

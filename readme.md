@@ -1,160 +1,123 @@
-# Orbia - Gerenciador de Finanças Pessoais 💰
+# Orbia 🪐
 
-Orbia é um aplicativo de finanças pessoais desenvolvido em React Native com Expo, pensado para Android. O app permite gerenciar despesas, receitas e visualizar o balanço financeiro de forma simples e intuitiva, com suporte a temas claro e escuro.
+Aplicativo de controle financeiro pessoal minimalista e intuitivo, desenvolvido em React Native com Expo.
 
-## 📱 Funcionalidades
+<p align="center">
+  <img src="https://imgur.com/JFTlHYV.png" alt="Orbia App" />
+</p>
 
-- ✅ **Gestão de Receitas e Despesas** - Adicione, edite e remova transações financeiras
-- ✅ **Saldo Personalizável** - Configure seu saldo inicial e veja atualizações em tempo real
-- ✅ **Superávite do Mês** - Visualize automaticamente a diferença entre receitas e despesas
-- ✅ **Previsão de Saldo** - Veja o saldo estimado para o próximo mês
-- ✅ **Categorização de Despesas** - Organize despesas em fixas ou parceladas
-- ✅ **Modo Claro/Escuro** - Alterne entre temas com um toque
-- ✅ **Navegação Animada** - Transições suaves entre telas
-- ✅ **Persistência de Dados** - Dados salvos localmente com AsyncStorage
-- ✅ **Interface Intuitiva** - Design minimalista e responsivo
+## ✨ Funcionalidades
 
-## 🛠️ Tecnologias Utilizadas
+### Gestão Financeira
+- ✅ Adicionar, editar e remover **receitas** e **despesas**
+- ✅ Categorizar despesas como **fixas** ou **parceladas**
+- ✅ Vincular despesas a **cartões de crédito** (Nubank, Inter)
+- ✅ Acompanhar progresso de **parcelas**
+- ✅ Saldo editável com persistência automática
 
-### Core
-- **React Native** - Framework para desenvolvimento mobile
-- **Expo** - Plataforma para facilitar o desenvolvimento e deploy
-- **JavaScript (ES6+)** - Linguagem principal do projeto
+### Visualizações
+- ✅ **Início**: Saldo, Superávite e Previsão de Saldo
+- ✅ **Itens**: Lista completa de receitas e despesas
+- ✅ **Por Mês**: Agrupamento por mês/ano com totais
+- ✅ **Por Cartão**: Agrupamento por cartão com totais por categoria
+- ✅ **Configurações**: Backup, importação e gerenciamento de dados
 
-### Navegação
-- **@react-navigation/native** - Sistema de navegação
-- **@react-navigation/stack** - Navegação em pilha com animações customizadas
+### Recursos Avançados
+- ✅ **Temas**: Modo claro e escuro com persistência
+- ✅ **Backup/Restauração**: Exportar e importar dados em JSON
+- ✅ **Navegação fluida**: Swipe entre telas com indicador animado
+- ✅ **Tela de Loading**: Animação personalizada no carregamento
+- ✅ **Performance otimizada**: Lazy loading, memoization e FlatList otimizado
 
-### Armazenamento
-- **@react-native-async-storage/async-storage** - Persistência de dados local (substituindo SQLite para maior simplicidade)
+## Tecnologias
 
-### UI/UX
-- **react-native-toast-message** - Notificações e feedback visual
-- **@expo/vector-icons** - Ícones do Material Design e Feather Icons
-- **@react-native-picker/picker** - Seletor de opções
+- **React Native** + **Expo SDK 54**
+- **AsyncStorage** - Persistência local
+- **React Navigation** - Navegação em tabs e stack
+- **Context API** - Gerenciamento de estado global
+- **Toast Messages** - Feedback visual
+- **Expo File System** - Importação/exportação de arquivos
 
-### Gerenciamento de Estado
-- **React Hooks** (useState, useEffect, useCallback, useMemo)
-- **Context API** - Para gerenciamento do tema global
+## Próximas etapas
 
-## 📂 Estrutura do Projeto
+- **Adição de cartões personalizados**
+- **...**
 
-```
-orbia/
-├── app/
-│   ├── components/          # Componentes reutilizáveis
-│   │   ├── Actions.js       # Menu de ações flutuante
-│   │   ├── Balance.js       # Componente de saldo editável
-│   │   ├── Footer.js        # Rodapé com navegação
-│   │   ├── Header.js        # Cabeçalho do app
-│   │   ├── Superavite.js    # Exibição do superávite
-│   │   ├── NextBalance.js   # Previsão de saldo futuro
-│   │   └── ThemeSwitcher.js # Alternador de tema
-│   ├── screens/             # Telas do aplicativo
-│   │   ├── ItemAdd.js       # Tela para adicionar receitas/despesas
-│   │   ├── ItemList.js      # Listagem de itens
-│   │   └── ItemEdit.js      # Edição de itens
-│   ├── App.js               # Componente principal e navegação
-│   └── ThemeContext.js      # Context para gerenciamento de tema
-├── assets/                  # Imagens e recursos estáticos
-├── package.json             # Dependências do projeto
-└── README.md                # Documentação do projeto
-```
+## 📦 Instalação
 
-## 🚀 Como Executar
-
-### Pré-requisitos
-- Node.js (v14 ou superior)
-- npm ou yarn
-- Expo CLI
-- Expo Go (app no celular) ou Android Studio
-
-### Instalação
-
-1. **Clone o repositório**
 ```bash
-git clone https://github.com/seu-usuario/orbia.git
+# Clone o repositório
+git clone https://github.com/lucsdsm/orbia.git
 cd orbia/app
-```
 
-2. **Instale as dependências**
-```bash
+# Instale as dependências
 npm install
-# ou
-yarn install
-```
 
-3. **Inicie o Expo**
-```bash
+# Inicie o app
 npx expo start
 ```
 
-4. **Execute no dispositivo**
-- Escaneie o QR Code com o app Expo Go (Android)
-- Ou pressione `a` para abrir no emulador Android
+## 📱 Como Usar
 
-## 📱 Fluxo de Uso
+1. **Adicione seu saldo inicial** - Toque no saldo para editar
+2. **Cadastre receitas/despesas** - Use os botões verde/vermelho no rodapé
+3. **Visualize por categorias** - Navegue entre as telas deslizando
+4. **Faça backup** - Acesse Configurações → Exportar Dados
+5. **Alterne o tema** - Toque no ícone sol/lua
 
-1. **Tela Inicial**
-   - Visualize seu saldo atual
-   - Veja o superávite do mês (receitas - despesas)
-   - Confira a previsão de saldo para o próximo mês
+## 🏗️ Estrutura
 
-2. **Adicionar Transação**
-   - Toque no botão `+` no rodapé
-   - Escolha entre receita ou despesa
-   - Preencha os detalhes (descrição, emoji, valor, etc.)
-   - Para despesas: escolha entre fixa ou parcelada
+```
+app/
+├── components/       # Componentes reutilizáveis
+│   ├── Header.js
+│   ├── Footer.js
+│   ├── Balance.js
+│   ├── Superavite.js
+│   ├── NextBalance.js
+│   ├── ParcelProgress.js
+│   ├── Navigator.js
+│   ├── Indicator.js
+│   └── LoadingScreen.js
+├── screens/          # Telas principais
+│   ├── Home.js
+│   ├── ItemList.js
+│   ├── ItemByMonth.js
+│   ├── ItemByCard.js
+│   ├── ItemAdd.js
+│   ├── ItemEdit.js
+│   └── Settings.js
+├── services/         # Lógica de negócio
+│   └── storage.js
+├── constants/        # Constantes (cartões, meses)
+│   └── index.js
+├── ThemeContext.js   # Gerenciamento de tema
+└── ItensContext.js   # Gerenciamento de itens
+```
 
-3. **Gerenciar Saldo**
-   - Toque no saldo atual para editá-lo
-   - Digite o novo valor e confirme
+## 🎯 Cálculos Automáticos
 
-4. **Alternar Tema**
-   - Use o botão no rodapé para trocar entre modo claro e escuro
+- **Superávite**: Receitas - Despesas (do mês atual)
+- **Próximo saldo**: Saldo Atual + Superávite
+- **Totais por cartão**: Soma de despesas agrupadas
+- **Totais por mês**: Soma de itens por período
 
-## 🎨 Componentes Principais
+## 🔧 Build APK Otimizado
 
-### Actions
-Menu flutuante animado com opções para adicionar receitas e despesas.
+```bash
+eas build --platform android --profile production
+```
 
-### Balance
-Componente editável que permite ao usuário definir seu saldo inicial/atual.
-
-### Superavite
-Calcula e exibe automaticamente a diferença entre receitas e despesas do mês.
-
-### NextBalance
-Mostra a previsão do saldo para o próximo mês (Saldo Atual + Superávite).
-
-## 🎯 Próximas Funcionalidades
-
-- [ ] Gráficos de gastos por categoria
-- [ ] Relatórios mensais e anuais
-- [ ] Metas de economia
-- [ ] Notificações de vencimento de parcelas
-- [ ] Exportação de dados (CSV/PDF)
-- [ ] Backup em nuvem
-- [ ] Múltiplas contas/carteiras
-- [ ] Categorias personalizáveis
-
-## 🤝 Contribuindo
-
-Contribuições são bem-vindas! Sinta-se à vontade para:
-1. Fazer fork do projeto
-2. Criar uma branch para sua feature (`git checkout -b feature/MinhaFeature`)
-3. Commit suas mudanças (`git commit -m 'Adiciona MinhaFeature'`)
-4. Push para a branch (`git push origin feature/MinhaFeature`)
-5. Abrir um Pull Request
-
-## 📄 Licença
-
-Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
-
-## 👨‍💻 Autor
-
-Desenvolvido com ❤️ para ajudar no controle financeiro pessoal.
+**Otimizações aplicadas:**
+- ProGuard habilitado
+- Shrink Resources
+- Minificação avançada (Metro)
+- Dead code elimination
 
 ---
-
-**Status:** 🚧 Em desenvolvimento ativo
+<br>
+<p align="center">
+  Autor: lucsdsm <br>
+  Versão: 1.0.0 
+</p>
+ 

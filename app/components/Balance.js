@@ -1,15 +1,36 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, TextInput, StyleSheet, TouchableOpacity } from "react-native";
 import { useTheme } from "../ThemeContext";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export default function Balance({ diferenca, setDiferenca }) {
+export default function Balance() {
   const { colors } = useTheme();
   const [saldo, setSaldo] = useState("0.00");
   const [editando, setEditando] = useState(false);
 
+  // Carrega o saldo ao montar o componente
   useEffect(() => {
-    setSaldo(diferenca.toFixed(2));
-  }, [diferenca]);
+    carregarSaldo();
+  }, []);
+
+  const carregarSaldo = async () => {
+    try {
+      const saldoSalvo = await AsyncStorage.getItem("@orbia:saldo");
+      if (saldoSalvo !== null) {
+        setSaldo(parseFloat(saldoSalvo).toFixed(2));
+      }
+    } catch (error) {
+      console.error("Erro ao carregar saldo:", error);
+    }
+  };
+
+  const salvarSaldo = async (valor) => {
+    try {
+      await AsyncStorage.setItem("@orbia:saldo", valor.toString());
+    } catch (error) {
+      console.error("Erro ao salvar saldo:", error);
+    }
+  };
 
   const handlePress = () => setEditando(true);
 
@@ -29,7 +50,7 @@ export default function Balance({ diferenca, setDiferenca }) {
     
     const valorFormatado = valor.toFixed(2);
     setSaldo(valorFormatado);
-    setDiferenca(valor); 
+    salvarSaldo(valor);
     setEditando(false);
   };
 

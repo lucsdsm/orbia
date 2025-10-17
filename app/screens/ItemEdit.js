@@ -4,7 +4,8 @@ import { useTheme } from "../ThemeContext";
 import Toast from "react-native-toast-message";
 import { Picker } from "@react-native-picker/picker";
 
-import { CARTOES } from "../constants";
+import { CARDS } from "../constants";
+import ActualDateInput from "../components/ActualDateInput";
 
 import { StorageService } from "../services/storage";
 
@@ -25,7 +26,20 @@ export default function ItemEdit({ route, navigation }) {
       Toast.show({
         type: "error",
         text1: "Campos obrigatórios!",
-        text2: "Preencha todos os campos antes de salvar.",
+        text2: "Preencha descrição, emoji e valor antes de salvar.",
+        position: "top",
+        visibilityTime: 3000,
+      });
+      return;
+    }
+
+    if (tipo === "parcelada" && (!cartao || !data || !parcelas)) {
+      Toast.show({
+        type: "error",
+        text1: "Campos obrigatórios!",
+        text2: "Preencha cartão, data e parcelas para despesas parceladas.",
+        position: "top",
+        visibilityTime: 3000,
       });
       return;
     }
@@ -50,6 +64,8 @@ export default function ItemEdit({ route, navigation }) {
         type: "success",
         text1: "Item atualizado!",
       });
+
+      console.log("Item editado de:", item, "\npara:", itemEditado);
 
       navigation.goBack();
     } 
@@ -109,10 +125,33 @@ export default function ItemEdit({ route, navigation }) {
           <View style={[styles.pickerContainer, { borderColor: colors.text, backgroundColor: colors.background }]}>
             <Picker
               selectedValue={tipo}
-              onValueChange={setTipo}
+              onValueChange={(itemValue) => {
+                setTipo(itemValue);
+                if (itemValue === "parcelada") {
+                  setCartao("nubank");
+                } else {
+                  setCartao("");
+                }
+                if (itemValue === "fixa") {
+                  setData("");
+                  setParcelas("");
+                }
+              }}
+              // quando o picker for carregado, o valor inicial será vazio
+              onLayout={() => {
+                setCartao("");
+              }}
+
               dropdownIconColor={colors.text}
-              style={[styles.picker, { color: colors.text }]}
-              itemStyle={{ color: colors.text }}
+              style={[
+                styles.picker,
+                {
+                  color: colors.text,
+                },
+              ]}
+              itemStyle={{
+                color: colors.text,
+              }}
             >
               <Picker.Item label="Fixa" value="fixa" />
               <Picker.Item label="Parcelada" value="parcelada" />
@@ -141,7 +180,7 @@ export default function ItemEdit({ route, navigation }) {
                 style={[styles.picker, { color: colors.text }]}
                 itemStyle={{ color: colors.text }}
               >
-                {CARTOES.map((cartao) => (
+                {CARDS.map((cartao) => (
                   <Picker.Item
                     key={cartao.value}
                     label={cartao.label}
@@ -152,13 +191,12 @@ export default function ItemEdit({ route, navigation }) {
             </View>
 
             {item.natureza === "despesa" && (
-              <TextInput
-                style={[styles.input, { borderColor: colors.text, color: colors.text }]}
-                placeholder="Data da compra"
-                placeholderTextColor="#888"
-                value={data}
-                keyboardType="numeric"
-                onChangeText={dateChange}
+              <ActualDateInput
+                data={data}
+                setData={setData}
+                dateChange={dateChange}
+                natureza={item.natureza}
+                tipo={tipo}
               />
             )}
             

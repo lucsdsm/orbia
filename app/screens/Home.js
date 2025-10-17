@@ -2,35 +2,49 @@ import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { View, StyleSheet } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useTheme } from "../ThemeContext";
+import { useItens } from "../ItensContext";
 import { useFocusEffect } from "@react-navigation/native";
 
 import Superavite from "../components/Superavite";
 import Balance from "../components/Balance";
 import NextBalance from "../components/NextBalance";
 
-export default function Home({ navigation }) {
-  const { colors } = useTheme();
-  const [itens, setItens] = useState([]);
-  const [diferenca, setDiferenca] = useState(0);
+function useSaldo() {
+  const [saldo, setSaldo] = React.useState(0);
 
-  const carregarItens = useCallback(async () => {
+  const carregarSaldo = useCallback(async () => {
     try {
-      const itensExistentes = await AsyncStorage.getItem("itens");
-      if (itensExistentes) {
-        const itensCarregados = JSON.parse(itensExistentes);
-        setItens(itensCarregados);
-      } else {
-        setItens([]);
+      const saldoSalvo = await AsyncStorage.getItem("@orbia:saldo");
+      if (saldoSalvo !== null) {
+        setSaldo(parseFloat(saldoSalvo));
       }
     } catch (error) {
-      console.error("Erro ao carregar itens:", error);
+      console.error("Erro ao carregar saldo:", error);
     }
   }, []);
 
+  useEffect(() => {
+    carregarSaldo();
+  }, [carregarSaldo]);
+
   useFocusEffect(
     useCallback(() => {
-      carregarItens();
-    }, [carregarItens])
+      carregarSaldo();
+    }, [carregarSaldo])
+  );
+
+  return saldo;
+}
+
+export default function Home({ navigation }) {
+  const { colors } = useTheme();
+  const { itens, recarregarItens } = useItens();
+  const saldoAtual = useSaldo();
+
+  useFocusEffect(
+    useCallback(() => {
+      recarregarItens();
+    }, [recarregarItens])
   );
 
   const superavite = useMemo(() => {
@@ -51,8 +65,8 @@ export default function Home({ navigation }) {
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Superavite itens={itens} />
-      <Balance itens={itens} diferenca={diferenca} setDiferenca={setDiferenca} />
-      <NextBalance saldoAtual={diferenca} superavite={superavite} />
+      <Balance />
+      <NextBalance saldoAtual={saldoAtual} superavite={superavite} />
     </View>
   );
 }

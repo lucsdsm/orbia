@@ -1,13 +1,12 @@
 import React from "react";
 import { View, Animated, StyleSheet } from "react-native";
 import { useTheme } from "../ThemeContext";
-import { Dimensions } from "react-native";
-
-const screenX = Dimensions.get("window");
 
 export default function Indicator({ scrollX, totalPages }) {
   const { colors } = useTheme();
-  const containerWidth = screenX.width * 2 + 150;
+  
+  // Largura fixa da barra (150px como no Header)
+  const containerWidth = 150;
   const indicatorWidth = containerWidth / totalPages;
 
   const translateX = scrollX.interpolate({

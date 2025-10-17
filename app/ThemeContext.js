@@ -13,6 +13,7 @@ export function ThemeProvider({ children }) {
             background: isDark ? "#121212" : "#ffffffff",
             text: isDark ? "#ffffff" : "#000000",
             secondBackground: isDark ? "#1e1e1e" : "#f0f0f0",
+            secondText: isDark ? "#444444ff" : "#bbbbbbff",
         },
         toggleTheme,
     };

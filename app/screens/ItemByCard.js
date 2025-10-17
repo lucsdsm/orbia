@@ -1,19 +1,19 @@
 import React, { useMemo, useCallback } from "react";
-import { View, Text, FlatList, StyleSheet, TouchableOpacity } from "react-native";
-
+import { View, Text, StyleSheet, SectionList, TouchableOpacity } from "react-native";
 import { useTheme } from "../ThemeContext";
 import { useItens } from "../ItensContext";
-import { useNavigation, useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import Toast from "react-native-toast-message";
 import { MaterialIcons } from "@expo/vector-icons";
 
 import ParcelProgress from "../components/ParcelProgress";
 import { StorageService } from "../services/storage";
+import { CARDS } from "../constants";
 
-export default function ItemList() {
+export default function ItemByCard() {
   const { colors } = useTheme();
-  const { itens, recarregarItens } = useItens();
   const navigation = useNavigation();
+  const { itens, recarregarItens } = useItens();
 
   useFocusEffect(
     useCallback(() => {
@@ -21,29 +21,10 @@ export default function ItemList() {
     }, [recarregarItens])
   );
 
-  const itensOrdenados = useMemo(() => {
-    return [...itens].sort((a, b) => {
-      // 1º critério: receitas primeiro, depois despesas
-      if (a.natureza !== b.natureza) {
-        return a.natureza === "receita" ? -1 : 1;
-      }
-
-      // 2º critério: se ambos forem despesas, fixas primeiro
-      if (a.natureza === "despesa" && a.tipo !== b.tipo) {
-        return a.tipo === "fixa" ? -1 : 1;
-      }
-
-      // 3º critério: maior valor primeiro
-      const valorA = parseFloat(a.valor) || 0;
-      const valorB = parseFloat(b.valor) || 0;
-      return valorB - valorA;
-    });
-  }, [itens]);
-
   const removerItem = async (id) => {
     try {
       await StorageService.deleteItem(id);
-      await recarregarItens(); // Recarrega a lista
+      await recarregarItens();
       
       Toast.show({
         type: "success",
@@ -61,42 +42,70 @@ export default function ItemList() {
     }
   };
 
+  // Agrupa despesas parceladas por cartão
+  const itensPorCartao = useMemo(() => {
+    // Filtra apenas despesas parceladas que têm cartão
+    const despesasParceladas = itens.filter(
+      (item) => item.natureza === "despesa" && item.tipo === "parcelada" && item.cartao
+    );
+
+    // Agrupa por cartão
+    const grupos = {};
+
+    despesasParceladas.forEach((item) => {
+      const cartao = item.cartao;
+      
+      if (!grupos[cartao]) {
+        grupos[cartao] = {
+          cartao,
+          itens: [],
+          total: 0,
+        };
+      }
+
+      grupos[cartao].itens.push(item);
+      grupos[cartao].total += parseFloat(item.valor) || 0;
+    });
+
+    // Converte para array e ordena por total (maior primeiro)
+    const sections = Object.values(grupos)
+      .sort((a, b) => b.total - a.total)
+      .map((grupo) => {
+        const cartaoInfo = CARDS.find((c) => c.value === grupo.cartao);
+        return {
+          title: cartaoInfo?.label || grupo.cartao,
+          cartao: grupo.cartao,
+          total: grupo.total,
+          color: cartaoInfo?.color || "gray",
+          data: grupo.itens.sort((a, b) => {
+            const valorA = parseFloat(a.valor) || 0;
+            const valorB = parseFloat(b.valor) || 0;
+            return valorB - valorA;
+          }),
+        };
+      });
+
+    return sections;
+  }, [itens]);
+
   const renderItem = ({ item }) => (
-    <View style={[styles.item, { backgroundColor: colors.text, borderLeftColor: item.natureza === "receita" ? "#4CAF50" : "#F44336" }]}>
+    <View style={[styles.item, { backgroundColor: colors.text }]}>
       <View style={{ flex: 1 }}>
-        {/* emoji */}
-        <Text style={[styles.descricao, { color: colors.background }]}>{item.emoji} {item.descricao}</Text>
-        
+        <Text style={[styles.descricao, { color: colors.background }]}>
+          {item.emoji} {item.descricao}
+        </Text>
+
         <View style={styles.valorRow}>
           <Text style={[styles.valor, { color: colors.background }]}>
-            {item.natureza === "receita" ? "+" : "-"} R$ {item.valor.toFixed(2)}
+            R$ {item.valor.toFixed(2)}
           </Text>
-          
-          {item.natureza === "despesa" && item.tipo === "fixa" && (
-            <Text style={styles.emoji}>📌</Text>
-          )}
-          
-          {item.natureza === "despesa" && item.tipo === "parcelada" && item.data && item.parcelas && (
-            <ParcelProgress 
+
+          {item.data && item.parcelas && (
+            <ParcelProgress
               dataCompra={item.data}
               totalParcelas={item.parcelas}
               cor={colors.background}
             />
-          )}
-
-          {/* cartão */}
-          {item.cartao && (
-            <View style={{
-              backgroundColor: item.cartao === "nubank" ? "#8A05BE" : "#FF7A00",
-              paddingHorizontal: 8,
-              paddingVertical: 4,
-              borderRadius: 15,
-              marginLeft: 8,
-            }}>
-              <Text style={{ color: "#FFFFFF", fontSize: 11, fontWeight: "600" }}>
-                {item.cartao === "nubank" ? "Nubank" : "Inter"}
-              </Text>
-            </View>
           )}
         </View>
       </View>
@@ -137,23 +146,47 @@ export default function ItemList() {
     </View>
   );
 
-  return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      {itens.length === 0 ? (
-        <View style={styles.vazioContainer}>
-          <Text style={[styles.vazio, { color: colors.text }]}>
-            Nenhum item cadastrado, por enquanto 😲.
+  const renderSectionHeader = ({ section: { title, total, cartao } }) => (
+    <View style={[styles.sectionHeader, { backgroundColor: colors.background }]}>
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+        <View
+          style={{
+            backgroundColor: cartao === "nubank" ? "#8A05BE" : "#FF7A00",
+            paddingHorizontal: 12,
+            paddingVertical: 6,
+            borderRadius: 20,
+          }}
+        >
+          <Text style={{ color: "#FFFFFF", fontSize: 14, fontWeight: "bold" }}>
+            {title}
           </Text>
         </View>
-        ) : (
-          <FlatList
-            data={itensOrdenados}
-            keyExtractor={(item) => item.id} 
-            renderItem={renderItem}
-            contentContainerStyle={styles.listContent}
-          />
-        )}
+        <Text style={[styles.sectionTotal, { color: colors.text }]}>
+          R$ {total.toFixed(2)}
+        </Text>
       </View>
+    </View>
+  );
+
+  return (
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      {itensPorCartao.length === 0 ? (
+        <View style={styles.vazioContainer}>
+          <Text style={[styles.vazio, { color: colors.text }]}>
+            Nenhuma despesa parcelada com cartão cadastrada 💳
+          </Text>
+        </View>
+      ) : (
+        <SectionList
+          sections={itensPorCartao}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          renderSectionHeader={renderSectionHeader}
+          contentContainerStyle={styles.listContent}
+          stickySectionHeadersEnabled={true}
+        />
+      )}
+    </View>
   );
 }
 
@@ -164,15 +197,26 @@ const styles = StyleSheet.create({
   listContent: {
     padding: 20,
   },
+  sectionHeader: {
+    paddingVertical: 12,
+    paddingHorizontal: 5,
+    marginBottom: 10,
+    borderRadius: 8,
+  },
+  sectionTotal: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
   item: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    height: 80,
+    minHeight: 70,
     padding: 15,
     borderRadius: 10,
     marginBottom: 10,
     borderLeftWidth: 5,
+    borderLeftColor: "#F44336",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
@@ -181,17 +225,16 @@ const styles = StyleSheet.create({
   },
   descricao: {
     fontWeight: "bold",
+    fontSize: 14,
   },
   valorRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    marginTop: 7,
+    marginTop: 4,
   },
   valor: {
     fontWeight: "bold",
-  },
-  emoji: {
     fontSize: 14,
   },
   vazioContainer: {

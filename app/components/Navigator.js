@@ -6,6 +6,8 @@ import { useNavigation } from "@react-navigation/native";
 
 import Home from "../screens/Home";
 import ItemList from "../screens/ItemList";
+import ItemByMonth from "../screens/ItemByMonth";
+import ItemByCard from "../screens/ItemByCard";
 import Header from "./Header";
 import Footer from "./Footer";
 
@@ -16,7 +18,7 @@ export default function Navigator() {
   const navigation = useNavigation();
   
   const scrollX = useRef(new Animated.Value(0)).current;
-  const totalPages = 2; 
+  const totalPages = 4; 
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -44,6 +46,8 @@ export default function Navigator() {
         >
           <Tab.Screen name="Início" component={Home} />
           <Tab.Screen name="Itens" component={ItemList} />
+          <Tab.Screen name="Por Mês" component={ItemByMonth} />
+          <Tab.Screen name="Por Cartão" component={ItemByCard} />
         </Tab.Navigator>
       </View>
 

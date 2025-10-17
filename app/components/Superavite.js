@@ -26,7 +26,7 @@ export default function Superavite({ itens = [] }) {
     <View style={styles.container}>
       <Text style={[styles.label, { color: colors.text }]}> {positivo ? "Superávite" : "Déficit"} </Text>
       <Text style={[styles.valor, { color: positivo ? "#4CAF50" : "#F44336" }]}>
-      {positivo ? "+ " : "- "} {"R$ " + saldoDoMes}
+      {positivo ? "+ " : "- "} R$ {Math.abs(saldoDoMes).toFixed(2)}
       </Text>
     </View>
   );

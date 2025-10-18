@@ -2,9 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, StatusBar, Platform } from 'react-native';
 import { useTheme } from '../ThemeContext';
 
-import Indicator from './Indicator';
-
-export default function Header({ scrollX, totalPages }) {
+export default function Header() {
   const { colors, isDark } = useTheme();
 
   return (
@@ -16,10 +14,6 @@ export default function Header({ scrollX, totalPages }) {
       <View style={[styles.container, { backgroundColor: colors.background }]}>
         <Text style={[styles.title, { color: colors.text }]}>Orbia</Text>
         <Text style={[styles.version, { color: colors.text, opacity: 0.6 }]}>versão 1.0</Text>
-
-        {scrollX && totalPages && (
-          <Indicator scrollX={scrollX} totalPages={totalPages} />
-        )}
       </View>  
     </View>
   );

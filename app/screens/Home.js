@@ -9,41 +9,31 @@ import Superavite from "../components/Superavite";
 import Balance from "../components/Balance";
 import NextBalance from "../components/NextBalance";
 
-function useSaldo() {
-  const [saldo, setSaldo] = React.useState(0);
+export default function Home({ navigation }) {
+  const { colors } = useTheme();
+  const { itens, recarregarItens } = useItens();
+  const [saldoAtual, setSaldoAtual] = useState(0);
 
-  const carregarSaldo = useCallback(async () => {
+  // Carrega o saldo inicial
+  useEffect(() => {
+    carregarSaldoInicial();
+  }, []);
+
+  const carregarSaldoInicial = async () => {
     try {
       const saldoSalvo = await AsyncStorage.getItem("@orbia:saldo");
       if (saldoSalvo !== null) {
-        setSaldo(parseFloat(saldoSalvo));
+        setSaldoAtual(parseFloat(saldoSalvo));
       }
     } catch (error) {
       console.error("Erro ao carregar saldo:", error);
     }
-  }, []);
-
-  useEffect(() => {
-    carregarSaldo();
-  }, [carregarSaldo]);
-
-  useFocusEffect(
-    useCallback(() => {
-      carregarSaldo();
-    }, [carregarSaldo])
-  );
-
-  return saldo;
-}
-
-export default function Home({ navigation }) {
-  const { colors } = useTheme();
-  const { itens, recarregarItens } = useItens();
-  const saldoAtual = useSaldo();
+  };
 
   useFocusEffect(
     useCallback(() => {
       recarregarItens();
+      carregarSaldoInicial();
     }, [recarregarItens])
   );
 
@@ -65,7 +55,7 @@ export default function Home({ navigation }) {
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Superavite itens={itens} />
-      <Balance />
+      <Balance onSaldoChange={(novoSaldo) => setSaldoAtual(novoSaldo)} />
       <NextBalance saldoAtual={saldoAtual} superavite={superavite} />
     </View>
   );

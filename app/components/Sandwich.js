@@ -4,11 +4,11 @@ import { Feather } from "@expo/vector-icons";
 import { useTheme } from "../ThemeContext";
 import { useNavigation } from "@react-navigation/native";
 
-export default function Modal({ visible, onClose }) {
+export default function Sandwich({ visible, onClose }) {
   const { colors } = useTheme();
   const navigation = useNavigation();
 
-  const menuItems = [
+  const SandwichItems = [
     { name: "Itens", icon: "list", screen: "Itens" },
     { name: "Por Mês", icon: "calendar", screen: "Por Mês" },
     { name: "Por Cartão", icon: "credit-card", screen: "Por Cartão" },
@@ -17,8 +17,10 @@ export default function Modal({ visible, onClose }) {
 
   const navigateToScreen = (screen) => {
     onClose();
-    navigation.navigate("Drawer", { screen });
+    navigation.navigate("Drawer", { screen }, { animationEnabled: false });
   };
+
+  if (!visible) return null;
 
   return (
     <Modal
@@ -28,26 +30,26 @@ export default function Modal({ visible, onClose }) {
       onRequestClose={onClose}
     >
       <TouchableOpacity 
-        style={styles.modalOverlay}
+        style={styles.SandwichOverlay}
         activeOpacity={1}
         onPress={onClose}
       >
-        <View style={[styles.menuContainer, { backgroundColor: colors.secondBackground }]}>
-          <View style={styles.menuHeader}>
-            <Text style={[styles.menuTitle, { color: colors.text }]}>Menu</Text>
+        <View style={[styles.SandwichContainer, { backgroundColor: colors.secondBackground }]}>
+          <View style={styles.SandwichHeader}>
+            <Text style={[styles.SandwichTitle, { color: colors.text }]}> Menu </Text>
             <TouchableOpacity onPress={onClose}>
               <Feather name="x" size={24} color={colors.text} />
             </TouchableOpacity>
           </View>
 
-          {menuItems.map((item, index) => (
+          {SandwichItems.map((item, index) => (
             <TouchableOpacity
               key={index}
-              style={[styles.menuItem, { borderBottomColor: colors.text + '20' }]}
+              style={[styles.SandwichItem, { borderBottomColor: colors.text + '20' }]}
               onPress={() => navigateToScreen(item.screen)}
             >
               <Feather name={item.icon} size={22} color={colors.text} />
-              <Text style={[styles.menuItemText, { color: colors.text }]}>
+              <Text style={[styles.SandwichItemText, { color: colors.text }]}>
                 {item.name}
               </Text>
             </TouchableOpacity>
@@ -59,18 +61,18 @@ export default function Modal({ visible, onClose }) {
 }
 
 const styles = StyleSheet.create({
-  modalOverlay: {
+  SandwichOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'flex-end',
   },
-  menuContainer: {
+  SandwichContainer: {
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 20,
     paddingBottom: 40,
   },
-  menuHeader: {
+  SandwichHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -79,18 +81,18 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(128, 128, 128, 0.3)',
   },
-  menuTitle: {
+  SandwichTitle: {
     fontSize: 20,
     fontWeight: 'bold',
   },
-  menuItem: {
+  SandwichItem: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 15,
     borderBottomWidth: 1,
     gap: 15,
   },
-  menuItemText: {
+  SandwichItemText: {
     fontSize: 16,
   },
 });

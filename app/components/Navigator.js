@@ -21,14 +21,14 @@ export default function Navigator() {
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
 
-      <Header />
+      <Header/>
 
       <View style={styles.content}>
         <Stack.Navigator
           initialRouteName="Início"
           screenOptions={{
             headerShown: false,
-            animationEnabled: false, // Remove todas as animações
+            animationEnabled: false,
           }}
         >
           <Stack.Screen name="Início" component={Home} />

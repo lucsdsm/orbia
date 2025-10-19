@@ -34,7 +34,7 @@ export default function App() {
               name="ItemEdit"
               component={ItemEdit}
               options={{
-                presentation: "modal",
+                presentation: "Sandwich",
                 animation: "slide_from_bottom",
               }}
             />

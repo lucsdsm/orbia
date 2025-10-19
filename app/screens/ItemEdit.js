@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-nativ
 import { useTheme } from "../ThemeContext";
 import Toast from "react-native-toast-message";
 import { Picker } from "@react-native-picker/picker";
+import { MaterialIcons } from "@expo/vector-icons";
 
 import { CARDS } from "../constants";
 import ActualDateInput from "../components/ActualDateInput";
@@ -213,6 +214,7 @@ export default function ItemEdit({ route, navigation }) {
 
         <TouchableOpacity
           style={[styles.button, { backgroundColor: colors.text }]}
+          activeOpacity={0.7}
           onPress={handleSalvar}
         >
           <Text style={{ color: colors.background, fontWeight: "bold" }}>Salvar</Text>
@@ -220,9 +222,31 @@ export default function ItemEdit({ route, navigation }) {
 
         <TouchableOpacity
           onPress={() => navigation.goBack()}
+          activeOpacity={0.7}
           style={[styles.button, { backgroundColor: colors.text, marginTop: 10 }]}
         >
           <Text style={{ color: colors.background, fontWeight: "bold" }}>Voltar</Text>
+        </TouchableOpacity>
+
+        {/* botão para excluir item */}
+        <TouchableOpacity
+          onPress={() => {
+            Toast.show({
+              type: "error",
+              text1: "Excluir item?",
+              text2: "Toque novamente para confirmar.",
+              position: "top",
+              visibilityTime: 2500,
+              onPress: () => {
+                removerItem(item.id);
+                Toast.hide();
+              },
+            });
+          }}
+          activeOpacity={0.7}
+          style={[styles.button, { backgroundColor: "#F44336", color: colors.text, marginTop: 10 }]}
+        >
+          <Text style={{ color: colors.background, fontWeight: "bold" }}> Excluir item </Text>
         </TouchableOpacity>
       </View>
     </View>

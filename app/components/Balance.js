@@ -4,7 +4,7 @@ import { useTheme } from "../ThemeContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
 
-export default function Balance() {
+export default function Balance({ onSaldoChange }) {
   const { colors } = useTheme();
   const [saldo, setSaldo] = useState("0.00");
   const [editando, setEditando] = useState(false);
@@ -25,7 +25,11 @@ export default function Balance() {
     try {
       const saldoSalvo = await AsyncStorage.getItem("@orbia:saldo");
       if (saldoSalvo !== null) {
-        setSaldo(parseFloat(saldoSalvo).toFixed(2));
+        const valorSaldo = parseFloat(saldoSalvo);
+        setSaldo(valorSaldo.toFixed(2));
+        if (onSaldoChange) {
+          onSaldoChange(valorSaldo);
+        }
       }
     } catch (error) {
       console.error("Erro ao carregar saldo:", error);
@@ -35,6 +39,9 @@ export default function Balance() {
   const salvarSaldo = async (valor) => {
     try {
       await AsyncStorage.setItem("@orbia:saldo", valor.toString());
+      if (onSaldoChange) {
+        onSaldoChange(valor);
+      }
     } catch (error) {
       console.error("Erro ao salvar saldo:", error);
     }

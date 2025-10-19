@@ -3,12 +3,12 @@ import { View, TouchableOpacity, StyleSheet } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useTheme } from "../ThemeContext";
 import { useNavigation } from "@react-navigation/native";
-import Modal from "./Modal";
+import Sandwich from "./Sandwich";
 
 export default function Footer( { onNovoItem } ) {
   const { toggleTheme, isDark, colors } = useTheme();
   const navigation = useNavigation();
-  const [menuVisible, setMenuVisible] = useState(false);
+  const [SandwichVisible, setSandwichVisible] = useState(false);
 
   return (
     <>
@@ -50,19 +50,19 @@ export default function Footer( { onNovoItem } ) {
             )}
           </TouchableOpacity>
 
-          {/* botão menu sanduíche */}
+          {/* botão Sandwich sanduíche */}
           <TouchableOpacity
             style={[styles.button, { backgroundColor: "rgba(128,128,128,0.5)" }]}
-            onPress={() => setMenuVisible(true)}
+            onPress={() => setSandwichVisible(true)}
           >
             <Feather name="menu" size={28} color={colors.text} />
           </TouchableOpacity>
         </View>
       </View>
 
-      <Modal 
-        visible={menuVisible} 
-        onClose={() => setMenuVisible(false)} 
+      <Sandwich 
+        visible={SandwichVisible} 
+        onClose={() => setSandwichVisible(false)} 
       />
     </>
   );

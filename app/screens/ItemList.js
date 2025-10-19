@@ -64,22 +64,31 @@ const ItemList = React.memo(() => {
   }, [recarregarItens]);
 
   const renderItem = useCallback(({ item }) => (
-    <View style={[styles.item, { backgroundColor: colors.text, borderLeftColor: item.natureza === "receita" ? "#4CAF50" : "#F44336" }]}>
+    <TouchableOpacity
+      activeOpacity={0.8}
+      style={[styles.item, { backgroundColor: colors.text, borderLeftColor: item.natureza === "receita" ? "#4CAF50" : "#F44336" }]}
+      onPress={() => navigation.navigate("ItemEdit", {
+        item,
+        onEdit: async (itemEditado) => {
+          await StorageService.updateItem(itemEditado.id, itemEditado);
+          await recarregarItens();
+        }
+      })}>
       <View style={{ flex: 1 }}>
         {/* emoji */}
         <Text style={[styles.descricao, { color: colors.background }]}>{item.emoji} {item.descricao}</Text>
-        
+
         <View style={styles.valorRow}>
           <Text style={[styles.valor, { color: colors.background }]}>
             {item.natureza === "receita" ? "+" : "-"} R$ {item.valor.toFixed(2)}
           </Text>
-          
+
           {item.natureza === "despesa" && item.tipo === "fixa" && (
             <Text style={styles.emoji}>📌</Text>
           )}
-          
+
           {item.natureza === "despesa" && item.tipo === "parcelada" && item.data && item.parcelas && (
-            <ParcelProgress 
+            <ParcelProgress
               dataCompra={item.data}
               totalParcelas={item.parcelas}
               cor={colors.background}
@@ -103,41 +112,7 @@ const ItemList = React.memo(() => {
           )}
         </View>
       </View>
-
-      <View style={{ flexDirection: "row", alignItems: "center" }}>
-        <TouchableOpacity
-          onPress={() => navigation.navigate("ItemEdit", {
-            item,
-            onEdit: async (itemEditado) => {
-              await StorageService.updateItem(itemEditado.id, itemEditado);
-              await recarregarItens();
-            }
-          })}
-          style={{ marginRight: 10 }}
-        >
-          <MaterialIcons name="edit" size={28} color={colors.background} />
-        </TouchableOpacity>
-        
-        <TouchableOpacity
-          onPress={() => {
-            Toast.show({
-              type: "error",
-              text1: "Excluir item?",
-              text2: "Toque novamente para confirmar.",
-              position: "top",
-              visibilityTime: 2500,
-              onPress: () => {
-                removerItem(item.id);
-                Toast.hide();
-              },
-            });
-          }}
-          style={{ alignItems: "center", justifyContent: "center" }}
-        >
-          <MaterialIcons name="delete" size={28} color={colors.background} />
-        </TouchableOpacity>
-      </View>
-    </View>
+    </TouchableOpacity>
   ), [colors, navigation, recarregarItens, removerItem]);
 
   const keyExtractor = useCallback((item) => item.id, []);
@@ -176,6 +151,8 @@ const styles = StyleSheet.create({
   },
   listContent: {
     padding: 20,
+    paddingLeft: 30,
+    paddingRight: 30,
     
   },
   item: {

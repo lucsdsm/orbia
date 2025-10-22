@@ -128,6 +128,17 @@ export default function ItemEdit({ route, navigation }) {
             <Picker
               selectedValue={tipo}
               onValueChange={(itemValue) => {
+                if (itemValue === "parcelada" && cartoes.length === 0) {
+                  Toast.show({
+                    type: "error",
+                    text1: "Nenhum cartão cadastrado!",
+                    text2: "Adicione um cartão antes de criar despesas parceladas.",
+                    position: "top",
+                    visibilityTime: 3000,
+                  });
+                  return;
+                }
+                
                 setTipo(itemValue);
                 if (itemValue === "parcelada" && cartoes.length > 0) {
                   setCartao(cartoes[0].id);

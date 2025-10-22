@@ -1,7 +1,4 @@
-export const DEFAULT_CARDS = [
-  { id: "1", nome: "Nubank", emoji: "🔮", color: "#820AD1", limite: 5000 },
-  { id: "2", nome: "Inter", emoji: "🦊", color: "#FF7300", limite: 3000 },
-];
+export const DEFAULT_CARDS = [];
 
 export const COLORS = [
   "#820AD1", // Roxo Nubank

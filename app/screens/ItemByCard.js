@@ -52,6 +52,7 @@ const ItemByCard = React.memo(() => {
 
     // agrupa por cartão
     const grupos = {};
+    const hoje = new Date();
 
     despesasParceladas.forEach((item) => {
       const cartao = item.cartao;
@@ -65,7 +66,26 @@ const ItemByCard = React.memo(() => {
       }
 
       grupos[cartao].itens.push(item);
-      grupos[cartao].total += parseFloat(item.valor) || 0;
+      
+      // Calcula apenas as parcelas restantes
+      if (item.data && item.parcelas) {
+        const dataCompra = new Date(item.data);
+        
+        // Verifica se a data é válida
+        if (!isNaN(dataCompra.getTime())) {
+          const mesesPassados = (hoje.getFullYear() - dataCompra.getFullYear()) * 12 + 
+                                 (hoje.getMonth() - dataCompra.getMonth());
+          const totalParcelas = parseInt(item.parcelas) || 0;
+          const parcelasRestantes = Math.max(0, totalParcelas - mesesPassados);
+          const valorParcela = parseFloat(item.valor) || 0;
+          grupos[cartao].total += valorParcela * parcelasRestantes;
+        } else {
+          // Se a data for inválida, considera o valor total
+          grupos[cartao].total += parseFloat(item.valor) || 0;
+        }
+      } else {
+        grupos[cartao].total += parseFloat(item.valor) || 0;
+      }
     });
 
     // converte para array e ordena por total (maior primeiro)

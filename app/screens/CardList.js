@@ -77,9 +77,9 @@ export default function CardList({ navigation }) {
       />
 
       <TouchableOpacity
-            style={[styles.fab, { backgroundColor: colors.primary }]}
+            style={[styles.fab, { backgroundColor: colors.text }]}
             onPress={() => navigation.navigate('CardAdd')} >
-            <Feather name="plus" size={24} color="#FFF" />
+            <Feather name="plus" size={24} color={colors.background} />
         </TouchableOpacity>
     </View>
   );

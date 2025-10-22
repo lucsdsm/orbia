@@ -13,7 +13,7 @@ export default function Header() {
       />
       <View style={[styles.container, { backgroundColor: colors.background }]}>
         <Text style={[styles.title, { color: colors.text }]}>Orbia</Text>
-        <Text style={[styles.version, { color: colors.text, opacity: 0.6 }]}>versão 1.0</Text>
+        <Text style={[styles.version, { color: colors.text, opacity: 0.6 }]}>versão 1.0.1</Text>
       </View>  
     </View>
   );

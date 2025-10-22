@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { View, Text, StyleSheet, Animated } from "react-native";
-import { useTheme } from "../ThemeContext";
+import { useTheme } from "../contexts/ThemeContext";
 
 export default function LoadingScreen() {
   const { colors } = useTheme();

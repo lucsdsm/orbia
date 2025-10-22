@@ -1,13 +1,12 @@
 import React, { useMemo, useCallback } from "react";
 import { View, Text, FlatList, StyleSheet, TouchableOpacity } from "react-native";
 
-import { useTheme } from "../ThemeContext";
-import { useItens } from "../ItensContext";
+import { useTheme } from "../contexts/ThemeContext";
+import { useItens } from "../contexts/ItensContext";
+import { useCartoes } from "../contexts/CartoesContext";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import Toast from "react-native-toast-message";
 import { MaterialIcons } from "@expo/vector-icons";
-
-import { CARDS } from "../constants";
 
 import ParcelProgress from "../components/ParcelProgress";
 import { StorageService } from "../services/storage";
@@ -15,6 +14,7 @@ import { StorageService } from "../services/storage";
 const ItemList = React.memo(() => {
   const { colors } = useTheme();
   const { itens, recarregarItens } = useItens();
+  const { cartoes } = useCartoes();
   const navigation = useNavigation();
 
   useFocusEffect(
@@ -63,11 +63,13 @@ const ItemList = React.memo(() => {
     }
   }, [recarregarItens]);
 
-  const renderItem = useCallback(({ item }) => (
-    <TouchableOpacity
-      activeOpacity={0.8}
-      style={[styles.item, { backgroundColor: colors.text, borderLeftColor: item.natureza === "receita" ? "#4CAF50" : "#F44336" }]}
-      onPress={() => navigation.navigate("ItemEdit", {
+  const renderItem = useCallback((props) => {
+    const { item } = props;
+    return (
+      <TouchableOpacity
+        activeOpacity={0.8}
+        style={[styles.item, { backgroundColor: colors.card, borderLeftColor: item.natureza === "receita" ? "#4CAF50" : "#F44336" }]}
+        onPress={() => navigation.navigate("ItemEdit", {
         item,
         onEdit: async (itemEditado) => {
           await StorageService.updateItem(itemEditado.id, itemEditado);
@@ -76,10 +78,10 @@ const ItemList = React.memo(() => {
       })}>
       <View style={{ flex: 1 }}>
         {/* emoji */}
-        <Text style={[styles.descricao, { color: colors.background }]}>{item.emoji} {item.descricao}</Text>
+        <Text style={[styles.descricao, { color: colors.text }]}>{item.emoji} {item.descricao}</Text>
 
         <View style={styles.valorRow}>
-          <Text style={[styles.valor, { color: colors.background }]}>
+          <Text style={[styles.valor, { color: colors.text }]}>
             {item.natureza === "receita" ? "+" : "-"} R$ {item.valor.toFixed(2)}
           </Text>
 
@@ -91,29 +93,29 @@ const ItemList = React.memo(() => {
             <ParcelProgress
               dataCompra={item.data}
               totalParcelas={item.parcelas}
-              cor={colors.background}
+              cor={colors.text}
             />
           )}
 
           {/* cartão */}
           {item.cartao && (
             <View style={{
-              // retornar cor do cartão conforme constante
-              backgroundColor: CARDS.find(c => c.value === item.cartao)?.color || "gray",
+              backgroundColor: cartoes.find(c => c.id === item.cartao)?.color || "gray",
               paddingHorizontal: 8,
               paddingVertical: 4,
               borderRadius: 15,
               marginLeft: 8,
             }}>
               <Text style={{ color: "#FFFFFF", fontSize: 11, fontWeight: "600" }}>
-                {CARDS.find(c => c.value === item.cartao)?.label || "Cartão Desconhecido"}
+                {cartoes.find(c => c.id === item.cartao)?.emoji || "💳"} {cartoes.find(c => c.id === item.cartao)?.nome || "Cartão"}
               </Text>
             </View>
           )}
         </View>
       </View>
     </TouchableOpacity>
-  ), [colors, navigation, recarregarItens, removerItem]);
+    );
+  }, [colors, navigation, recarregarItens, cartoes]);
 
   const keyExtractor = useCallback((item) => item.id, []);
 

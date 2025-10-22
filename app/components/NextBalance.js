@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
-import { useTheme } from "../ThemeContext";
+import { useTheme } from "../contexts/ThemeContext";
 
 export default function NextBalance({ saldoAtual = 0, superavite = 0 }) {
   const { colors } = useTheme();

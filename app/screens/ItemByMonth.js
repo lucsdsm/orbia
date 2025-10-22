@@ -1,20 +1,21 @@
 import React, { useMemo, useCallback } from "react";
 import { View, Text, FlatList, StyleSheet, SectionList, TouchableOpacity } from "react-native";
-import { useTheme } from "../ThemeContext";
-import { useItens } from "../ItensContext";
+import { useTheme } from "../contexts/ThemeContext";
+import { useItens } from "../contexts/ItensContext";
+import { useCartoes } from "../contexts/CartoesContext";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import Toast from "react-native-toast-message";
 import { MaterialIcons } from "@expo/vector-icons";
 
 import ParcelProgress from "../components/ParcelProgress";
 import { StorageService } from "../services/storage";
-import { CARDS } from "../constants";
 import { MONTHS } from "../constants";
 
 const ItemByMonth = React.memo(() => {
   const { colors } = useTheme();
   const navigation = useNavigation();
   const { itens, recarregarItens } = useItens();
+  const { cartoes } = useCartoes();
 
   useFocusEffect(
     useCallback(() => {
@@ -104,11 +105,13 @@ const ItemByMonth = React.memo(() => {
     return sections;
   }, [itens]);
 
-  const renderItem = useCallback(({ item }) => (
-    <TouchableOpacity
-      activeOpacity={0.8}
-      style={[styles.item, { backgroundColor: colors.text, borderLeftColor: item.natureza === "receita" ? "#4CAF50" : "#F44336" }]}
-      onPress={() => navigation.navigate("ItemEdit", {
+  const renderItem = useCallback((props) => {
+    const { item } = props;
+    return (
+      <TouchableOpacity
+        activeOpacity={0.8}
+        style={[styles.item, { backgroundColor: colors.card, borderLeftColor: item.natureza === "receita" ? "#4CAF50" : "#F44336" }]}
+        onPress={() => navigation.navigate("ItemEdit", {
         item,
         onEdit: async (itemEditado) => {
           await StorageService.updateItem(itemEditado.id, itemEditado);
@@ -116,26 +119,26 @@ const ItemByMonth = React.memo(() => {
         }
       })}>
       <View style={{ flex: 1 }}>
-        <Text style={[styles.descricao, { color: colors.background }]}>
+        <Text style={[styles.descricao, { color: colors.text }]}>
           {item.emoji} {item.descricao}
         </Text>
 
         <View style={styles.valorRow}>
-          <Text style={[styles.valor, { color: colors.background }]}>
+          <Text style={[styles.valor, { color: colors.text }]}>
             R$ {item.valor.toFixed(2)}
           </Text>
 
           <ParcelProgress
             dataCompra={item.data}
             totalParcelas={item.parcelas}
-            cor={colors.background}
+            cor={colors.text}
           />
 
           {/* Badge do cartão */}
           {item.cartao && (
             <View
               style={{
-                backgroundColor: CARDS.find(c => c.value === item.cartao)?.color || "gray",
+                backgroundColor: cartoes.find(c => c.id === item.cartao)?.color || "gray",
                 paddingHorizontal: 8,
                 paddingVertical: 4,
                 borderRadius: 15,
@@ -143,20 +146,24 @@ const ItemByMonth = React.memo(() => {
               }}
             >
               <Text style={{ color: "#FFFFFF", fontSize: 11, fontWeight: "600" }}>
-                {CARDS.find(c => c.value === item.cartao)?.label || "Cartão Desconhecido"}
+                {cartoes.find(c => c.id === item.cartao)?.emoji || "💳"} {cartoes.find(c => c.id === item.cartao)?.nome || "Cartão"}
               </Text>
             </View>
           )}
         </View>
       </View>
     </TouchableOpacity>
-  ), [colors, navigation, recarregarItens, removerItem]);
+    );
+  }, [colors, navigation, recarregarItens, cartoes]);
 
-  const renderSectionHeader = useCallback(({ section: { title } }) => (
-    <View style={[styles.sectionHeader, { backgroundColor: colors.background }]}>
-      <Text style={[styles.sectionTitle, { color: colors.text }]}>{title}</Text>
-    </View>
-  ), [colors]);
+  const renderSectionHeader = useCallback(
+    ({ section: { title } }) => (
+      <View style={[styles.sectionHeader, { backgroundColor: colors.background }]}>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>{title}</Text>
+      </View>
+    ),
+    [colors]
+  );
 
   const keyExtractor = useCallback((item) => item.id, []);
 

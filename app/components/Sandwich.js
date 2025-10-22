@@ -1,17 +1,24 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Modal } from "react-native";
 import { Feather } from "@expo/vector-icons";
-import { useTheme } from "../ThemeContext";
+import { useTheme } from "../contexts/ThemeContext";
 import { useNavigation } from "@react-navigation/native";
 
 export default function Sandwich({ visible, onClose }) {
   const { colors } = useTheme();
   const navigation = useNavigation();
 
-  const SandwichItems = [
-    { name: "Itens", icon: "list", screen: "Itens" },
+  const SandwichCardItems = [
+    { name: "Todos os itens", icon: "list", screen: "Itens" },
     { name: "Por Mês", icon: "calendar", screen: "Por Mês" },
     { name: "Por Cartão", icon: "credit-card", screen: "Por Cartão" },
+  ];
+
+  const SandwichCardCards = [
+    { name: "Meus Cartões", icon: "credit-card", screen: "Cartões" },
+  ];
+
+  const SandwichCardApp = [
     { name: "Configurações", icon: "settings", screen: "Configurações" },
   ];
 
@@ -34,15 +41,18 @@ export default function Sandwich({ visible, onClose }) {
         activeOpacity={1}
         onPress={onClose}
       >
+        
         <View style={[styles.SandwichContainer, { backgroundColor: colors.secondBackground }]}>
+
+          {/* Itens */}
           <View style={styles.SandwichHeader}>
-            <Text style={[styles.SandwichTitle, { color: colors.text }]}> Menu </Text>
+            <Text style={[styles.SandwichTitle, { color: colors.text }]}> Itens </Text>
             <TouchableOpacity onPress={onClose}>
               <Feather name="x" size={24} color={colors.text} />
             </TouchableOpacity>
           </View>
 
-          {SandwichItems.map((item, index) => (
+          {SandwichCardItems.map((item, index) => (
             <TouchableOpacity
               key={index}
               style={[styles.SandwichItem, { borderBottomColor: colors.text + '20' }]}
@@ -54,6 +64,44 @@ export default function Sandwich({ visible, onClose }) {
               </Text>
             </TouchableOpacity>
           ))}
+
+          {/* Cartões */}
+          <View style={styles.SandwichHeader}>
+            <Text style={[styles.SandwichTitle, { color: colors.text }]}> Cartões </Text>
+          </View>
+
+          {SandwichCardCards.map((item, index) => (
+            <TouchableOpacity
+              key={index}
+              style={[styles.SandwichItem, { borderBottomColor: colors.text + '20' }]}
+              onPress={() => navigateToScreen(item.screen)}
+            >
+              <Feather name={item.icon} size={22} color={colors.text} />
+              <Text style={[styles.SandwichItemText, { color: colors.text }]}>
+                {item.name}
+              </Text>
+            </TouchableOpacity>
+          ))}
+
+          {/* Aplicativo */}
+          <View style={styles.SandwichHeader}>
+            <Text style={[styles.SandwichTitle, { color: colors.text }]}> Aplicativo </Text>
+          </View>
+
+          {SandwichCardApp.map((item, index) => (
+            <TouchableOpacity
+              key={index}
+              style={[styles.SandwichItem, { borderBottomColor: colors.text + '20' }]}
+              onPress={() => navigateToScreen(item.screen)}
+            >
+              <Feather name={item.icon} size={22} color={colors.text} />
+              <Text style={[styles.SandwichItemText, { color: colors.text }]}>
+                {item.name}
+              </Text>
+            </TouchableOpacity>
+          ))}
+
+
         </View>
       </TouchableOpacity>
     </Modal>
@@ -76,21 +124,23 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
-    paddingBottom: 15,
+    paddingTop: 25,
+    paddingBottom: 10,
+    marginBottom: 10,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(128, 128, 128, 0.3)',
   },
   SandwichTitle: {
     fontSize: 20,
     fontWeight: 'bold',
+    paddingBottom: 5,
   },
   SandwichItem: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 15,
-    borderBottomWidth: 1,
-    gap: 15,
+    paddingHorizontal: 8,
+    gap: 10,
   },
   SandwichItemText: {
     fontSize: 16,

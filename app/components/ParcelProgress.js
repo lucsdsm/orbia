@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import { View, Text, StyleSheet } from "react-native";
-import { useTheme } from "../ThemeContext";
+import { useTheme } from "../contexts/ThemeContext";
 import Svg, { Circle } from "react-native-svg";
 
 export default function ParcelProgress({ dataCompra, totalParcelas, cor }) {

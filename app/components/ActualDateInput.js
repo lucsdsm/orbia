@@ -1,7 +1,7 @@
 import React from "react";
 import { View, TextInput, TouchableOpacity, StyleSheet } from "react-native";
 import { Feather } from "@expo/vector-icons";
-import { useTheme } from "../ThemeContext";
+import { useTheme } from "../contexts/ThemeContext";
 
 export default function DataCompraInput({ data, setData, dateChange, natureza, tipo }) {
   const { colors } = useTheme();
@@ -21,7 +21,7 @@ export default function DataCompraInput({ data, setData, dateChange, natureza, t
     <View style={[styles.container, { borderColor: colors.text }]}>
       <TextInput
         style={[styles.input, { color: colors.text }]}
-        placeholder="Data da compra"
+        placeholder="Data da primeira parcela"
         placeholderTextColor="#888"
         value={data}
         keyboardType="numeric"

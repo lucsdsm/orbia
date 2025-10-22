@@ -1,19 +1,20 @@
 import React, { useMemo, useCallback } from "react";
 import { View, Text, StyleSheet, SectionList, TouchableOpacity } from "react-native";
-import { useTheme } from "../ThemeContext";
-import { useItens } from "../ItensContext";
+import { useTheme } from "../contexts/ThemeContext";
+import { useItens } from "../contexts/ItensContext";
+import { useCartoes } from "../contexts/CartoesContext";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import Toast from "react-native-toast-message";
 import { MaterialIcons } from "@expo/vector-icons";
 
 import ParcelProgress from "../components/ParcelProgress";
 import { StorageService } from "../services/storage";
-import { CARDS } from "../constants";
 
 const ItemByCard = React.memo(() => {
   const { colors } = useTheme();
   const navigation = useNavigation();
   const { itens, recarregarItens } = useItens();
+  const { cartoes } = useCartoes();
 
   useFocusEffect(
     useCallback(() => {
@@ -71,9 +72,9 @@ const ItemByCard = React.memo(() => {
     const sections = Object.values(grupos)
       .sort((a, b) => b.total - a.total)
       .map((grupo) => {
-        const cartaoInfo = CARDS.find((c) => c.value === grupo.cartao);
+        const cartaoInfo = cartoes.find((c) => c.id === grupo.cartao);
         return {
-          title: cartaoInfo?.label || grupo.cartao,
+          title: cartaoInfo ? `${cartaoInfo.emoji} ${cartaoInfo.nome}` : grupo.cartao,
           cartao: grupo.cartao,
           total: grupo.total,
           color: cartaoInfo?.color || "gray",
@@ -86,12 +87,12 @@ const ItemByCard = React.memo(() => {
       });
 
     return sections;
-  }, [itens]);
+  }, [itens, cartoes]);
 
   const renderItem = useCallback(({ item }) => (
     <TouchableOpacity
       activeOpacity={0.8}
-      style={[styles.item, { backgroundColor: colors.text, borderLeftColor: item.natureza === "receita" ? "#4CAF50" : "#F44336" }]}
+      style={[styles.item, { backgroundColor: colors.card, borderLeftColor: item.natureza === "receita" ? "#4CAF50" : "#F44336" }]}
       onPress={() => navigation.navigate("ItemEdit", {
         item,
         onEdit: async (itemEditado) => {
@@ -100,12 +101,12 @@ const ItemByCard = React.memo(() => {
         }
       })}>
       <View style={{ flex: 1 }}>
-        <Text style={[styles.descricao, { color: colors.background }]}>
+        <Text style={[styles.descricao, { color: colors.text }]}>
           {item.emoji} {item.descricao}
         </Text>
 
         <View style={styles.valorRow}>
-          <Text style={[styles.valor, { color: colors.background }]}>
+          <Text style={[styles.valor, { color: colors.text }]}>
             R$ {item.valor.toFixed(2)}
           </Text>
 
@@ -113,7 +114,7 @@ const ItemByCard = React.memo(() => {
             <ParcelProgress
               dataCompra={item.data}
               totalParcelas={item.parcelas}
-              cor={colors.background}
+              cor={colors.text}
             />
           )}
         </View>
@@ -121,27 +122,53 @@ const ItemByCard = React.memo(() => {
     </TouchableOpacity>
   ), [colors, navigation, recarregarItens, removerItem]);
 
-  const renderSectionHeader = useCallback(({ section: { title, total, cartao } }) => (
-    <View style={[styles.sectionHeader, { backgroundColor: colors.background }]}>
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-        <View
-          style={{
-            backgroundColor: CARDS.find(c => c.value === cartao)?.color || "gray",
-            paddingHorizontal: 12,
-            paddingVertical: 6,
-            borderRadius: 20,
-          }}
-        >
-          <Text style={{ color: "#FFFFFF", fontSize: 14, fontWeight: "bold" }}>
-            {title}
+  const renderSectionHeader = useCallback(({ section: { title, total, cartao, color } }) => {
+    const cartaoInfo = cartoes.find((c) => c.id === cartao);
+    const limite = cartaoInfo?.limite || 0;
+    const percentualUtilizado = limite > 0 ? (total / limite) * 100 : 0;
+    const percentualLimitado = Math.min(percentualUtilizado, 100);
+
+    return (
+      <View style={[styles.sectionHeader, { backgroundColor: colors.background }]}>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+          <View
+            style={{
+              backgroundColor: color,
+              paddingHorizontal: 12,
+              paddingVertical: 6,
+              borderRadius: 20,
+            }}
+          >
+            <Text style={{ color: "#FFFFFF", fontSize: 14, fontWeight: "bold" }}>
+              {title}
+            </Text>
+          </View>
+          <Text style={[styles.sectionTotal, { color: colors.text }]}>
+            R$ {total.toFixed(2)}
           </Text>
         </View>
-        <Text style={[styles.sectionTotal, { color: colors.text }]}>
-          R$ {total.toFixed(2)}
-        </Text>
+
+        {limite > 0 && (
+          <View style={{ marginTop: 8, gap: 4 }}>
+            <View style={[styles.progressBarContainer, { backgroundColor: colors.card }]}>
+              <View 
+                style={[
+                  styles.progressBar, 
+                  { 
+                    backgroundColor: color,
+                    width: `${percentualLimitado}%`
+                  }
+                ]} 
+              />
+            </View>
+            <Text style={[styles.limiteText, { color: colors.textSecondary }]}>
+              Limite: R$ {limite.toFixed(2)}
+            </Text>
+          </View>
+        )}
       </View>
-    </View>
-  ), [colors]);
+    );
+  }, [colors, cartoes]);
 
   const keyExtractor = useCallback((item) => item.id, []);
 
@@ -192,6 +219,21 @@ const styles = StyleSheet.create({
   sectionTotal: {
     fontSize: 18,
     fontWeight: "bold",
+  },
+  progressBarContainer: {
+    marginTop: 5,
+    width: '100%',
+    height: 6,
+    borderRadius: 3,
+    overflow: 'hidden',
+  },
+  progressBar: {
+    height: '100%',
+    borderRadius: 3,
+  },
+  limiteText: {
+    fontSize: 11,
+    fontWeight: '500',
   },
   item: {
     flexDirection: "row",

@@ -1,7 +1,7 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
 import { createStackNavigator, TransitionPresets } from "@react-navigation/stack";
-import { useTheme } from "../ThemeContext";
+import { useTheme } from "../contexts/ThemeContext";
 import { useNavigation } from "@react-navigation/native";
 
 import Settings from "../screens/Settings";
@@ -9,6 +9,7 @@ import Home from "../screens/Home";
 import ItemList from "../screens/ItemList";
 import ItemByMonth from "../screens/ItemByMonth";
 import ItemByCard from "../screens/ItemByCard";
+import CardList from "../screens/CardList";
 import Header from "./Header";
 import Footer from "./Footer";
 
@@ -35,6 +36,7 @@ export default function Navigator() {
           <Stack.Screen name="Itens" component={ItemList} />
           <Stack.Screen name="Por Mês" component={ItemByMonth} />
           <Stack.Screen name="Por Cartão" component={ItemByCard} />
+          <Stack.Screen name="Cartões" component={CardList} />
           <Stack.Screen name="Configurações" component={Settings} />
         </Stack.Navigator>
       </View>

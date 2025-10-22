@@ -1,18 +1,21 @@
-export const CARDS = [
-  { label: "Nubank 🔮", value: "nubank", color: "#820AD1" },
-  { label: "Inter 🦊", value: "inter", color: "#FF7300" },
-  { label: "Itaú 🦁", value: "itau", color: "#FF6200" },
-  { label: "Bradesco 🐴", value: "bradesco", color: "#FF0000" },
-  { label: "Santander 🏦", value: "santander", color: "#C50000" },
-  { label: "Caixa 🏛️", value: "caixa", color: "#00A2FF" },
-  { label: "Banco do Brasil 🦅", value: "bb", color: "#FFDD00" },
-  { label: "C6 Bank 💜", value: "c6bank", color: "#4D4D4D" },
-  { label: "PicPay 💚", value: "picpay", color: "#21C25E" },
-  { label: "BTG Pactual 💼", value: "btg", color: "#002776" },
-  { label: "Neon 💙", value: "neon", color: "#00FFFF" },
-  { label: "Pan 💠", value: "pan", color: "#0073CF" },
-  { label: "Mercado Pago 💳", value: "mercadopago", color: "#009EE3" },
-  { label: "Next 🚀", value: "next", color: "#1b9a30ff" },
+export const DEFAULT_CARDS = [
+  { id: "1", nome: "Nubank", emoji: "🔮", color: "#820AD1", limite: 5000 },
+  { id: "2", nome: "Inter", emoji: "🦊", color: "#FF7300", limite: 3000 },
+];
+
+export const COLORS = [
+  "#820AD1", // Roxo Nubank
+  "#FF7300", // Laranja Inter
+  "#1E88E5", // Azul
+  "#43A047", // Verde
+  "#E53935", // Vermelho
+  "#FB8C00", // Laranja
+  "#8E24AA", // Roxo
+  "#00ACC1", // Ciano
+  "#FDD835", // Amarelo
+  "#6D4C41", // Marrom
+  "#546E7A", // Cinza Azulado
+  "#26A69A", // Teal
 ];
 
 export const MONTHS = [

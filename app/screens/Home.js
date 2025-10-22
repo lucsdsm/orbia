@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { View, StyleSheet } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useTheme } from "../ThemeContext";
-import { useItens } from "../ItensContext";
+import { useTheme } from "../contexts/ThemeContext";
+import { useItens } from "../contexts/ItensContext";
 import { useFocusEffect } from "@react-navigation/native";
 
 import Superavite from "../components/Superavite";

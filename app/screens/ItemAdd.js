@@ -1,17 +1,18 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
-import { useTheme } from "../ThemeContext";
+import { Feather } from "@expo/vector-icons";
+import { useTheme } from "../contexts/ThemeContext";
+import { useCartoes } from "../contexts/CartoesContext";
 
 import Toast from "react-native-toast-message";
 import { Picker } from "@react-native-picker/picker";
 import ActualDateInput from "../components/ActualDateInput";
 
-import { CARDS } from "../constants";
-
 import { StorageService } from "../services/storage";
 
 export default function ItemAdd({ route, navigation }) {
   const { colors } = useTheme();
+  const { cartoes } = useCartoes();
   const { natureza } = route.params; 
 
   const [descricao, setDescricao] = useState("");
@@ -154,8 +155,8 @@ export default function ItemAdd({ route, navigation }) {
               selectedValue={tipo}
               onValueChange={(itemValue) => {
                 setTipo(itemValue);
-                if (itemValue === "parcelada") {
-                  setCartao("nubank");
+                if (itemValue === "parcelada" && cartoes.length > 0) {
+                  setCartao(cartoes[0].id);
                 } else {
                   setCartao("");
                 }
@@ -217,11 +218,11 @@ export default function ItemAdd({ route, navigation }) {
                 color: colors.text,
               }}
             >
-              {CARDS.map((cartao) => (
+              {cartoes.map((c) => (
                 <Picker.Item
-                  key={cartao.value}
-                  label={cartao.label}
-                  value={cartao.value} 
+                  key={c.id}
+                  label={`${c.emoji} ${c.nome}`}
+                  value={c.id} 
                 />
               ))}
             </Picker>
@@ -249,21 +250,24 @@ export default function ItemAdd({ route, navigation }) {
           />
         )}
 
-        <TouchableOpacity
-          style={[styles.button, { backgroundColor: colors.text }]}
-          onPress={handleSalvar}
-        >
-          <Text style={{ color: colors.background, fontWeight: "bold" }}>
-            Salvar
-          </Text>
-        </TouchableOpacity>
+        {/* Botões lado a lado com ícones */}
+        <View style={styles.buttonRow}>
+          <TouchableOpacity
+            style={[styles.iconButton, { backgroundColor: "#4CAF50" }]}
+            onPress={handleSalvar}
+          >
+            <Feather name="check" size={28} color="#FFF" />
+            <Text style={styles.iconButtonText}>Salvar</Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity 
-          onPress={() => navigation.goBack()} 
-          style={[styles.button, { backgroundColor: colors.text, marginTop: 10 }]}
-        >
-          <Text style={{ color: colors.background, fontWeight: "bold" }}>Voltar</Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.iconButton, { backgroundColor: "#757575" }]}
+            onPress={() => navigation.goBack()}
+          >
+            <Feather name="x" size={28} color="#FFF" />
+            <Text style={styles.iconButtonText}>Cancelar</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
@@ -293,10 +297,26 @@ const styles = StyleSheet.create({
     padding: 20,
     marginBottom: 15,
   },
-  button: {
-    padding: 12,
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 12,
+    marginTop: 20,
+    marginHorizontal: 20,
+  },
+  iconButton: {
+    flex: 1,
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 16,
     borderRadius: 10,
-    alignItems: "center",
+    gap: 8,
+  },
+  iconButtonText: {
+    color: '#FFF',
+    fontSize: 13,
+    fontWeight: '600',
   },
   picker: {
     height: 60,

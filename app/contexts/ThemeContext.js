@@ -7,7 +7,7 @@ export function ThemeProvider({ children }) {
     const [isDark, setIsDark] = useState(false);
     const [loading, setLoading] = useState(true);
 
-    // Carrega o tema salvo ao iniciar
+    // carrega o tema salvo ao iniciar
     useEffect(() => {
         carregarTema();
     }, []);
@@ -44,8 +44,12 @@ export function ThemeProvider({ children }) {
         colors: {
             background: isDark ? "#121212" : "#ffffffff",
             text: isDark ? "#ffffff" : "#000000",
-            secondBackground: isDark ? "#1e1e1e" : "#f0f0f0",
+            secondBackground: isDark ? "#474747ff" : "#f0f0f0",
             secondText: isDark ? "#444444ff" : "#bbbbbbff",
+            card: isDark ? "#1e1e1e" : "#ffffff",
+            textSecondary: isDark ? "#999999" : "#666666",
+            border: isDark ? "#333333" : "#dddddd",
+            primary: isDark ? "#820AD1" : "#820AD1",
         },
         toggleTheme,
         loading,

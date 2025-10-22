@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Alert, Platform } from "react-native";
-import { useTheme } from "../ThemeContext";
-import { useItens } from "../ItensContext";
+import { useTheme } from "../contexts/ThemeContext";
+import { useItens } from "../contexts/ItensContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as DocumentPicker from "expo-document-picker";
 import * as FileSystemLegacy from "expo-file-system/legacy";

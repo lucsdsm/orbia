@@ -107,6 +107,10 @@ const ItemByMonth = React.memo(() => {
 
   const renderItem = useCallback((props) => {
     const { item } = props;
+    
+    // Busca o cartão UMA ÚNICA VEZ e armazena em uma variável
+    const cartaoData = item.cartao ? cartoes.find(c => c.id === item.cartao) : null;
+    
     return (
       <TouchableOpacity
         activeOpacity={0.8}
@@ -135,10 +139,10 @@ const ItemByMonth = React.memo(() => {
           />
 
           {/* Badge do cartão */}
-          {item.cartao && (
+          {cartaoData && (
             <View
               style={{
-                backgroundColor: cartoes.find(c => c.id === item.cartao)?.color || "gray",
+                backgroundColor: cartaoData.color || "gray",
                 paddingHorizontal: 8,
                 paddingVertical: 4,
                 borderRadius: 15,
@@ -146,7 +150,7 @@ const ItemByMonth = React.memo(() => {
               }}
             >
               <Text style={{ color: "#FFFFFF", fontSize: 11, fontWeight: "600" }}>
-                {cartoes.find(c => c.id === item.cartao)?.emoji || "💳"} {cartoes.find(c => c.id === item.cartao)?.nome || "Cartão"}
+                {cartaoData.emoji || "💳"} {cartaoData.nome || "Cartão"}
               </Text>
             </View>
           )}

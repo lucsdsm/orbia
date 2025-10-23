@@ -98,38 +98,43 @@ const ItemByCard = React.memo(() => {
     return sections;
   }, [itens, cartoes]);
 
-  const renderItem = useCallback(({ item }) => (
-    <TouchableOpacity
-      activeOpacity={0.8}
-      style={[styles.item, { backgroundColor: colors.card, borderLeftColor: item.natureza === "receita" ? "#4CAF50" : "#F44336" }]}
-      onPress={() => navigation.navigate("ItemEdit", {
-        item,
-        onEdit: async (itemEditado) => {
-          await StorageService.updateItem(itemEditado.id, itemEditado);
-          await recarregarItens();
-        }
-      })}>
-      <View style={{ flex: 1 }}>
-        <Text style={[styles.descricao, { color: colors.text }]}>
-          {item.emoji} {item.descricao}
-        </Text>
-
-        <View style={styles.valorRow}>
-          <Text style={[styles.valor, { color: colors.text }]}>
-            R$ {item.valor.toFixed(2)}
+  const renderItem = useCallback(({ item }) => {
+    // Busca o cartão UMA ÚNICA VEZ e armazena em uma variável
+    const cartaoData = item.cartao ? cartoes.find(c => c.id === item.cartao) : null;
+    
+    return (
+      <TouchableOpacity
+        activeOpacity={0.8}
+        style={[styles.item, { backgroundColor: colors.card, borderLeftColor: item.natureza === "receita" ? "#4CAF50" : "#F44336" }]}
+        onPress={() => navigation.navigate("ItemEdit", {
+          item,
+          onEdit: async (itemEditado) => {
+            await StorageService.updateItem(itemEditado.id, itemEditado);
+            await recarregarItens();
+          }
+        })}>
+        <View style={{ flex: 1 }}>
+          <Text style={[styles.descricao, { color: colors.text }]}>
+            {item.emoji} {item.descricao}
           </Text>
 
-          {item.data && item.parcelas && (
-            <ParcelProgress
-              dataCompra={item.data}
-              totalParcelas={item.parcelas}
-              cor={colors.text}
-            />
-          )}
+          <View style={styles.valorRow}>
+            <Text style={[styles.valor, { color: colors.text }]}>
+              R$ {item.valor.toFixed(2)}
+            </Text>
+
+            {item.data && item.parcelas && (
+              <ParcelProgress
+                dataCompra={item.data}
+                totalParcelas={item.parcelas}
+                cor={colors.text}
+              />
+            )}
+          </View>
         </View>
-      </View>
-    </TouchableOpacity>
-  ), [colors, navigation, recarregarItens, removerItem]);
+      </TouchableOpacity>
+    );
+  }, [colors, navigation, recarregarItens, cartoes]);
 
   const renderSectionHeader = useCallback(({ section: { title, total, cartao, color } }) => {
     const cartaoInfo = cartoes.find((c) => c.id === cartao);

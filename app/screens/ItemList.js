@@ -71,8 +71,10 @@ const ItemList = React.memo(() => {
   const renderItem = useCallback((props) => {
     const { item } = props;
     
+    // Busca o cartão UMA ÚNICA VEZ e armazena em uma variável
+    const cartaoData = item.cartao ? cartoes.find(c => c.id === item.cartao) : null;
+    
     // debug: verifica os dados do cartão
-    const cartaoData = cartoes.find(c => c.id === item.cartao);
     if (item.cartao && !cartaoData) {
       console.log('Cartão não encontrado:', item.cartao, 'Cartões disponíveis:', cartoes.map(c => c.id));
     }
@@ -110,7 +112,7 @@ const ItemList = React.memo(() => {
           )}
 
           {/* cartão */}
-          {item.cartao && cartaoData && (
+          {cartaoData && (
             <View style={{
               backgroundColor: cartaoData.color || "gray",
               paddingHorizontal: 8,

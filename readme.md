@@ -3,7 +3,7 @@
 Aplicativo de controle financeiro pessoal minimalista e intuitivo, desenvolvido em React Native com Expo.
 
 <p align="center">
-  <img src="https://imgur.com/JFTlHYV.png" alt="Orbia App" />
+  <img src="https://i.imgur.com/XxMxaJ7.png" alt="Orbia App" />
 </p>
 
 ## ✨ Funcionalidades
@@ -11,15 +11,18 @@ Aplicativo de controle financeiro pessoal minimalista e intuitivo, desenvolvido 
 ### Gestão Financeira
 - ✅ Adicionar, editar e remover **receitas** e **despesas**
 - ✅ Categorizar despesas como **fixas** ou **parceladas**
-- ✅ Vincular despesas a **cartões de crédito** (Nubank, Inter)
-- ✅ Acompanhar progresso de **parcelas**
+- ✅ **Gerenciamento completo de cartões**: Criar, editar e excluir cartões personalizados
+- ✅ Vincular despesas a **cartões de crédito** personalizados
+- ✅ Definir **limite de crédito** para cada cartão
+- ✅ Acompanhar progresso de **parcelas** com indicador visual
 - ✅ Saldo editável com persistência automática
 
 ### Visualizações
 - ✅ **Início**: Saldo, Superávite e Previsão de Saldo
-- ✅ **Itens**: Lista completa de receitas e despesas
-- ✅ **Por Mês**: Agrupamento por mês/ano com totais
-- ✅ **Por Cartão**: Agrupamento por cartão com totais por categoria
+- ✅ **Itens**: Lista completa de receitas e despesas com badges de cartão
+- ✅ **Por Mês**: Agrupamento por mês/ano com totais e parcelas restantes
+- ✅ **Por Cartão**: Agrupamento por cartão com barra de utilização de limite
+- ✅ **Cartões**: Lista de cartões com visualização de limite utilizado
 - ✅ **Configurações**: Backup, importação e gerenciamento de dados
 
 ### Recursos Avançados
@@ -27,22 +30,21 @@ Aplicativo de controle financeiro pessoal minimalista e intuitivo, desenvolvido 
 - ✅ **Backup/Restauração**: Exportar e importar dados em JSON
 - ✅ **Navegação fluida**: Swipe entre telas com indicador animado
 - ✅ **Tela de Loading**: Animação personalizada no carregamento
+- ✅ **Dropdowns personalizados**: Modais elegantes para seleção de tipo e cartão
+- ✅ **Migração automática**: Sistema inteligente para atualizar dados de versões antigas
 - ✅ **Performance otimizada**: Lazy loading, memoization e FlatList otimizado
 
-## Tecnologias
+## 🛠️ Tecnologias
 
 - **React Native** + **Expo SDK 54**
-- **AsyncStorage** - Persistência local
+- **AsyncStorage** - Persistência local de dados
 - **React Navigation** - Navegação em tabs e stack
-- **Context API** - Gerenciamento de estado global
-- **Toast Messages** - Feedback visual
+- **Context API** - Gerenciamento de estado global (Theme, Cartões, Itens)
+- **Toast Messages** - Feedback visual de ações
+- **Expo Vector Icons (Feather)** - Ícones modernos
+- **React Native Picker** - Seleção de dados (substituído por CustomPicker)
 - **Expo File System** - Importação/exportação de arquivos
-
-## Próximas etapas
-
-- **Adição de cartões personalizados**
-- **Modais personalizados**
-- **...**
+- **React Native Reanimated** - Animações fluidas
 
 ## 📦 Instalação
 
@@ -61,66 +63,48 @@ npx expo start
 ## 📱 Como Usar
 
 1. **Adicione seu saldo inicial** - Toque no saldo para editar
-2. **Cadastre receitas/despesas** - Use os botões verde/vermelho no rodapé
-3. **Visualize por categorias** - Navegue entre as telas deslizando
-4. **Faça backup** - Acesse Configurações → Exportar Dados
-5. **Alterne o tema** - Toque no ícone sol/lua
+2. **Cadastre seus cartões** - Acesse o menu → Cartões → Adicionar
+3. **Cadastre receitas/despesas** - Use os botões verde/vermelho no rodapé
+4. **Vincule despesas parceladas** - Selecione o cartão ao criar uma despesa parcelada
+5. **Acompanhe seus limites** - Veja barras de progresso em Cartões e Por Cartão
+6. **Visualize por categorias** - Navegue entre as telas deslizando
+7. **Faça backup** - Acesse Configurações → Exportar Dados
+8. **Alterne o tema** - Toque no ícone sol/lua no cabeçalho
 
-## 🏗️ Estrutura
-
-```
-app/
-├── components/       # Componentes reutilizáveis
-│   ├── Header.js
-│   ├── Footer.js
-│   ├── Balance.js
-│   ├── Superavite.js
-│   ├── NextBalance.js
-│   ├── ParcelProgress.js
-│   ├── Navigator.js
-│   ├── Indicator.js
-│   └── LoadingScreen.js
-├── screens/          # Telas principais
-│   ├── Home.js
-│   ├── ItemList.js
-│   ├── ItemByMonth.js
-│   ├── ItemByCard.js
-│   ├── ItemAdd.js
-│   ├── ItemEdit.js
-│   └── Settings.js
-├── services/         # Lógica de negócio
-│   └── storage.js
-├── constants/        # Constantes (cartões, meses)
-│   └── index.js
-├── ThemeContext.js   # Gerenciamento de tema
-└── ItensContext.js   # Gerenciamento de itens
-```
 
 ## 🎯 Cálculos Automáticos
 
 - **Superávite**: Receitas - Despesas (do mês atual)
 - **Próximo saldo**: Saldo Atual + Superávite
-- **Totais por cartão**: Soma de despesas agrupadas
-- **Totais por mês**: Soma de itens por período
+- **Parcelas restantes**: Cálculo dinâmico baseado na data de compra
+- **Utilização de limite**: Percentual usado do limite do cartão (apenas parcelas futuras)
+- **Totais por cartão**: Soma de parcelas restantes agrupadas por cartão
+- **Totais por mês**: Soma de itens agrupados por período com parcelas ativas
 
-## 🔧 Build APK Otimizado
+## 📝 Notas de Versão
 
-```bash
-eas build --platform android --profile production
-```
+### v1.0.1 (Atual)
+- ✨ Sistema completo de gerenciamento de cartões personalizados
+- ✨ Barras de progresso de utilização de limite
+- ✨ Dropdown customizado substituindo picker nativo
+- ✨ Migração automática de dados de versões antigas
+- ✨ Cálculo inteligente de parcelas restantes
+- 🐛 Correção de bugs na exibição de etiquetas de cartão
+- 🎨 Melhorias visuais e de UX
 
-**Otimizações aplicadas:**
-- ProGuard habilitado
-- Shrink Resources
-- Minificação avançada (Metro)
-- Dead code elimination
+### v1.0.0
+- 🎉 Lançamento inicial do Orbia
+- ✅ Gestão de receitas e despesas
+- ✅ Suporte a despesas parceladas
+- ✅ Temas claro e escuro
+- ✅ Backup e restauração de dados
 
 ---
 
 <br>
 <p align="center">
-  Autor: lucsdsm <br>
-  Versão: 1.0.0 
+  Desenvolvido por <strong>lucsdsm</strong> <br>
+  Versão: <strong>1.0.1</strong> 
 </p>
 
 

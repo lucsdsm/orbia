@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Alert, Platform } from "react-native";
 import { useTheme } from "../contexts/ThemeContext";
 import { useItens } from "../contexts/ItensContext";
+import { useCartoes } from "../contexts/CartoesContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as DocumentPicker from "expo-document-picker";
 import * as FileSystemLegacy from "expo-file-system/legacy";
@@ -13,6 +14,7 @@ import { useNavigation } from "@react-navigation/native";
 const Settings = React.memo(() => {
     const { colors } = useTheme();
     const { recarregarItens } = useItens();
+    const { reloadCartoes } = useCartoes();
     const [loading, setLoading] = useState(false);
     const navigation = useNavigation();
 
@@ -23,12 +25,14 @@ const Settings = React.memo(() => {
             // Busca todos os dados
             const itens = await AsyncStorage.getItem("itens");
             const saldo = await AsyncStorage.getItem("@orbia:saldo");
+            const cartoes = await AsyncStorage.getItem("cartoes");
 
             const dados = {
                 itens: itens ? JSON.parse(itens) : [],
                 saldo: saldo ? parseFloat(saldo) : 0,
+                cartoes: cartoes ? JSON.parse(cartoes) : [],
                 exportadoEm: new Date().toISOString(),
-                versao: "1.0",
+                versao: "1.0.1",
             };
 
             const jsonString = JSON.stringify(dados, null, 2);
@@ -116,8 +120,13 @@ const Settings = React.memo(() => {
                             await AsyncStorage.setItem("@orbia:saldo", dados.saldo.toString());
                         }
 
-                        // Recarrega os itens no contexto
+                        if (dados.cartoes && Array.isArray(dados.cartoes)) {
+                            await AsyncStorage.setItem("cartoes", JSON.stringify(dados.cartoes));
+                        }
+
+                        // Recarrega os itens e cartões no contexto
                         await recarregarItens();
+                        await reloadCartoes();
 
                         // Navega para outra tela e volta para forçar atualização
                         navigation.navigate("Início");
@@ -170,7 +179,10 @@ const Settings = React.memo(() => {
                 try {
                     await AsyncStorage.removeItem("itens");
                     await AsyncStorage.removeItem("@orbia:saldo");
+                    await AsyncStorage.removeItem("cartoes");
+                    await AsyncStorage.removeItem("cards_migrated_v1.0.1");
                     await recarregarItens();
+                    await reloadCartoes();
 
                     Toast.show({
                         type: "success",

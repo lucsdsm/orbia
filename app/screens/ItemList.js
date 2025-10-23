@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback } from "react";
+import React, { useMemo, useCallback, useEffect } from "react";
 import { View, Text, FlatList, StyleSheet, TouchableOpacity } from "react-native";
 
 import { useTheme } from "../contexts/ThemeContext";
@@ -23,6 +23,11 @@ const ItemList = React.memo(() => {
     }, [recarregarItens])
   );
 
+  // Debug: monitora mudanças nos cartões
+  useEffect(() => {
+    console.log('Cartões atualizados no ItemList:', cartoes.length, cartoes.map(c => ({ id: c.id, nome: c.nome })));
+  }, [cartoes]);
+
   const itensOrdenados = useMemo(() => {
     return [...itens].sort((a, b) => {
       // 1º critério: receitas primeiro, depois despesas
@@ -45,7 +50,7 @@ const ItemList = React.memo(() => {
   const removerItem = useCallback(async (id) => {
     try {
       await StorageService.deleteItem(id);
-      await recarregarItens(); // Recarrega a lista
+      await recarregarItens(); // recarrega a lista
       
       Toast.show({
         type: "success",
@@ -65,6 +70,13 @@ const ItemList = React.memo(() => {
 
   const renderItem = useCallback((props) => {
     const { item } = props;
+    
+    // debug: verifica os dados do cartão
+    const cartaoData = cartoes.find(c => c.id === item.cartao);
+    if (item.cartao && !cartaoData) {
+      console.log('Cartão não encontrado:', item.cartao, 'Cartões disponíveis:', cartoes.map(c => c.id));
+    }
+    
     return (
       <TouchableOpacity
         activeOpacity={0.8}
@@ -98,16 +110,16 @@ const ItemList = React.memo(() => {
           )}
 
           {/* cartão */}
-          {item.cartao && (
+          {item.cartao && cartaoData && (
             <View style={{
-              backgroundColor: cartoes.find(c => c.id === item.cartao)?.color || "gray",
+              backgroundColor: cartaoData.color || "gray",
               paddingHorizontal: 8,
               paddingVertical: 4,
               borderRadius: 15,
               marginLeft: 8,
             }}>
               <Text style={{ color: "#FFFFFF", fontSize: 11, fontWeight: "600" }}>
-                {cartoes.find(c => c.id === item.cartao)?.emoji || "💳"} {cartoes.find(c => c.id === item.cartao)?.nome || "Cartão"}
+                {cartaoData.emoji || "💳"} {cartaoData.nome || "Cartão"}
               </Text>
             </View>
           )}

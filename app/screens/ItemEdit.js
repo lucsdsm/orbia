@@ -24,7 +24,7 @@ export default function ItemEdit({ route, navigation }) {
   const [parcelas, setParcelas] = useState(item.parcelas?.toString() || "");
 
   const handleSalvar = async () => {
-    if (!descricao || !emoji || !valor) {
+    if (!descricao || !valor) {
       Toast.show({
         type: "error",
         text1: "Campos obrigatórios!",
@@ -117,7 +117,7 @@ export default function ItemEdit({ route, navigation }) {
 
         <TextInput
           style={[styles.input, { borderColor: colors.text, color: colors.text }]}
-          placeholder="Emoji (*)"
+          placeholder="Emoji"
           placeholderTextColor="#888"
           value={emoji}
           onChangeText={setEmoji}

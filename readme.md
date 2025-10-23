@@ -25,15 +25,6 @@ Aplicativo de controle financeiro pessoal minimalista e intuitivo, desenvolvido 
 - ✅ **Cartões**: Lista de cartões com visualização de limite utilizado
 - ✅ **Configurações**: Backup, importação e gerenciamento de dados
 
-### Recursos Avançados
-- ✅ **Temas**: Modo claro e escuro com persistência
-- ✅ **Backup/Restauração**: Exportar e importar dados em JSON
-- ✅ **Navegação fluida**: Swipe entre telas com indicador animado
-- ✅ **Tela de Loading**: Animação personalizada no carregamento
-- ✅ **Dropdowns personalizados**: Modais elegantes para seleção de tipo e cartão
-- ✅ **Migração automática**: Sistema inteligente para atualizar dados de versões antigas
-- ✅ **Performance otimizada**: Lazy loading, memoization e FlatList otimizado
-
 ## 🛠️ Tecnologias
 
 - **React Native** + **Expo SDK 54**

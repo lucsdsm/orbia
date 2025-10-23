@@ -49,7 +49,7 @@ export default function CardEdit({ navigation, route }) {
       Toast.show({
         type: "error",
         text1: "Campos obrigatórios!",
-        text2: "Preencha nome e limite antes de salvar.",
+        text2: "Preencha os campos marcados com (*).",
         position: "top",
         visibilityTime: 3000,
       });
@@ -88,7 +88,22 @@ export default function CardEdit({ navigation, route }) {
   return (
     <View style={[styles.wrapper, { backgroundColor: colors.secondBackground }]}>
       <View style={[styles.container, { backgroundColor: colors.background }]}>
-        <Text style={[styles.title, { color: colors.text }]}>Editar Cartão</Text>
+        <Text style={[styles.title, { color: colors.text }]}> ~ {card.nome} </Text>
+
+        {/* preview */}
+        <View style={[styles.preview, { backgroundColor: colors.card }]}>
+          <Text style={styles.previewEmoji}>{emoji || '💳'}</Text>
+          <Text style={[styles.previewNome, { color: colors.text }]}>
+            {nome || 'Nome do Cartão'}
+          </Text>
+
+          <View style={[styles.previewColor, { backgroundColor: color }]} />
+          {limite && (
+            <Text style={[styles.previewLimite, { color: colors.textSecondary }]}>
+              Limite: R$ {parseFloat(limite || 0).toFixed(2)}
+            </Text>
+          )}
+        </View>
 
         {/* nome do cartão */}
         <TextInput
@@ -118,8 +133,7 @@ export default function CardEdit({ navigation, route }) {
           onSubmitEditing={limiteSubmit}
         />
 
-        {/* Cor */}
-        <Text style={[styles.label, { color: colors.text }]}> Cor </Text>
+        {/* cor */}
         <View style={styles.colorGrid}>
           {COLORS.map((c) => (
             <TouchableOpacity
@@ -132,24 +146,6 @@ export default function CardEdit({ navigation, route }) {
               onPress={() => setColor(c)}
             />
           ))}
-        </View>
-
-        {/* Preview */}
-        <Text style={[styles.label, { color: colors.text, marginTop: 30 }]}>
-          Pré-visualização
-        </Text>
-        <View style={[styles.preview, { backgroundColor: colors.card }]}>
-          <Text style={styles.previewEmoji}>{emoji || '💳'}</Text>
-          <Text style={[styles.previewNome, { color: colors.text }]}>
-            {nome || 'Nome do Cartão'}
-          </Text>
-
-          <View style={[styles.previewColor, { backgroundColor: color }]} />
-          {limite && (
-            <Text style={[styles.previewLimite, { color: colors.textSecondary }]}>
-              Limite: R$ {parseFloat(limite || 0).toFixed(2)}
-            </Text>
-          )}
         </View>
 
         {/* botões lado a lado com ícones */}
@@ -214,24 +210,18 @@ const styles = StyleSheet.create({
     marginBlockStart: 60,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
+    gap: 12,
   },
   title: {
     fontSize: 22,
     fontWeight: "bold",
     marginBottom: 20,
   },
-  label: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 16,
-    marginTop: 16,
-    marginLeft: 15,
-  },
   input: {
-    borderWidth: 0,
-    borderRadius: 10,
-    padding: 20,
+    borderRightWidth: 1,
     marginBottom: 15,
+    marginLeft: 20,
+    marginRight: 20,
   },
   colorGrid: {
     flexDirection: 'row',

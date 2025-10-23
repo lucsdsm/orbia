@@ -5,8 +5,8 @@ import { useTheme } from "../contexts/ThemeContext";
 import { useCartoes } from "../contexts/CartoesContext";
 
 import Toast from "react-native-toast-message";
-import { Picker } from "@react-native-picker/picker";
 import ActualDateInput from "../components/ActualDateInput";
+import CustomPicker from "../components/CustomPicker";
 
 import { StorageService } from "../services/storage";
 
@@ -19,17 +19,16 @@ export default function ItemAdd({ route, navigation }) {
   const [emoji, setEmoji] = useState("");
   const [valor, setValor] = useState("");
   const [tipo, setTipo] = useState("fixa");
-  // se o tipo for parcelado, o cartão será nubank por padrão
   const [cartao, setCartao] = useState(""); 
   const [data, setData] = useState("");
   const [parcelas, setParcelas] = useState("");
   
   const handleSalvar = async () => { 
-    if (!descricao || !emoji || !valor) {
+    if (!descricao || !valor) {
       Toast.show({
         type: "error",
         text1: "Campos obrigatórios!",
-        text2: "Preencha todos os campos antes de salvar.",
+        text2: "Preencha os campos marcados com (*).",
         position: "top",
         visibilityTime: 3000,
       });
@@ -40,7 +39,7 @@ export default function ItemAdd({ route, navigation }) {
       if (!data || !parcelas || !cartao) {
         Toast.show({
           type: "error",
-          text1: "Preencha todos os campos!",
+          text1: "Preencha os campos marcados com (*).",
           text2: "Data, cartão e parcelas são obrigatórios.",
           position: "top",
           visibilityTime: 3000,
@@ -135,63 +134,40 @@ export default function ItemAdd({ route, navigation }) {
 
         <TextInput
           style={[styles.input, { borderColor: colors.text, color: colors.text }]}
-          placeholder="Emoji (*)"
+          placeholder="Emoji"
           placeholderTextColor="#888"
           value={emoji}
           onChangeText={setEmoji}
         />
 
         {natureza === "despesa" && (
-          <View
-            style={[
-              styles.pickerContainer,
-              {
-                borderColor: colors.text,
-                backgroundColor: colors.background
-              },
+          <CustomPicker
+            options={[
+              { label: "Fixa", value: "fixa" },
+              { label: "Parcelada", value: "parcelada" }
             ]}
-          >
-            <Picker
-              selectedValue={tipo}
-              onValueChange={(itemValue) => {
-                if (itemValue === "parcelada" && cartoes.length === 0) {
-                  Toast.show({
-                    type: "error",
-                    text1: "Nenhum cartão cadastrado!",
-                    text2: "Adicione um cartão antes de criar despesas parceladas.",
-                    position: "top",
-                    visibilityTime: 3000,
-                  });
-                  return;
-                }
-                
-                setTipo(itemValue);
-                if (itemValue === "parcelada" && cartoes.length > 0) {
-                  setCartao(cartoes[0].id);
-                } else {
-                  setCartao("");
-                }
-              }}
-              // quando o picker for carregado, o valor inicial será vazio
-              onLayout={() => {
+            selectedValue={tipo}
+            onValueChange={(itemValue) => {
+              if (itemValue === "parcelada" && cartoes.length === 0) {
+                Toast.show({
+                  type: "error",
+                  text1: "Nenhum cartão cadastrado!",
+                  text2: "Adicione um cartão antes de criar despesas parceladas.",
+                  position: "top",
+                  visibilityTime: 3000,
+                });
+                return;
+              }
+              
+              setTipo(itemValue);
+              if (itemValue === "parcelada" && cartoes.length > 0) {
+                setCartao(cartoes[0].id);
+              } else {
                 setCartao("");
-              }}
-
-              dropdownIconColor={colors.text}
-              style={[
-                styles.picker,
-                {
-                  color: colors.text,
-                },
-              ]}
-              itemStyle={{
-                color: colors.text,
-              }}
-            >
-              <Picker.Item label="Fixa" value="fixa" />
-              <Picker.Item label="Parcelada" value="parcelada" />
-            </Picker>
-          </View>
+              }
+            }}
+            placeholder="Tipo de despesa"
+          />
         )}
 
         <TextInput
@@ -206,38 +182,15 @@ export default function ItemAdd({ route, navigation }) {
         />
 
         {tipo === "parcelada" && (
-          <View
-            style={[
-              styles.pickerContainer,
-              {
-                borderColor: colors.text,
-                backgroundColor: colors.background
-              },
-            ]}
-          >
-            <Picker
-              selectedValue={cartao}
-              onValueChange={(itemValue) => setCartao(itemValue)}
-              dropdownIconColor={colors.text}
-              style={[
-                styles.picker,
-                {
-                  color: colors.text,
-                },
-              ]}
-              itemStyle={{
-                color: colors.text,
-              }}
-            >
-              {cartoes.map((c) => (
-                <Picker.Item
-                  key={c.id}
-                  label={`${c.emoji} ${c.nome}`}
-                  value={c.id} 
-                />
-              ))}
-            </Picker>
-          </View>
+          <CustomPicker
+            options={cartoes.map(c => ({
+              label: `${c.emoji} ${c.nome}`,
+              value: c.id
+            }))}
+            selectedValue={cartao}
+            onValueChange={(itemValue) => setCartao(itemValue)}
+            placeholder="Selecione um cartão"
+          />
         )}
 
         {natureza === "despesa" && tipo === "parcelada" && (
@@ -296,6 +249,7 @@ const styles = StyleSheet.create({
     marginBlockStart: 60,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
+    gap: 12,
   },
   title: {
     fontSize: 22,
@@ -303,10 +257,10 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   input: {
-    borderWidth: 0,
-    borderRadius: 10,
-    padding: 20,
+    borderRightWidth: 1,
     marginBottom: 15,
+    marginLeft: 20,
+    marginRight: 20,
   },
   buttonRow: {
     flexDirection: 'row',
@@ -328,16 +282,5 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 13,
     fontWeight: '600',
-  },
-  picker: {
-    height: 60,
-    borderWidth: 0,
-    borderRadius: 10,
-    marginLeft: 12,
-    marginRight: 10,
-  },
-  pickerContainer: {
-    borderRadius: 10,
-    marginBottom: 15,
   },
 });

@@ -10,33 +10,20 @@ export default function CardList({ navigation }) {
   const { cartoes } = useCartoes();
   const { itens } = useItens();
 
-  // calcula o total de parcelas restantes em cada cartão
+  // calcula o valor total de cada item no cartão
   const gastoPorCartao = useMemo(() => {
     const gastos = {};
-    const hoje = new Date();
     
     itens.forEach(item => {
       if (item.cartao && item.natureza === 'despesa') {
         let valorConsiderar = 0;
         
-        if (item.tipo === 'parcelada' && item.data && item.parcelas) {
-          // Para parceladas, calcula quantas parcelas faltam
-          const dataCompra = new Date(item.data);
-          
-          // Verifica se a data é válida
-          if (!isNaN(dataCompra.getTime())) {
-            const mesesPassados = (hoje.getFullYear() - dataCompra.getFullYear()) * 12 + 
-                                   (hoje.getMonth() - dataCompra.getMonth());
-            const totalParcelas = parseInt(item.parcelas) || 0;
-            const parcelasRestantes = Math.max(0, totalParcelas - mesesPassados);
-            const valorParcela = parseFloat(item.valor) || 0;
-            valorConsiderar = valorParcela * parcelasRestantes;
-          } else {
-            // Se a data for inválida, considera o valor total
-            valorConsiderar = parseFloat(item.valor) || 0;
-          }
+        if (item.tipo === 'parcelada' && item.parcelas) {
+          const valorParcela = parseFloat(item.valor) || 0;
+          const totalParcelas = parseInt(item.parcelas, 10) || 0;
+          valorConsiderar = valorParcela * totalParcelas;
         } else {
-          // Para fixas ou outras, considera o valor total
+          // para fixas ou outras, considera o valor único
           valorConsiderar = parseFloat(item.valor) || 0;
         }
         

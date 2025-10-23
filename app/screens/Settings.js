@@ -99,56 +99,51 @@ const Settings = React.memo(() => {
             }
 
             // Confirma antes de substituir
-            Alert.alert(
-                "Confirmar importação",
-                `Isso irá substituir todos os seus dados atuais. ${dados.itens.length} itens serão importados. Deseja continuar?`,
-                [
-                    {
-                        text: "Cancelar",
-                        style: "cancel",
-                        onPress: () => setLoading(false),
-                    },
-                    {
-                        text: "Importar",
-                        style: "destructive",
-                        onPress: async () => {
-                            try {
-                                // Salva os dados
-                                await AsyncStorage.setItem("itens", JSON.stringify(dados.itens));
+            Toast.show({
+                type: "info", // Ou 'info' se você tiver um estilo para isso
+                text1: `Confirmar a importação de ${dados.itens.length} itens?`,
+                text2: `Toqie novamente para importar e substituir seus dados atuais.`,
+                position: "top",
+                visibilityTime: 4000, // Tempo para o usuário ler a mensagem
+                autoHide: false, // Não esconder automaticamente para permitir interação
+                onPress: async () => {
+                    Toast.hide(); // Esconder o Toast atual
+                    try {
+                        // Salva os dados
+                        await AsyncStorage.setItem("itens", JSON.stringify(dados.itens));
 
-                                if (dados.saldo !== undefined) {
-                                    await AsyncStorage.setItem("@orbia:saldo", dados.saldo.toString());
-                                }
+                        if (dados.saldo !== undefined) {
+                            await AsyncStorage.setItem("@orbia:saldo", dados.saldo.toString());
+                        }
 
-                                // Recarrega os itens no contexto
-                                await recarregarItens();
+                        // Recarrega os itens no contexto
+                        await recarregarItens();
 
-                                // Navega para outra tela e volta para forçar atualização
-                                navigation.navigate("Início");
+                        // Navega para outra tela e volta para forçar atualização
+                        navigation.navigate("Início");
 
-                                Toast.show({
-                                    type: "success",
-                                    text1: "Dados importados!",
-                                    text2: `${dados.itens.length} itens restaurados`,
-                                    position: "top",
-                                    visibilityTime: 3000,
-                                });
-                            } catch (error) {
-                                console.error("Erro ao salvar dados:", error);
-                                Toast.show({
-                                    type: "error",
-                                    text1: "Erro ao salvar dados",
-                                    text2: error.message,
-                                    position: "top",
-                                    visibilityTime: 3000,
-                                });
-                            } finally {
-                                setLoading(false);
-                            }
-                        },
-                    },
-                ]
-            );
+                        Toast.show({
+                            type: "success",
+                            text1: "Dados importados!",
+                            text2: `${dados.itens.length} itens restaurados`,
+                            position: "top",
+                            visibilityTime: 3000,
+                        });
+                    } catch (error) {
+                        console.error("Erro ao salvar dados:", error);
+                        Toast.show({
+                            type: "error",
+                            text1: "Erro ao salvar dados",
+                            text2: error.message,
+                            position: "top",
+                            visibilityTime: 3000,
+                        });
+                    } finally {
+                        setLoading(false);
+                    }
+                },
+                onHide: () => setLoading(false), // Se o usuário não interagir, apenas esconde e desativa o loading
+            });
         } catch (error) {
             console.error("Erro ao importar:", error);
             Toast.show({
@@ -163,44 +158,40 @@ const Settings = React.memo(() => {
     };
 
     const limparDados = () => {
-        Alert.alert(
-            "Limpar todos os dados",
-            "Isso irá apagar TODOS os seus dados permanentemente. Esta ação não pode ser desfeita!",
-            [
-                {
-                    text: "Cancelar",
-                    style: "cancel",
-                },
-                {
-                    text: "Limpar",
-                    style: "destructive",
-                    onPress: async () => {
-                        try {
-                            await AsyncStorage.removeItem("itens");
-                            await AsyncStorage.removeItem("@orbia:saldo");
-                            await recarregarItens();
+        Toast.show({
+            type: "error", 
+            text1: "Limpar todos os dados?",
+            text2: "Aperte novamente para excluir todos os seus dados permanentemente.",
+            position: "top",
+            visibilityTime: 4000,
+            autoHide: false,
+            onPress: async () => {
+                Toast.hide(); 
+                try {
+                    await AsyncStorage.removeItem("itens");
+                    await AsyncStorage.removeItem("@orbia:saldo");
+                    await recarregarItens();
 
-                            Toast.show({
-                                type: "success",
-                                text1: "Dados limpos!",
-                                text2: "Todos os dados foram apagados",
-                                position: "top",
-                                visibilityTime: 3000,
-                            });
-                        } catch (error) {
-                            console.error("Erro ao limpar dados:", error);
-                            Toast.show({
-                                type: "error",
-                                text1: "Erro ao limpar dados",
-                                text2: error.message,
-                                position: "top",
-                                visibilityTime: 3000,
-                            });
-                        }
-                    },
-                },
-            ]
-        );
+                    Toast.show({
+                        type: "success",
+                        text1: "Dados limpos!",
+                        text2: "Todos os dados foram apagados",
+                        position: "top",
+                        visibilityTime: 3000,
+                    });
+                    navigation.navigate("Início");
+                } catch (error) {
+                    console.error("Erro ao limpar dados:", error);
+                    Toast.show({
+                        type: "error",
+                        text1: "Erro ao limpar dados",
+                        text2: error.message,
+                        position: "top",
+                        visibilityTime: 3000,
+                    });
+                }
+            },
+        });
     };
 
     return (
@@ -251,7 +242,7 @@ const Settings = React.memo(() => {
 
                 <View style={styles.info}>
                     <Text style={[styles.infoText, { color: colors.text, opacity: 0.6 }]}>
-                        Orbia v1.0
+                        Orbia v1.0.1
                     </Text>
                     <Text style={[styles.infoText, { color: colors.text, opacity: 0.6 }]}>
                         by lucsdsm

@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { StorageService } from "../services/storage";
 
 const ItensContext = createContext();
 
@@ -12,6 +13,9 @@ export function ItensProvider({ children }) {
     const minLoadingTime = 1500; // 1.5 segundos mínimo
     
     try {
+      // executa migração ate de carregar os itens
+      await StorageService.migrateOldCardReferences();
+      
       const itensExistentes = await AsyncStorage.getItem("itens");
       if (itensExistentes) {
         const itensCarregados = JSON.parse(itensExistentes);

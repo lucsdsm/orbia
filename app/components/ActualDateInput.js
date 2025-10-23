@@ -21,7 +21,7 @@ export default function DataCompraInput({ data, setData, dateChange, natureza, t
     <View style={[styles.container, { borderColor: colors.text }]}>
       <TextInput
         style={[styles.input, { color: colors.text }]}
-        placeholder="Data da primeira parcela"
+        placeholder="Data da primeira parcela (*)"
         placeholderTextColor="#888"
         value={data}
         keyboardType="numeric"
@@ -38,11 +38,13 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 15,
-    padding: 20,
+    padding: 10,
+    marginBottom: 10,
   },
   input: {
     flex: 1,
     height: 40,
+    marginRight: 10,
+    marginLeft: 10,
   },
 });

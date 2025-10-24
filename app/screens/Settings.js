@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Alert, Platform } from "react-native";
 import { useTheme } from "../contexts/ThemeContext";
 import { useItens } from "../contexts/ItensContext";
@@ -9,14 +9,81 @@ import * as FileSystemLegacy from "expo-file-system/legacy";
 import * as Sharing from "expo-sharing";
 import Toast from "react-native-toast-message";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
+import WidgetControl from "../components/WidgetControl";
+import { useNotificationWidget, useNotificationListener } from "../hooks";
 
 const Settings = React.memo(() => {
     const { colors } = useTheme();
-    const { recarregarItens } = useItens();
+    const { itens, recarregarItens } = useItens();
     const { reloadCartoes } = useCartoes();
     const [loading, setLoading] = useState(false);
+    const [saldoAtual, setSaldoAtual] = useState(0);
     const navigation = useNavigation();
+
+    // Adiciona listener para toques na notificação
+    useNotificationListener(navigation);
+
+    // Carrega o saldo
+    const carregarSaldo = useCallback(async () => {
+        try {
+            const saldoSalvo = await AsyncStorage.getItem("@orbia:saldo");
+            if (saldoSalvo !== null) {
+                setSaldoAtual(parseFloat(saldoSalvo));
+            }
+        } catch (error) {
+            console.error("Erro ao carregar saldo:", error);
+        }
+    }, []);
+
+    // Calcula superávite
+    const superavite = useMemo(() => {
+        let receita = 0;
+        let despesa = 0;
+
+        if (Array.isArray(itens)) {
+            itens.forEach((item) => {
+                const valor = Number(item.valor) || 0;
+                if (item.natureza === "receita") receita += valor;
+                else if (item.natureza === "despesa") despesa += valor;
+            });
+        }
+
+        return receita - despesa;
+    }, [itens]);
+
+    // Calcula saldo do próximo mês
+    const saldoProximo = useMemo(() => {
+        return saldoAtual + superavite;
+    }, [saldoAtual, superavite]);
+
+    // Hook do widget de notificação
+    const { widgetEnabled, loading: widgetLoading, toggleWidget } = useNotificationWidget(
+        saldoAtual,
+        superavite,
+        saldoProximo
+    );
+
+    // Recarrega dados financeiros quando a tela ganha foco
+    useFocusEffect(
+        useCallback(() => {
+            recarregarItens();
+            carregarSaldo();
+        }, [recarregarItens, carregarSaldo])
+    );
+
+    // Handler para toggle do widget com feedback
+    const handleToggleWidget = useCallback(async () => {
+        const result = await toggleWidget();
+        if (result) {
+            Toast.show({
+                type: result.success ? 'success' : 'error',
+                text1: result.message,
+                position: 'top',
+                visibilityTime: 2000,
+            });
+        }
+    }, [toggleWidget]);
 
     const exportarDados = async () => {
         try {
@@ -212,6 +279,18 @@ const Settings = React.memo(() => {
                 <Text style={[styles.title, { color: colors.text }]}>Configurações</Text>
 
                 <View style={styles.section}>
+                    <Text style={[styles.sectionTitle, { color: colors.text }]}>Widget de Notificação</Text>
+                    <Text style={[styles.sectionDescription, { color: colors.text }]}>
+                        Exibe saldo, superávite e previsão na barra de notificações
+                    </Text>
+                    <WidgetControl 
+                        widgetEnabled={widgetEnabled}
+                        loading={widgetLoading}
+                        onToggle={handleToggleWidget}
+                    />
+                </View>
+
+                <View style={styles.section}>
                     <Text style={[styles.sectionTitle, { color: colors.text }]}>Backup de Dados</Text>   
 
                     <TouchableOpacity
@@ -288,6 +367,12 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: "600",
         marginBottom: 15,
+    },
+    sectionDescription: {
+        fontSize: 14,
+        opacity: 0.7,
+        marginBottom: 15,
+        lineHeight: 20,
     },
     button: {
         flexDirection: "row",

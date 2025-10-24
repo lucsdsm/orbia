@@ -17,3 +17,4 @@ export { default as NextBalance } from './NextBalance';
 export { default as ParcelProgress } from './ParcelProgress';
 export { default as Sandwich } from './Sandwich';
 export { default as Superavite } from './Superavite';
+export { default as WidgetControl } from './WidgetControl';

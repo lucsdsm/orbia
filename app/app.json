@@ -27,13 +27,28 @@
       "edgeToEdgeEnabled": true,
       "package": "com.lucsdsm.app",
       "enableProguardInReleaseBuilds": true,
-      "enableShrinkResourcesInReleaseBuilds": true
+      "enableShrinkResourcesInReleaseBuilds": true,
+      "permissions": [
+        "RECEIVE_BOOT_COMPLETED",
+        "VIBRATE"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-font"
+      "expo-font",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#820AD1",
+          "sounds": [],
+          "android": {
+            "mode": "default"
+          }
+        }
+      ]
     ],
     "extra": {
       "eas": {

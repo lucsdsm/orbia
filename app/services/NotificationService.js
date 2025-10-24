@@ -3,12 +3,26 @@ import { Platform } from 'react-native';
 
 /**
  * Serviço para gerenciar notificação persistente com informações financeiras
+ * 
+ * IMPORTANTE: Notificações persistentes funcionam melhor em Development Builds.
+ * No Expo Go, a funcionalidade pode ser limitada.
+ * Leia mais: https://docs.expo.dev/develop/development-builds/introduction/
  */
+
+/**
+ * Verifica se está rodando no Expo Go (verifica se __DEV__ está definido)
+ * Nota: Esta é uma verificação simplificada
+ */
+const isExpoGo = () => {
+  return __DEV__;
+};
 
 // Configuração de como as notificações devem ser apresentadas
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
-    shouldShowAlert: true,
+    shouldShowAlert: true, 
+    shouldShowBanner: true, 
+    shouldShowList: true,  
     shouldPlaySound: false,
     shouldSetBadge: false,
   }),
@@ -21,6 +35,14 @@ const NOTIFICATION_ID = 'orbia-widget-notification';
  */
 export const requestNotificationPermissions = async () => {
   try {
+    // Avisa se está no Expo Go
+    if (isExpoGo()) {
+      console.warn(
+        '[Orbia Widget] Notificações persistentes podem não funcionar completamente no Expo Go. ' +
+        'Para melhor experiência, use um Development Build.'
+      );
+    }
+
     const { status: existingStatus } = await Notifications.getPermissionsAsync();
     let finalStatus = existingStatus;
     

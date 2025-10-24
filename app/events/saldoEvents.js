@@ -1,9 +1,37 @@
-import { EventEmitter } from 'events';
-
 /**
- * Event Emitter para notificar mudanças no saldo
+ * Event Emitter simples para notificar mudanças no saldo
+ * Compatível com React Native (não usa Node.js events)
  */
-class SaldoEventEmitter extends EventEmitter {}
+class SaldoEventEmitter {
+  constructor() {
+    this.listeners = {};
+  }
+
+  on(event, callback) {
+    if (!this.listeners[event]) {
+      this.listeners[event] = [];
+    }
+    this.listeners[event].push(callback);
+  }
+
+  off(event, callback) {
+    if (!this.listeners[event]) return;
+    this.listeners[event] = this.listeners[event].filter(cb => cb !== callback);
+  }
+
+  emit(event, data) {
+    if (!this.listeners[event]) return;
+    this.listeners[event].forEach(callback => callback(data));
+  }
+
+  removeAllListeners(event) {
+    if (event) {
+      delete this.listeners[event];
+    } else {
+      this.listeners = {};
+    }
+  }
+}
 
 export const saldoEmitter = new SaldoEventEmitter();
 

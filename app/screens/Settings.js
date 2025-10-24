@@ -99,7 +99,7 @@ const Settings = React.memo(() => {
                 saldo: saldo ? parseFloat(saldo) : 0,
                 cartoes: cartoes ? JSON.parse(cartoes) : [],
                 exportadoEm: new Date().toISOString(),
-                versao: "1.0.1",
+                versao: "1.0.2",
             };
 
             const jsonString = JSON.stringify(dados, null, 2);
@@ -247,7 +247,7 @@ const Settings = React.memo(() => {
                     await AsyncStorage.removeItem("itens");
                     await AsyncStorage.removeItem("@orbia:saldo");
                     await AsyncStorage.removeItem("cartoes");
-                    await AsyncStorage.removeItem("cards_migrated_v1.0.1");
+                    await AsyncStorage.removeItem("cards_migrated_v1.0.2");
                     await recarregarItens();
                     await reloadCartoes();
 
@@ -333,7 +333,7 @@ const Settings = React.memo(() => {
 
                 <View style={styles.info}>
                     <Text style={[styles.infoText, { color: colors.text, opacity: 0.6 }]}>
-                        Orbia v1.0.1
+                        Orbia v1.0.2
                     </Text>
                     <Text style={[styles.infoText, { color: colors.text, opacity: 0.6 }]}>
                         by lucsdsm

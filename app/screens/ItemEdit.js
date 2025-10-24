@@ -5,10 +5,10 @@ import { useTheme } from "../contexts/ThemeContext";
 import { useCartoes } from "../contexts/CartoesContext";
 import Toast from "react-native-toast-message";
 
-import ActualDateInput from "../components/ActualDateInput";
 import CustomPicker from "../components/CustomPicker";
 
 import { StorageService } from "../services/storage";
+import { MONTHS } from "../constants";
 
 export default function ItemEdit({ route, navigation }) {
   const { colors } = useTheme();
@@ -20,7 +20,8 @@ export default function ItemEdit({ route, navigation }) {
   const [valor, setValor] = useState(item.valor.toString());
   const [tipo, setTipo] = useState(item.tipo || "fixa");
   const [cartao, setCartao] = useState(item.cartao || "");
-  const [data, setData] = useState(item.data || "");
+  const [mesPrimeiraParcela, setMesPrimeiraParcela] = useState(item.mesPrimeiraParcela?.toString() || "");
+  const [anoPrimeiraParcela, setAnoPrimeiraParcela] = useState(item.anoPrimeiraParcela?.toString() || "");
   const [parcelas, setParcelas] = useState(item.parcelas?.toString() || "");
 
   const handleSalvar = async () => {
@@ -35,7 +36,7 @@ export default function ItemEdit({ route, navigation }) {
       return;
     }
 
-    if (tipo === "parcelada" && (!cartao || !data || !parcelas)) {
+    if (tipo === "parcelada" && (!cartao || !mesPrimeiraParcela || !anoPrimeiraParcela || !parcelas)) {
       Toast.show({
         type: "error",
         text1: "Campos obrigatórios!",
@@ -54,7 +55,8 @@ export default function ItemEdit({ route, navigation }) {
         valor: parseFloat(valor),
         tipo,
         cartao,
-        data,
+        mesPrimeiraParcela: parseInt(mesPrimeiraParcela) || 0,
+        anoPrimeiraParcela: parseInt(anoPrimeiraParcela) || 0,
         parcelas: parseInt(parcelas) || 0,
       };
 
@@ -94,13 +96,12 @@ export default function ItemEdit({ route, navigation }) {
     setValor(valorNumerico.toFixed(2));
   };
 
-  const dateChange = texto => {
-    let novoTexto = texto.replace(/[^0-9]/g, "");
-    if (novoTexto.length > 8) novoTexto = novoTexto.slice(0, 8);
-    if (novoTexto.length > 2) novoTexto = novoTexto.slice(0, 2) + "/" + novoTexto.slice(2);
-    if (novoTexto.length > 5) novoTexto = novoTexto.slice(0, 5) + "/" + novoTexto.slice(5);
-    setData(novoTexto);
-  };
+  // Gera anos (atual até 5 anos no futuro)
+  const anoAtual = new Date().getFullYear();
+  const anos = Array.from({ length: 6 }, (_, i) => ({
+    label: (anoAtual + i).toString(),
+    value: anoAtual + i
+  }));
 
   return (
     <View style={[styles.wrapper, { backgroundColor: colors.secondBackground }]}>
@@ -149,7 +150,8 @@ export default function ItemEdit({ route, navigation }) {
                 setCartao("");
               }
               if (itemValue === "fixa") {
-                setData("");
+                setMesPrimeiraParcela("");
+                setAnoPrimeiraParcela("");
                 setParcelas("");
               }
             }}
@@ -181,13 +183,21 @@ export default function ItemEdit({ route, navigation }) {
             />
 
             {item.natureza === "despesa" && (
-              <ActualDateInput
-                data={data}
-                setData={setData}
-                dateChange={dateChange}
-                natureza={item.natureza}
-                tipo={tipo}
-              />
+              <>
+                <CustomPicker
+                  options={MONTHS}
+                  selectedValue={mesPrimeiraParcela ? parseInt(mesPrimeiraParcela) : ""}
+                  onValueChange={(itemValue) => setMesPrimeiraParcela(itemValue.toString())}
+                  placeholder="Mês da primeira parcela (*)"
+                />
+
+                <CustomPicker
+                  options={anos}
+                  selectedValue={anoPrimeiraParcela ? parseInt(anoPrimeiraParcela) : ""}
+                  onValueChange={(itemValue) => setAnoPrimeiraParcela(itemValue.toString())}
+                  placeholder="Ano da primeira parcela (*)"
+                />
+              </>
             )}
             
             <TextInput

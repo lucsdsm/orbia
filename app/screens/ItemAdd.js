@@ -5,10 +5,10 @@ import { useTheme } from "../contexts/ThemeContext";
 import { useCartoes } from "../contexts/CartoesContext";
 
 import Toast from "react-native-toast-message";
-import ActualDateInput from "../components/ActualDateInput";
 import CustomPicker from "../components/CustomPicker";
 
 import { StorageService } from "../services/storage";
+import { MONTHS } from "../constants";
 
 export default function ItemAdd({ route, navigation }) {
   const { colors } = useTheme();
@@ -20,7 +20,9 @@ export default function ItemAdd({ route, navigation }) {
   const [valor, setValor] = useState("");
   const [tipo, setTipo] = useState("fixa");
   const [cartao, setCartao] = useState(""); 
-  const [data, setData] = useState("");
+
+  const [mesPrimeiraParcela, setMesPrimeiraParcela] = useState(""); 
+  const [anoPrimeiraParcela, setAnoPrimeiraParcela] = useState(""); 
   const [parcelas, setParcelas] = useState("");
   
   const handleSalvar = async () => { 
@@ -36,11 +38,11 @@ export default function ItemAdd({ route, navigation }) {
     }
 
     if (natureza === "despesa" && tipo === "parcelada") {
-      if (!data || !parcelas || !cartao) {
+      if (!mesPrimeiraParcela || !anoPrimeiraParcela || !parcelas || !cartao) {
         Toast.show({
           type: "error",
-          text1: "Preencha os campos marcados com (*).",
-          text2: "Data, cartão e parcelas são obrigatórios.",
+          text1: "Campos obrigatórios!",
+          text2: "Preencha os campos marcados com (*).",
           position: "top",
           visibilityTime: 3000,
         });
@@ -57,7 +59,8 @@ export default function ItemAdd({ route, navigation }) {
         valor: parseFloat(valor),
         tipo,
         cartao,
-        data,
+        mesPrimeiraParcela: parseInt(mesPrimeiraParcela) || 0,
+        anoPrimeiraParcela: parseInt(anoPrimeiraParcela) || 0,
         parcelas: parseInt(parcelas) || 0,
       };
 
@@ -101,21 +104,12 @@ export default function ItemAdd({ route, navigation }) {
     setValor(valorNumerico.toFixed(2));
   };
 
-  const dateChange = (texto) => {
-    let novoTexto = texto.replace(/[^0-9]/g, "");
-
-    if (novoTexto.length > 8) novoTexto = novoTexto.slice(0, 8);
-
-    if (novoTexto.length > 2) {
-      novoTexto = novoTexto.slice(0, 2) + "/" + novoTexto.slice(2);
-    }
-
-    if (novoTexto.length > 5) {
-      novoTexto = novoTexto.slice(0, 5) + "/" + novoTexto.slice(5);
-    }
-
-    setData(novoTexto);
-  };
+  // gera anos (atual até 3 anos no futuro)
+  const anoAtual = new Date().getFullYear();
+  const anos = Array.from({ length: 3 }, (_, i) => ({
+    label: (anoAtual + i).toString(),
+    value: anoAtual + i
+  }));
 
   return (
     <View style={[styles.wrapper, { backgroundColor: colors.secondBackground }]}>
@@ -161,7 +155,7 @@ export default function ItemAdd({ route, navigation }) {
               
               setTipo(itemValue);
               if (itemValue === "parcelada" && cartoes.length > 0) {
-                setCartao(cartoes[0].id);
+                setCartao(""); 
               } else {
                 setCartao("");
               }
@@ -189,18 +183,26 @@ export default function ItemAdd({ route, navigation }) {
             }))}
             selectedValue={cartao}
             onValueChange={(itemValue) => setCartao(itemValue)}
-            placeholder="Selecione um cartão"
+            placeholder="Selecione um cartão (*)"
           />
         )}
 
         {natureza === "despesa" && tipo === "parcelada" && (
-          <ActualDateInput
-            data={data}
-            setData={setData}
-            dateChange={dateChange}
-            natureza={natureza}
-            tipo={tipo}
-          />
+          <>
+            <CustomPicker
+              options={MONTHS}
+              selectedValue={mesPrimeiraParcela}
+              onValueChange={(itemValue) => setMesPrimeiraParcela(itemValue)}
+              placeholder="Mês da primeira parcela (*)"
+            />
+
+            <CustomPicker
+              options={anos}
+              selectedValue={anoPrimeiraParcela}
+              onValueChange={(itemValue) => setAnoPrimeiraParcela(itemValue)}
+              placeholder="Ano da primeira parcela (*)"
+            />
+          </>
         )}
 
         {tipo === "parcelada" && (

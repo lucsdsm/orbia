@@ -4,6 +4,9 @@ import { useTheme } from "../contexts/ThemeContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
 
+/**
+ * Componente para exibição e edição do saldo.
+*/
 export default function Balance({ onSaldoChange }) {
   const { colors } = useTheme();
   const [saldo, setSaldo] = useState("0.00");

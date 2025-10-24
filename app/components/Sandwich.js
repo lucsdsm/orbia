@@ -4,6 +4,9 @@ import { Feather } from "@expo/vector-icons";
 import { useTheme } from "../contexts/ThemeContext";
 import { useNavigation } from "@react-navigation/native";
 
+/**
+ * Menu sanduíche para navegação entre telas principais.
+*/
 export default function Sandwich({ visible, onClose }) {
   const { colors } = useTheme();
   const navigation = useNavigation();

@@ -10,6 +10,9 @@ import {
 import { Feather } from '@expo/vector-icons';
 import { useTheme } from '../contexts/ThemeContext';
 
+/**
+ * Dropdown customizado para seleção de opções.
+*/
 export default function CustomPicker({ 
   options, 
   selectedValue, 
@@ -101,7 +104,7 @@ const styles = StyleSheet.create({
     
   },
   pickerText: {
-    fontSize: 16,
+    fontSize: 14,
   },
   modalOverlay: {
     flex: 1,

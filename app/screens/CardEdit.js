@@ -29,6 +29,7 @@ export default function CardEdit({ navigation, route }) {
   const [emoji, setEmoji] = useState(card.emoji || '');
   const [color, setColor] = useState(card.color || COLORS[0]);
   const [limite, setLimite] = useState(card.limite ? card.limite.toString() : '');
+  const [diaFechamento, setDiaFechamento] = useState(card.diaFechamento ? card.diaFechamento.toString() : '');
 
   const limiteChange = (texto) => {
     const novoValor = texto.replace(/[^0-9.]/g, "");
@@ -45,11 +46,23 @@ export default function CardEdit({ navigation, route }) {
   };
 
   const handleSave = async () => {
-    if (!nome.trim() || !limite.trim()) {
+    if (!nome.trim() || !limite.trim() || !diaFechamento.trim()) {
       Toast.show({
         type: "error",
         text1: "Campos obrigatórios!",
         text2: "Preencha os campos marcados com (*).",
+        position: "top",
+        visibilityTime: 3000,
+      });
+      return;
+    }
+
+    const dia = parseInt(diaFechamento);
+    if (isNaN(dia) || dia < 1 || dia > 31) {
+      Toast.show({
+        type: "error",
+        text1: "Dia de fechamento inválido!",
+        text2: "Digite um dia entre 1 e 31.",
         position: "top",
         visibilityTime: 3000,
       });
@@ -63,6 +76,7 @@ export default function CardEdit({ navigation, route }) {
         emoji: emoji.trim(),
         color,
         limite: parseFloat(limite) || 0,
+        diaFechamento: dia,
       };
 
       await updateCartao(card.id, updatedCard);
@@ -131,6 +145,18 @@ export default function CardEdit({ navigation, route }) {
           onChangeText={limiteChange}
           onBlur={limiteSubmit}
           onSubmitEditing={limiteSubmit}
+        />
+
+        <TextInput
+          style={[styles.input, { borderColor: colors.text, color: colors.text }]}
+          placeholder="Dia de fechamento (1-31) (*)"
+          placeholderTextColor="#888"
+          keyboardType="numeric"
+          value={diaFechamento}
+          onChangeText={(texto) => {
+            const valor = texto.replace(/[^0-9]/g, "");
+            if (valor.length <= 2) setDiaFechamento(valor);
+          }}
         />
 
         {/* cor */}

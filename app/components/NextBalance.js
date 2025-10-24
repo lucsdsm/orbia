@@ -2,6 +2,9 @@ import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { useTheme } from "../contexts/ThemeContext";
 
+/**
+ * Componente que exibe o saldo projetado para o próximo mês.
+*/
 export default function NextBalance({ saldoAtual = 0, superavite = 0 }) {
   const { colors } = useTheme();
 

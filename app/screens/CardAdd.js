@@ -1,163 +1,118 @@
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  Alert,
-  ScrollView,
-} from 'react-native';
-import { Feather } from '@expo/vector-icons';
-import Toast from "react-native-toast-message";
+import React from 'react';
+import { View, Text, TextInput, StyleSheet } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
 import { useCartoes } from '../contexts/CartoesContext';
+import { useCardForm } from '../hooks';
+import { showToast } from '../utils/toast';
 import { COLORS } from '../constants';
+import CardPreview from '../components/CardPreview';
+import ColorGrid from '../components/ColorGrid';
+import FormActionButtons from '../components/FormActionButtons';
 
 export default function CardAdd({ navigation }) {
   const { colors } = useTheme();
   const { addCartao } = useCartoes();
-
-  const [nome, setNome] = useState('');
-  const [emoji, setEmoji] = useState('');
-  const [color, setColor] = useState(COLORS[0]);
-  const [limite, setLimite] = useState('');
+  
+  const {
+    nome,
+    emoji,
+    color,
+    limite,
+    diaFechamento,
+    setNome,
+    setEmoji,
+    setColor,
+    handleLimiteChange,
+    handleLimiteBlur,
+    handleDiaFechamentoChange,
+    validate,
+    getFormValues,
+  } = useCardForm({ color: COLORS[0] });
 
   const handleSave = async () => {
-    if (!nome.trim() || !limite.trim()) {
-      Toast.show({
-            type: "error",
-            text1: "Campos obrigatórios!",
-            text2: "Preencha os campos marcados com (*).",
-            position: "top",
-            visibilityTime: 3000,
-        });
+    const validation = validate();
+    
+    if (!validation.valid) {
+      showToast('error', 'Campos obrigatórios!', validation.message);
       return;
     }
 
     try {
       const newCard = {
         id: Date.now().toString(),
-        nome: nome.trim(),
-        emoji: emoji.trim(),
-        color,
-        limite: parseFloat(limite) || 0,
+        ...getFormValues(),
       };
 
       await addCartao(newCard);
-        Toast.show({
-            type: "success",
-            text1: "Cartão adicionado com sucesso!",
-            position: "top",
-            visibilityTime: 2000,
-        });
+      showToast('success', 'Cartão adicionado com sucesso!');
       navigation.goBack();
     } catch (error) {
-        Toast.show({
-            type: "error",
-            text1: "Erro ao adicionar cartão.",
-            position: "top",
-        });
+      showToast('error', 'Erro ao adicionar cartão');
     }
-  };
-
-  const limiteChange = (texto) => {
-    const novoValor = texto.replace(/[^0-9.]/g, "");
-    if (novoValor.split(".").length > 2) return;
-    setLimite(novoValor);
-  };
-
-  const limiteSubmit = () => {
-    let valorNumerico = parseFloat(limite);
-    if (isNaN(valorNumerico) || valorNumerico < 0) {
-      valorNumerico = 0;
-    }
-    setLimite(valorNumerico.toFixed(2));
   };
 
   return (
     <View style={[styles.wrapper, { backgroundColor: colors.secondBackground }]}>
-        <View style={[styles.container, { backgroundColor: colors.background }]}>
-            <Text style={[styles.title, { color: colors.text }]}> + cartão </Text>
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
+        <Text style={[styles.title, { color: colors.text }]}> + cartão </Text>
 
-            {/* preview */}
-            <View style={[styles.preview, { backgroundColor: colors.card }]}>
-            <Text style={styles.previewEmoji}>{emoji || '💳'}</Text>
-            <Text style={[styles.previewNome, { color: colors.text }]}>
-                {nome || 'Nome do Cartão'}
-            </Text>
-            
-            <View style={[styles.previewColor, { backgroundColor: color }]} />
-                {limite && (
-                <Text style={[styles.previewLimite, { color: colors.textSecondary }]}>
-                    Limite: R$ {parseFloat(limite || 0).toFixed(2)}
-                </Text>
-                )}
-            </View>
+        <CardPreview 
+          nome={nome}
+          emoji={emoji}
+          color={color}
+          limite={limite}
+          colors={colors}
+        />
 
-            {/* nome do cartão */}
-            <TextInput
-                style={[styles.input, { borderColor: colors.text, color: colors.text }]}
-                placeholder="Nome do cartão (*)"
-                placeholderTextColor="#888"
-                value={nome}
-                onChangeText={setNome}
-            />
+        <TextInput
+          style={[styles.input, { borderColor: colors.text, color: colors.text }]}
+          placeholder="Nome do cartão (*)"
+          placeholderTextColor="#888"
+          value={nome}
+          onChangeText={setNome}
+        />
 
-            <TextInput
-                style={[styles.input, { borderColor: colors.text, color: colors.text }]}
-                placeholder="Emoji"
-                placeholderTextColor="#888"
-                value={emoji}
-                onChangeText={setEmoji}
-            />
+        <TextInput
+          style={[styles.input, { borderColor: colors.text, color: colors.text }]}
+          placeholder="Emoji"
+          placeholderTextColor="#888"
+          value={emoji}
+          onChangeText={setEmoji}
+          maxLength={2}
+        />
 
-            <TextInput
-                style={[styles.input, { borderColor: colors.text, color: colors.text }]}
-                placeholder="Limite (R$) (*)"
-                placeholderTextColor="#888"
-                keyboardType="numeric"
-                value={limite}
-                onChangeText={limiteChange}
-                onBlur={limiteSubmit}
-                onSubmitEditing={limiteSubmit}
-            />
+        <TextInput
+          style={[styles.input, { borderColor: colors.text, color: colors.text }]}
+          placeholder="Limite (R$) (*)"
+          placeholderTextColor="#888"
+          keyboardType="numeric"
+          value={limite}
+          onChangeText={handleLimiteChange}
+          onBlur={handleLimiteBlur}
+          onSubmitEditing={handleLimiteBlur}
+        />
 
-            {/* cor */}
-            <View style={styles.colorGrid}>
-                {COLORS.map((c) => (
-                <TouchableOpacity
-                    key={c}
-                    style={[
-                    styles.colorButton,
-                    { backgroundColor: c },
-                    color === c && styles.colorSelected,
-                    ]}
-                    onPress={() => setColor(c)}
-                />
-            ))}
-            </View>
+        <TextInput
+          style={[styles.input, { borderColor: colors.text, color: colors.text }]}
+          placeholder="Dia de fechamento (1-31) (*)"
+          placeholderTextColor="#888"
+          keyboardType="numeric"
+          value={diaFechamento}
+          onChangeText={handleDiaFechamentoChange}
+        />
 
-            {/* botões lado a lado com ícones */}
-            <View style={styles.buttonRow}>
-                <TouchableOpacity
-                    style={[styles.iconButton, { backgroundColor: "#4CAF50" }]}
-                    onPress={handleSave}
-                >
-                    <Feather name="check" size={28} color="#FFF" />
-                    <Text style={styles.iconButtonText}>Adicionar</Text>
-                </TouchableOpacity>
+        <ColorGrid 
+          colors={COLORS}
+          selectedColor={color}
+          onColorSelect={setColor}
+        />
 
-                <TouchableOpacity
-                    style={[styles.iconButton, { backgroundColor: "#757575" }]}
-                    onPress={() => navigation.goBack()}
-                >
-                    <Feather name="x" size={28} color="#FFF" />
-                    <Text style={styles.iconButtonText}>Cancelar</Text>
-                </TouchableOpacity>
-            </View>
-
-        </View>
+        <FormActionButtons
+          onSave={handleSave}
+          onCancel={() => navigation.goBack()}
+          saveLabel="Adicionar"
+        />
+      </View>
     </View>
   );
 }
@@ -186,64 +141,5 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     marginLeft: 20,
     marginRight: 20,
-  },
-  colorGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 5,
-    alignContent: 'center',
-    justifyContent: 'center',
-  },
-  colorButton: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-  },
-  preview: {
-    padding: 10,
-    borderRadius: 12,
-    marginBottom: 10,
-    marginLeft: 20,
-    marginRight: 20,
-    alignItems: 'center',
-  },
-  previewEmoji: {
-    fontSize: 48,
-    marginBottom: 8,
-  },
-  previewNome: {
-    fontSize: 20,
-    fontWeight: '600',
-    marginBottom: 12,
-  },
-  previewColor: {
-    width: 100,
-    height: 8,
-    borderRadius: 4,
-  },
-  previewLimite: {
-    fontSize: 14,
-    marginTop: 8,
-  },
-  buttonRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 12,
-    marginTop: 20,
-    marginHorizontal: 20,
-  },
-  iconButton: {
-    flex: 1,
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 16,
-    borderRadius: 10,
-    gap: 8,
-  },
-  iconButtonText: {
-    color: '#FFF',
-    fontSize: 13,
-    fontWeight: '600',
   },
 });

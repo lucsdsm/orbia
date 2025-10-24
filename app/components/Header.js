@@ -2,6 +2,9 @@ import React from 'react';
 import { View, Text, StyleSheet, StatusBar, Platform } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
 
+/**
+ * Header do aplicativo exibindo título e versão.
+*/
 export default function Header() {
   const { colors, isDark } = useTheme();
 

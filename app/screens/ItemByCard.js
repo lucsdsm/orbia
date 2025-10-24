@@ -4,11 +4,11 @@ import { useTheme } from "../contexts/ThemeContext";
 import { useItens } from "../contexts/ItensContext";
 import { useCartoes } from "../contexts/CartoesContext";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
-import Toast from "react-native-toast-message";
-import { MaterialIcons } from "@expo/vector-icons";
-
+import { showToast } from "../utils/toast";
 import ParcelProgress from "../components/ParcelProgress";
 import { StorageService } from "../services/storage";
+import { calcularGastoItem, calcularPercentualLimite } from "../utils/calculations";
+import { formatCurrency } from "../utils/formatters";
 
 const ItemByCard = React.memo(() => {
   const { colors } = useTheme();
@@ -26,58 +26,37 @@ const ItemByCard = React.memo(() => {
     try {
       await StorageService.deleteItem(id);
       await recarregarItens();
-      
-      Toast.show({
-        type: "success",
-        text1: "Item removido!",
-        position: "top",
-        visibilityTime: 2000,
-      });
+      showToast('success', 'Item removido!');
     } catch (error) {
       console.log("Erro ao remover item:", error);
-      Toast.show({
-        type: "error",
-        text1: "Erro ao remover item.",
-        position: "top",
-      });
+      showToast('error', 'Erro ao remover item');
     }
   }, [recarregarItens]);
 
   // agrupa despesas parceladas por cartão
   const itensPorCartao = useMemo(() => {
-    // filtra apenas despesas parceladas que têm cartão
     const despesasParceladas = itens.filter(
       (item) => item.natureza === "despesa" && item.tipo === "parcelada" && item.cartao
     );
 
-    // agrupa por cartão
     const grupos = {};
-    const hoje = new Date();
 
     despesasParceladas.forEach((item) => {
-      const cartao = item.cartao;
+      const cartaoId = item.cartao;
       
-      if (!grupos[cartao]) {
-        grupos[cartao] = {
-          cartao,
+      if (!grupos[cartaoId]) {
+        grupos[cartaoId] = {
+          cartao: cartaoId,
           itens: [],
           total: 0,
         };
       }
 
-      grupos[cartao].itens.push(item);
-      
-      // calcula apenas as parcelas restantes
-      if (item.tipo === 'parcelada' && item.parcelas) {
-        const valorParcela = parseFloat(item.valor) || 0;
-        const totalParcelas = parseInt(item.parcelas, 10) || 0;
-        grupos[cartao].total += valorParcela * totalParcelas;
-      } else { // para fixas ou outras, considera o valor único
-        grupos[cartao].total += parseFloat(item.valor) || 0;
-      }
+      grupos[cartaoId].itens.push(item);
+      grupos[cartaoId].total += calcularGastoItem(item);
     });
 
-    // converte para array e ordena por total (maior primeiro)
+    // converte para array e ordena por total
     const sections = Object.values(grupos)
       .sort((a, b) => b.total - a.total)
       .map((grupo) => {
@@ -99,13 +78,12 @@ const ItemByCard = React.memo(() => {
   }, [itens, cartoes]);
 
   const renderItem = useCallback(({ item }) => {
-    // Busca o cartão UMA ÚNICA VEZ e armazena em uma variável
     const cartaoData = item.cartao ? cartoes.find(c => c.id === item.cartao) : null;
     
     return (
       <TouchableOpacity
         activeOpacity={0.8}
-        style={[styles.item, { backgroundColor: colors.card, borderLeftColor: item.natureza === "receita" ? "#4CAF50" : "#F44336" }]}
+        style={[styles.item, { backgroundColor: colors.card, borderLeftColor: "#F44336" }]}
         onPress={() => navigation.navigate("ItemEdit", {
           item,
           onEdit: async (itemEditado) => {
@@ -120,12 +98,13 @@ const ItemByCard = React.memo(() => {
 
           <View style={styles.valorRow}>
             <Text style={[styles.valor, { color: colors.text }]}>
-              R$ {item.valor.toFixed(2)}
+              R$ {formatCurrency(item.valor)}
             </Text>
 
-            {item.data && item.parcelas && (
+            {item.mesPrimeiraParcela && item.anoPrimeiraParcela && item.parcelas && (
               <ParcelProgress
-                dataCompra={item.data}
+                mesPrimeiraParcela={item.mesPrimeiraParcela}
+                anoPrimeiraParcela={item.anoPrimeiraParcela}
                 totalParcelas={item.parcelas}
                 cor={colors.text}
               />
@@ -139,18 +118,18 @@ const ItemByCard = React.memo(() => {
   const renderSectionHeader = useCallback(({ section: { title, total, cartao, color } }) => {
     const cartaoInfo = cartoes.find((c) => c.id === cartao);
     const limite = cartaoInfo?.limite || 0;
-    const percentualUtilizado = limite > 0 ? (total / limite) * 100 : 0;
-    const percentualLimitado = Math.min(percentualUtilizado, 100);
+    const percentualUtilizado = calcularPercentualLimite(total, limite);
 
     return (
       <View style={[styles.sectionHeader, { backgroundColor: colors.background }]}>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
           <View
             style={{
               backgroundColor: color,
               paddingHorizontal: 12,
               paddingVertical: 6,
               borderRadius: 20,
+              width: '50%',
             }}
           >
             <Text style={{ color: "#FFFFFF", fontSize: 14, fontWeight: "bold" }}>
@@ -158,7 +137,7 @@ const ItemByCard = React.memo(() => {
             </Text>
           </View>
           <Text style={[styles.sectionTotal, { color: colors.text }]}>
-            R$ {total.toFixed(2)}
+            R$ {formatCurrency(total)}
           </Text>
         </View>
 
@@ -170,13 +149,13 @@ const ItemByCard = React.memo(() => {
                   styles.progressBar, 
                   { 
                     backgroundColor: color,
-                    width: `${percentualLimitado}%`
+                    width: `${percentualUtilizado}%`
                   }
                 ]} 
               />
             </View>
             <Text style={[styles.limiteText, { color: colors.textSecondary }]}>
-              Limite: R$ {limite.toFixed(2)}
+              Limite: R$ {formatCurrency(limite)}
             </Text>
           </View>
         )}
@@ -283,6 +262,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    padding: 20,
   },
   vazio: {
     textAlign: "center",

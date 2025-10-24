@@ -15,6 +15,9 @@ import Footer from "./Footer";
 
 const Stack = createStackNavigator();
 
+/**
+ * Navegador principal do aplicativo com Drawer e pilhas de navegação.
+*/
 export default function Navigator() {
   const { colors } = useTheme();
   const navigation = useNavigation();

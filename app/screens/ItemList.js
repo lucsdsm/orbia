@@ -70,14 +70,7 @@ const ItemList = React.memo(() => {
 
   const renderItem = useCallback((props) => {
     const { item } = props;
-    
-    // Busca o cartão UMA ÚNICA VEZ e armazena em uma variável
     const cartaoData = item.cartao ? cartoes.find(c => c.id === item.cartao) : null;
-    
-    // debug: verifica os dados do cartão
-    if (item.cartao && !cartaoData) {
-      console.log('Cartão não encontrado:', item.cartao, 'Cartões disponíveis:', cartoes.map(c => c.id));
-    }
     
     return (
       <TouchableOpacity
@@ -95,21 +88,6 @@ const ItemList = React.memo(() => {
         <Text style={[styles.descricao, { color: colors.text }]}>{item.emoji} {item.descricao}</Text>
 
         <View style={styles.valorRow}>
-          <Text style={[styles.valor, { color: colors.text }]}>
-            {item.natureza === "receita" ? "+" : "-"} R$ {item.valor.toFixed(2)}
-          </Text>
-
-          {item.natureza === "despesa" && item.tipo === "fixa" && (
-            <Text style={styles.emoji}>📌</Text>
-          )}
-
-          {item.natureza === "despesa" && item.tipo === "parcelada" && item.data && item.parcelas && (
-            <ParcelProgress
-              dataCompra={item.data}
-              totalParcelas={item.parcelas}
-              cor={colors.text}
-            />
-          )}
 
           {/* cartão */}
           {cartaoData && (
@@ -121,9 +99,26 @@ const ItemList = React.memo(() => {
               marginLeft: 8,
             }}>
               <Text style={{ color: "#FFFFFF", fontSize: 11, fontWeight: "600" }}>
-                {cartaoData.emoji || "💳"} {cartaoData.nome || "Cartão"}
+                {cartaoData.emoji || "💳"}
               </Text>
             </View>
+          )}
+
+          <Text style={[styles.valor, { color: colors.text }]}>
+            {item.natureza === "receita" ? "+" : "-"} R$ {item.valor.toFixed(2)}
+          </Text>
+
+          {item.natureza === "despesa" && item.tipo === "fixa" && (
+            <Text style={styles.emoji}>📌</Text>
+          )}
+
+          {item.natureza === "despesa" && item.tipo === "parcelada" && item.mesPrimeiraParcela && item.anoPrimeiraParcela && item.parcelas && (
+            <ParcelProgress
+              mesPrimeiraParcela={item.mesPrimeiraParcela}
+              anoPrimeiraParcela={item.anoPrimeiraParcela}
+              totalParcelas={item.parcelas}
+              cor={colors.text}
+            />
           )}
         </View>
       </View>

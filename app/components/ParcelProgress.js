@@ -2,55 +2,41 @@ import React, { useMemo } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { useTheme } from "../contexts/ThemeContext";
 import Svg, { Circle } from "react-native-svg";
+import { calcularParcelasPagas } from "../utils/calculations";
+import { hexToRgba } from "../utils/formatters";
 
-export default function ParcelProgress({ dataCompra, totalParcelas, cor }) {
+/**
+ * Componente que exibe o progresso das parcelas de um item.
+*/
+export default function ParcelProgress({ mesPrimeiraParcela, anoPrimeiraParcela, totalParcelas, cor }) {
   const { colors } = useTheme();
 
   const { parcelasPagas, progresso } = useMemo(() => {
-    if (!dataCompra || !totalParcelas) return { parcelasPagas: 0, progresso: 0 };
+    if (!mesPrimeiraParcela || !anoPrimeiraParcela || !totalParcelas) {
+      return { parcelasPagas: 0, progresso: 0 };
+    }
 
-    const [dia, mes, ano] = dataCompra.split("/").map(Number);
-    const dataInicial = new Date(ano, mes - 1, dia);
-    const hoje = new Date();
-
-    let diffMeses =
-      (hoje.getFullYear() - dataInicial.getFullYear()) * 12 +
-      (hoje.getMonth() - dataInicial.getMonth());
-
-    if (hoje.getDate() < dataInicial.getDate()) diffMeses--;
-
-    const pagas = Math.min(totalParcelas, Math.max(0, diffMeses + 1));
+    const pagas = Math.min(
+      totalParcelas, 
+      Math.max(0, calcularParcelasPagas(mesPrimeiraParcela, anoPrimeiraParcela) + 1)
+    );
     const porcentagem = (pagas / totalParcelas) * 100;
 
     return { parcelasPagas: pagas, progresso: porcentagem };
-  }, [dataCompra, totalParcelas]);
+  }, [mesPrimeiraParcela, anoPrimeiraParcela, totalParcelas]);
 
   const concluido = parcelasPagas >= totalParcelas;
 
-  // configurações do círculo
-  const size = 32; 
+  // Configurações do círculo
+  const size = 32;
   const strokeWidth = 3;
   const radius = (size - strokeWidth) / 2;
   const circumference = radius * 2 * Math.PI;
   const strokeDashoffset = circumference - (progresso / 100) * circumference;
 
-  // ✅ Cores corrigidas - opacidade no formato rgba()
+  // Cores
   const corBase = cor || colors.background;
-  
-  // Converte hex para rgba com opacidade
-  const hexToRgba = (hex, opacity) => {
-    // Remove # se existir
-    hex = hex.replace('#', '');
-    
-    // Converte para RGB
-    const r = parseInt(hex.substring(0, 2), 16);
-    const g = parseInt(hex.substring(2, 4), 16);
-    const b = parseInt(hex.substring(4, 6), 16);
-    
-    return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-  };
-
-  const corFundo = hexToRgba(corBase, 0.3); // 30% de opacidade
+  const corFundo = hexToRgba(corBase, 0.3);
   const corProgresso = concluido ? "#4CAF50" : corBase;
 
   return (

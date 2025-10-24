@@ -2,6 +2,9 @@ import React, { useMemo } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { useTheme } from "../contexts/ThemeContext";
 
+/**
+ * Componente que exibe o superávite ou déficit com base nos itens fornecidos.
+*/
 export default function Superavite({ itens = [] }) { 
   const { colors } = useTheme();
 

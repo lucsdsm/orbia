@@ -2,6 +2,9 @@ import React, { useEffect, useRef } from "react";
 import { View, Text, StyleSheet, Animated } from "react-native";
 import { useTheme } from "../contexts/ThemeContext";
 
+/**
+ * Tela de carregamento com animações.
+*/
 export default function LoadingScreen() {
   const { colors } = useTheme();
   const fadeAnim = useRef(new Animated.Value(0)).current;

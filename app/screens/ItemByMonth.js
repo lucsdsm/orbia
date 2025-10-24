@@ -45,11 +45,11 @@ const ItemByMonth = React.memo(() => {
   }, [recarregarItens]);
 
   // Calcula o mês/ano final de uma parcela
-  const calcularMesFinal = (dataCompra, totalParcelas) => {
-    if (!dataCompra || !totalParcelas) return null;
+  const calcularMesFinal = (mesPrimeiraParcela, anoPrimeiraParcela, totalParcelas) => {
+    if (!mesPrimeiraParcela || !anoPrimeiraParcela || !totalParcelas) return null;
 
-    const [dia, mes, ano] = dataCompra.split("/").map(Number);
-    const dataInicial = new Date(ano, mes - 1, dia);
+    // Cria data do mês inicial (dia 1)
+    const dataInicial = new Date(anoPrimeiraParcela, mesPrimeiraParcela - 1, 1);
     
     // Adiciona o número de meses (parcelas - 1)
     dataInicial.setMonth(dataInicial.getMonth() + totalParcelas - 1);
@@ -64,14 +64,14 @@ const ItemByMonth = React.memo(() => {
   const itensPorMes = useMemo(() => {
     // Filtra apenas despesas parceladas
     const despesasParceladas = itens.filter(
-      (item) => item.natureza === "despesa" && item.tipo === "parcelada" && item.data && item.parcelas
+      (item) => item.natureza === "despesa" && item.tipo === "parcelada" && item.mesPrimeiraParcela && item.anoPrimeiraParcela && item.parcelas
     );
 
     // Agrupa por mês/ano final
     const grupos = {};
 
     despesasParceladas.forEach((item) => {
-      const mesFinal = calcularMesFinal(item.data, item.parcelas);
+      const mesFinal = calcularMesFinal(item.mesPrimeiraParcela, item.anoPrimeiraParcela, item.parcelas);
       if (!mesFinal) return;
 
       const chave = `${mesFinal.ano}-${String(mesFinal.mes).padStart(2, "0")}`;
@@ -87,7 +87,7 @@ const ItemByMonth = React.memo(() => {
       grupos[chave].itens.push(item);
     });
 
-    // Converte para array e ordena por data (mais recente primeiro)
+    // converte para array e ordena por data (mais recente primeiro)
     const sections = Object.values(grupos)
       .sort((a, b) => {
         if (a.ano !== b.ano) return a.ano - b.ano;
@@ -107,8 +107,6 @@ const ItemByMonth = React.memo(() => {
 
   const renderItem = useCallback((props) => {
     const { item } = props;
-    
-    // Busca o cartão UMA ÚNICA VEZ e armazena em uma variável
     const cartaoData = item.cartao ? cartoes.find(c => c.id === item.cartao) : null;
     
     return (
@@ -128,17 +126,8 @@ const ItemByMonth = React.memo(() => {
         </Text>
 
         <View style={styles.valorRow}>
-          <Text style={[styles.valor, { color: colors.text }]}>
-            R$ {item.valor.toFixed(2)}
-          </Text>
 
-          <ParcelProgress
-            dataCompra={item.data}
-            totalParcelas={item.parcelas}
-            cor={colors.text}
-          />
-
-          {/* Badge do cartão */}
+          {/* badge do cartão */}
           {cartaoData && (
             <View
               style={{
@@ -150,10 +139,21 @@ const ItemByMonth = React.memo(() => {
               }}
             >
               <Text style={{ color: "#FFFFFF", fontSize: 11, fontWeight: "600" }}>
-                {cartaoData.emoji || "💳"} {cartaoData.nome || "Cartão"}
+                {cartaoData.emoji || "💳"}
               </Text>
             </View>
           )}
+
+          <Text style={[styles.valor, { color: colors.text }]}>
+            R$ {item.valor.toFixed(2)}
+          </Text>
+
+          <ParcelProgress
+            mesPrimeiraParcela={item.mesPrimeiraParcela}
+            anoPrimeiraParcela={item.anoPrimeiraParcela}
+            totalParcelas={item.parcelas}
+            cor={colors.text}
+          />
         </View>
       </View>
     </TouchableOpacity>

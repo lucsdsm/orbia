@@ -5,6 +5,9 @@ import { useTheme } from "../contexts/ThemeContext";
 import { useNavigation } from "@react-navigation/native";
 import Sandwich from "./Sandwich";
 
+/**
+ * Footer com botões de navegação e ações rápidas.
+*/
 export default function Footer( { onNovoItem } ) {
   const { toggleTheme, isDark, colors } = useTheme();
   const navigation = useNavigation();

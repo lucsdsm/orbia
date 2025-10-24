@@ -1,42 +1,23 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import {View, Text, FlatList, TouchableOpacity, StyleSheet} from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useTheme } from '../contexts/ThemeContext';
 import { useCartoes } from '../contexts/CartoesContext';
 import { useItens } from '../contexts/ItensContext';
+import { useGastoPorCartao } from '../hooks';
+import { calcularPercentualLimite } from '../utils/calculations';
+import { formatCurrency } from '../utils/formatters';
 
 export default function CardList({ navigation }) {
   const { colors } = useTheme();
   const { cartoes } = useCartoes();
   const { itens } = useItens();
-
-  // calcula o valor total de cada item no cartão
-  const gastoPorCartao = useMemo(() => {
-    const gastos = {};
-    
-    itens.forEach(item => {
-      if (item.cartao && item.natureza === 'despesa') {
-        let valorConsiderar = 0;
-        
-        if (item.tipo === 'parcelada' && item.parcelas) {
-          const valorParcela = parseFloat(item.valor) || 0;
-          const totalParcelas = parseInt(item.parcelas, 10) || 0;
-          valorConsiderar = valorParcela * totalParcelas;
-        } else {
-          // para fixas ou outras, considera o valor único
-          valorConsiderar = parseFloat(item.valor) || 0;
-        }
-        
-        gastos[item.cartao] = (gastos[item.cartao] || 0) + valorConsiderar;
-      }
-    });
-    return gastos;
-  }, [itens]);
+  
+  const gastoPorCartao = useGastoPorCartao(itens);
 
   const renderCard = ({ item }) => {
     const gastoTotal = gastoPorCartao[item.id] || 0;
-    const percentualUtilizado = item.limite > 0 ? (gastoTotal / item.limite) * 100 : 0;
-    const percentualLimitado = Math.min(percentualUtilizado, 100);
+    const percentualUtilizado = calcularPercentualLimite(gastoTotal, item.limite);
 
     return (
       <TouchableOpacity
@@ -49,14 +30,13 @@ export default function CardList({ navigation }) {
           <View style={styles.cardInfo}>
             <Text style={[styles.nome, { color: colors.text }]}>{item.nome}</Text>
             
-            {/* barra de progresso do limite */}
             <View style={[styles.colorIndicatorContainer, { backgroundColor: colors.secondBackground }]}>
               <View 
                 style={[
                   styles.colorIndicator, 
                   { 
                     backgroundColor: item.color,
-                    width: `${percentualLimitado}%`
+                    width: `${percentualUtilizado}%`
                   }
                 ]} 
               />
@@ -64,7 +44,7 @@ export default function CardList({ navigation }) {
 
             {item.limite > 0 && (
               <Text style={[styles.limite, { color: colors.textSecondary }]}>
-                R$ {gastoTotal.toFixed(2)} / R$ {item.limite.toFixed(2)}
+                R$ {formatCurrency(gastoTotal)} / R$ {formatCurrency(item.limite)}
               </Text>
             )}
           </View>

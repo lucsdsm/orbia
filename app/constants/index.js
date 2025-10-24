@@ -1,8 +1,8 @@
 export const DEFAULT_CARDS = [];
 
 export const COLORS = [
-  "#820AD1", // Roxo Nubank
-  "#FF7300", // Laranja Inter
+  "#820AD1", // Roxo
+  "#FF7300", // Laranja
   "#1E88E5", // Azul
   "#43A047", // Verde
   "#E53935", // Vermelho

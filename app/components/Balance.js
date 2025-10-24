@@ -3,6 +3,7 @@ import { View, Text, TextInput, StyleSheet, TouchableOpacity } from "react-nativ
 import { useTheme } from "../contexts/ThemeContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
+import { saldoEmitter, SALDO_EVENTS } from "../events/saldoEvents";
 
 /**
  * Componente para exibição e edição do saldo.
@@ -45,6 +46,8 @@ export default function Balance({ onSaldoChange }) {
       if (onSaldoChange) {
         onSaldoChange(valor);
       }
+      // Emite evento de mudança de saldo
+      saldoEmitter.emit(SALDO_EVENTS.SALDO_CHANGED, valor);
     } catch (error) {
       console.error("Erro ao salvar saldo:", error);
     }

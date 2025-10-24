@@ -71,7 +71,7 @@ export const updateWidgetNotification = async (saldo, superavite, saldoProximo) 
       : `-R$ ${Math.abs(saldoProximo).toFixed(2)}`;
     
     const notificationContent = {
-      title: '🪐 Orbia',
+      title: 'Resumo Financeiro',
       body: `💰 Saldo: R$ ${saldo.toFixed(2)}\n${superavite >= 0 ? '📈' : '📉'} Superávite: ${superaviteTexto}\n🔮 Próximo mês: ${saldoProximoTexto}`,
       data: { 
         id: NOTIFICATION_ID,

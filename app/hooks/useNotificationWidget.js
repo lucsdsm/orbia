@@ -7,6 +7,7 @@ import {
   isWidgetActive,
   addNotificationResponseListener,
 } from '../services/NotificationService';
+import { saldoEmitter, SALDO_EVENTS } from '../events/saldoEvents';
 
 const STORAGE_KEY = '@orbia:widget_enabled';
 
@@ -56,6 +57,23 @@ export const useNotificationWidget = (saldo, superavite, saldoProximo) => {
       updateWidgetNotification(saldo, superavite, saldoProximo);
     }
   }, [saldo, superavite, saldoProximo, widgetEnabled, hasPermission, loading]);
+
+  // Ouve mudanças no saldo através do event emitter
+  useEffect(() => {
+    const handleSaldoChange = async (novoSaldo) => {
+      if (widgetEnabled && hasPermission) {
+        // Recalcula superavite e saldo próximo com novo saldo
+        const novoSaldoProximo = novoSaldo + superavite;
+        await updateWidgetNotification(novoSaldo, superavite, novoSaldoProximo);
+      }
+    };
+
+    saldoEmitter.on(SALDO_EVENTS.SALDO_CHANGED, handleSaldoChange);
+
+    return () => {
+      saldoEmitter.off(SALDO_EVENTS.SALDO_CHANGED, handleSaldoChange);
+    };
+  }, [widgetEnabled, hasPermission, superavite]);
 
   // Função para habilitar/desabilitar o widget
   const toggleWidget = useCallback(async () => {

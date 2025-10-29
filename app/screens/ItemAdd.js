@@ -66,8 +66,6 @@ export default function ItemAdd({ route, navigation }) {
 
       await StorageService.saveItem(novoItem);
 
-      console.log("Item salvo:", novoItem);
-
       Toast.show({
         type: "success",
         text1: "Item salvo com sucesso!",

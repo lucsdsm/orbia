@@ -97,7 +97,6 @@ export const StorageService = {
       // Salva apenas se houve mudanças
       if (hasChanges) {
         await AsyncStorage.setItem("itens", JSON.stringify(updatedItems));
-        console.log("✅ Migração de cartões concluída");
       }
 
       // Marca como migrado

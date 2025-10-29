@@ -22,17 +22,6 @@ const ItemByCard = React.memo(() => {
     }, [recarregarItens])
   );
 
-  const removerItem = useCallback(async (id) => {
-    try {
-      await StorageService.deleteItem(id);
-      await recarregarItens();
-      showToast('success', 'Item removido!');
-    } catch (error) {
-      console.log("Erro ao remover item:", error);
-      showToast('error', 'Erro ao remover item');
-    }
-  }, [recarregarItens]);
-
   // agrupa despesas parceladas por cartão
   const itensPorCartao = useMemo(() => {
     const despesasParceladas = itens.filter(
@@ -61,16 +50,26 @@ const ItemByCard = React.memo(() => {
       .sort((a, b) => b.total - a.total)
       .map((grupo) => {
         const cartaoInfo = cartoes.find((c) => c.id === grupo.cartao);
+
+        // Ordena os itens pelas parcelas restantes (menor primeiro)
+        const itensOrdenados = grupo.itens.slice().sort((a, b) => {
+          // Calcula parcelas restantes para cada item
+          const hoje = new Date();
+          const mesesPassadosA = (hoje.getFullYear() - a.anoPrimeiraParcela) * 12 + (hoje.getMonth() + 1 - a.mesPrimeiraParcela);
+          const parcelasRestantesA = Math.max(0, parseInt(a.parcelas) - mesesPassadosA);
+
+          const mesesPassadosB = (hoje.getFullYear() - b.anoPrimeiraParcela) * 12 + (hoje.getMonth() + 1 - b.mesPrimeiraParcela);
+          const parcelasRestantesB = Math.max(0, parseInt(b.parcelas) - mesesPassadosB);
+
+          return parcelasRestantesA - parcelasRestantesB;
+        });
+
         return {
           title: cartaoInfo ? `${cartaoInfo.emoji} ${cartaoInfo.nome}` : grupo.cartao,
           cartao: grupo.cartao,
           total: grupo.total,
           color: cartaoInfo?.color || "gray",
-          data: grupo.itens.sort((a, b) => {
-            const valorA = parseFloat(a.valor) || 0;
-            const valorB = parseFloat(b.valor) || 0;
-            return valorB - valorA;
-          }),
+          data: itensOrdenados,
         };
       });
 

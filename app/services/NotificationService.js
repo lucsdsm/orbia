@@ -52,7 +52,6 @@ export const requestNotificationPermissions = async () => {
     }
     
     if (finalStatus !== 'granted') {
-      console.log('Permissão de notificação negada');
       return false;
     }
     

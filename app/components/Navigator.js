@@ -10,6 +10,7 @@ import ItemList from "../screens/ItemList";
 import ItemByMonth from "../screens/ItemByMonth";
 import ItemByCard from "../screens/ItemByCard";
 import CardList from "../screens/CardList";
+import Charts from "../screens/Charts";
 import Header from "./Header";
 import Footer from "./Footer";
 
@@ -40,6 +41,7 @@ export default function Navigator() {
           <Stack.Screen name="Por Mês" component={ItemByMonth} />
           <Stack.Screen name="Por Cartão" component={ItemByCard} />
           <Stack.Screen name="Cartões" component={CardList} />
+          <Stack.Screen name="Gráficos" component={Charts} />
           <Stack.Screen name="Configurações" component={Settings} />
         </Stack.Navigator>
       </View>

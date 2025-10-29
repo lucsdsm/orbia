@@ -35,7 +35,6 @@ const ItemByMonth = React.memo(() => {
         visibilityTime: 2000,
       });
     } catch (error) {
-      console.log("Erro ao remover item:", error);
       Toast.show({
         type: "error",
         text1: "Erro ao remover item.",
@@ -93,14 +92,26 @@ const ItemByMonth = React.memo(() => {
         if (a.ano !== b.ano) return a.ano - b.ano;
         return a.mes - b.mes;
       })
-      .map((grupo) => ({
-        title: `${MONTHS.find((m) => m.value === grupo.mes)?.label || grupo.mes}/${grupo.ano}`,
-        data: grupo.itens.sort((a, b) => {
-          const valorA = parseFloat(a.valor) || 0;
-          const valorB = parseFloat(b.valor) || 0;
-          return valorB - valorA;
-        }),
-      }));
+      .map((grupo) => {
+        // Calcula o total das parcelas que vencem neste mês/ano
+        let totalMes = 0;
+        grupo.itens.forEach(item => {
+          // Descobre em qual parcela este mês/ano está
+          const parcelaIndex = (grupo.ano - item.anoPrimeiraParcela) * 12 + (grupo.mes - item.mesPrimeiraParcela) + 1;
+          if (parcelaIndex >= 1 && parcelaIndex <= item.parcelas) {
+            totalMes += parseFloat(item.valor) || 0;
+          }
+        });
+
+        return {
+          title: `${MONTHS.find((m) => m.value === grupo.mes)?.label || grupo.mes}/${grupo.ano}  - R$ ${totalMes.toFixed(2)}`,
+          data: grupo.itens.sort((a, b) => {
+            const valorA = parseFloat(a.valor) || 0;
+            const valorB = parseFloat(b.valor) || 0;
+            return valorB - valorA;
+          }),
+        };
+      });
 
     return sections;
   }, [itens]);
@@ -161,11 +172,16 @@ const ItemByMonth = React.memo(() => {
   }, [colors, navigation, recarregarItens, cartoes]);
 
   const renderSectionHeader = useCallback(
-    ({ section: { title } }) => (
-      <View style={[styles.sectionHeader, { backgroundColor: colors.background }]}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>{title}</Text>
-      </View>
-    ),
+    ({ section: { title } }) => {
+      // Separar título e valor
+      const [mesAno, valor] = title.split(' - R$ ');
+      return (
+        <View style={[styles.sectionHeader, { backgroundColor: colors.background, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }]}>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>{mesAno}</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text, fontWeight: 'bold' }]}> - R$ {valor}</Text>
+        </View>
+      );
+    },
     [colors]
   );
 

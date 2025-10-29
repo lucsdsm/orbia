@@ -15,6 +15,7 @@ export default function Sandwich({ visible, onClose }) {
     { name: "Todos os itens", icon: "list", screen: "Itens" },
     { name: "Por Mês", icon: "calendar", screen: "Por Mês" },
     { name: "Por Cartão", icon: "credit-card", screen: "Por Cartão" },
+    { name: "Gráficos", icon: "bar-chart-2", screen: "Gráficos" },
   ];
 
   const SandwichCardCards = [

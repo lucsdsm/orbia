@@ -23,11 +23,6 @@ const ItemList = React.memo(() => {
     }, [recarregarItens])
   );
 
-  // Debug: monitora mudanças nos cartões
-  useEffect(() => {
-    console.log('Cartões atualizados no ItemList:', cartoes.length, cartoes.map(c => ({ id: c.id, nome: c.nome })));
-  }, [cartoes]);
-
   const itensOrdenados = useMemo(() => {
     return [...itens].sort((a, b) => {
       // 1º critério: receitas primeiro, depois despesas
@@ -59,7 +54,6 @@ const ItemList = React.memo(() => {
         visibilityTime: 2000,
       });
     } catch (error) {
-      console.log("Erro ao remover item:", error);
       Toast.show({
         type: "error",
         text1: "Erro ao remover item.",

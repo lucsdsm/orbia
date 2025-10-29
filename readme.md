@@ -74,11 +74,16 @@ npx expo start
 
 ## 📝 Notas de Versão
 
-### v1.0.1 (Atual)
+### v1.0.3 (Atual)
+- 
+
+### v1.0.2 
+- ✨Widget de notificação com resumo financeiro
+
+### v1.0.1
 - ✨ Sistema completo de gerenciamento de cartões personalizados
 - ✨ Barras de progresso de utilização de limite
 - ✨ Dropdown customizado substituindo picker nativo
-- ✨ Migração automática de dados de versões antigas
 - ✨ Cálculo inteligente de parcelas restantes
 - 🐛 Correção de bugs na exibição de etiquetas de cartão
 - 🎨 Melhorias visuais e de UX
@@ -95,7 +100,7 @@ npx expo start
 <br>
 <p align="center">
   Desenvolvido por <strong>lucsdsm</strong> <br>
-  Versão: <strong>1.0.1</strong> 
+  Versão: <strong>1.0.3</strong> 
 </p>
 
 

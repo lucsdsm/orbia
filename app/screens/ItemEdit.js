@@ -69,8 +69,6 @@ export default function ItemEdit({ route, navigation }) {
         text1: "Item atualizado!",
       });
 
-      console.log("Item editado de:", item, "\npara:", itemEditado);
-
       navigation.goBack();
     } 
     catch (error) {

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, Dimensions, TouchableOpacity, ScrollView } from 'react-native';
 import { PieChart, BarChart } from 'react-native-chart-kit';
 import { useTheme } from '../contexts/ThemeContext';
@@ -16,12 +16,15 @@ const Charts = React.memo(() => {
   const { itens, recarregarItens } = useItens();
   const { cartoes } = useCartoes();
   const [activeChart, setActiveChart] = useState(0);
+  const scrollViewRef = useRef(null);
 
   useFocusEffect(
     useCallback(() => {
       recarregarItens();
     }, [recarregarItens])
   );
+
+  // Animação removida para evitar piscar durante o scroll horizontal
 
   // Calcula receitas e despesas totais
   const { totalReceitas, totalDespesas } = useMemo(() => {
@@ -42,6 +45,14 @@ const Charts = React.memo(() => {
     return { totalReceitas: receitas, totalDespesas: despesas };
   }, [itens]);
 
+  // Dimensões do donut minimalista
+  const pieWidth = screenWidth - 40;
+  const pieHeight = 220;
+  const pieDiameter = Math.min(pieWidth, pieHeight);
+  const innerRadius = Math.round(pieDiameter * 0.6); // 60% = buraco grande, apenas bordas visíveis
+  // Calcula padding dinâmico para centralizar o gráfico em qualquer tela
+  const dynamicPaddingLeft = Math.round((pieWidth - pieDiameter) / 2) + 15.5;
+
   // Dados do gráfico de pizza (Receitas vs Despesas)
   const pieChartData = useMemo(() => {
     const total = totalReceitas || 1; // Evita divisão por zero
@@ -52,18 +63,18 @@ const Charts = React.memo(() => {
 
     return [
       {
-        name: '% disponível',
+        name: 'Disponível',
         population: Math.max(percentualRestante, 0),
         color: '#4CAF50',
         legendFontColor: colors.text,
-        legendFontSize: 14,
+        legendFontSize: 12,
       },
       {
-        name: '% gasto',
+        name: 'Gasto',
         population: Math.min(percentualGasto, 100),
         color: '#F44336',
         legendFontColor: colors.text,
-        legendFontSize: 14,
+        legendFontSize: 12,
       },
     ];
   }, [totalReceitas, totalDespesas, colors.text]);
@@ -154,62 +165,58 @@ const Charts = React.memo(() => {
     },
   };
 
-  const renderChart = () => {
-    switch (activeChart) {
-      case 0:
-        return (
-          <View style={styles.chartContainer}>
-            <Text style={[styles.chartTitle, { color: colors.text }]}>
-              Proporção de Receitas e Despesas
-            </Text>
-            <Text style={[styles.chartSubtitle, { color: colors.text }]}>
-              Receitas: R$ {totalReceitas.toFixed(2)} | Despesas: R$ {totalDespesas.toFixed(2)}
-            </Text>
-            <PieChart
-              data={pieChartData}
-              width={screenWidth - 40}
-              height={220}
-              chartConfig={chartConfig}
-              accessor="population"
-              backgroundColor="transparent"
-              paddingLeft="15"
-              absolute
-            />
-          </View>
-        );
+  // Config minimalista para barras (roxa vibrante, sem linhas horizontais)
+  const barChartConfig = {
+    backgroundColor: colors.background,
+    backgroundGradientFrom: colors.background,
+    backgroundGradientTo: colors.background,
+    color: (opacity = 1) => `rgba(138, 43, 226, ${opacity})`, // Roxo vibrante (BlueViolet)
+    labelColor: (opacity = 1) => colors.text,
+    barPercentage: 0.6,
+    decimalPlaces: 0,
+    // Estilo dos valores ACIMA das barras (R$ 150, R$ 200, etc.)
+    propsForLabels: {
+      fontSize: 15,
+      fontWeight: 'bold',
+      fill: '#8A2BE2', // Roxo vibrante para destacar
+    },
+    propsForBackgroundLines: {
+      strokeWidth: 0, // Remove linhas horizontais
+    },
+    fillShadowGradient: '#8A2BE2', // Roxo vibrante
+    fillShadowGradientOpacity: 1,
+    barRadius: 8, // Cantos arredondados no topo
+    // Estilo dos rótulos ABAIXO das barras (Jan, Fev, Mar, etc.)
+    propsForVerticalLabels: {
+      fontSize: 11,
+      fontWeight: 'normal',
+      fill: colors.text, // Cor do tema
+    },
+  };
 
-      case 1:
-        return (
-          <View style={styles.chartContainer}>
-            <Text style={[styles.chartTitle, { color: colors.text }]}>
-              Parcelas nos Próximos Meses
-            </Text>
-            <Text style={[styles.chartSubtitle, { color: colors.text }]}>
-              Total de parcelas a pagar por mês
-            </Text>
-            <BarChart
-              data={barChartData}
-              width={screenWidth - 40}
-              height={screenHeight / 2.5}
-              chartConfig={chartConfig}
-              style={styles.chart} 
-              showValuesOnTopOfBars
-              fromZero
-              yAxisLabel="R$ "
-              yAxisSuffix=""
-              segments={5}
-            />
-          </View>
-        );
-      default:
-        return null;
+  // Função para detectar mudança de página no scroll
+  const handleScrollEnd = (event) => {
+    const scrollPosition = event.nativeEvent.contentOffset.x;
+    const pageWidth = screenWidth;
+    const currentPage = Math.round(scrollPosition / pageWidth);
+    if (currentPage !== activeChart) {
+      setActiveChart(currentPage);
     }
+  };
+
+  // Função para trocar gráfico via botões (com scroll automático)
+  const handleChartChange = (chartIndex) => {
+    setActiveChart(chartIndex);
+    scrollViewRef.current?.scrollTo({
+      x: chartIndex * screenWidth,
+      animated: true,
+    });
   };
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Navegação de gráficos */}
-      <View style={[styles.navigation, { backgroundColor: colors.card }]}>
+      <View style={[styles.navigation, { backgroundColor: colors.background }]}>
         {charts.map((chart) => (
           <TouchableOpacity
             key={chart.id}
@@ -217,7 +224,7 @@ const Charts = React.memo(() => {
               styles.navButton,
               activeChart === chart.id && { borderBottomColor: '#820AD1', borderBottomWidth: 3 },
             ]}
-            onPress={() => setActiveChart(chart.id)}
+            onPress={() => handleChartChange(chart.id)}
             activeOpacity={0.7}
           >
             <MaterialIcons
@@ -241,8 +248,94 @@ const Charts = React.memo(() => {
       </View>
 
       {/* Gráfico ativo */}
-      <ScrollView contentContainerStyle={[styles.content, { justifyContent: 'center'}]}>
-        {renderChart()}
+      <ScrollView
+        ref={scrollViewRef}
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        onMomentumScrollEnd={handleScrollEnd}
+        contentContainerStyle={[styles.content, { justifyContent: 'center'}]}
+      >
+        {/* Página 1: Gráfico de Pizza */}
+        <View style={{ width: screenWidth, alignItems: 'center', justifyContent: 'center' }}>
+          <View style={[styles.chartContainer]}>
+            <Text style={[styles.chartTitle, { color: colors.text }]}>Proporção de Receitas e Despesas</Text>
+            <Text style={[styles.chartSubtitle, { color: colors.text }]}>Receitas: R$ {totalReceitas.toFixed(2)} | Despesas: R$ {totalDespesas.toFixed(2)}</Text>
+
+            {/* Área ampla (largura da tela - padding) para o PieChart, com overflow oculto para mostrar só o centro circular */}
+            <View style={{ width: pieWidth, height: pieHeight, alignItems: 'center', justifyContent: 'center', overflow: 'hidden', position: 'relative' }}>
+              {/* PieChart usa a largura total disponível (pieWidth) para evitar corte à esquerda */}
+              <PieChart
+                data={pieChartData}
+                width={pieWidth}
+                height={pieHeight}
+                chartConfig={chartConfig}
+                accessor="population"
+                backgroundColor="transparent"
+                paddingLeft={dynamicPaddingLeft}
+                hasLegend={false}
+                style={{ alignSelf: 'center' }}
+              />
+
+              {/* Centro branco (donut) posicionado no centro do container amplo */}
+              <View
+                style={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  width: innerRadius,
+                  height: innerRadius,
+                  borderRadius: innerRadius / 2,
+                  backgroundColor: colors.background,
+                  marginTop: -innerRadius / 2,
+                  marginLeft: -innerRadius / 2,
+                }}
+              />
+            </View>
+
+            {/* Legendas customizadas abaixo do gráfico */}
+            <View style={{ flexDirection: 'row', marginTop: 20, justifyContent: 'center', gap: 30 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <View style={{ width: 12, height: 12, borderRadius: 2, backgroundColor: '#4CAF50' }} />
+                <Text style={{ color: colors.text, fontSize: 12 }}>
+                  {pieChartData[0].name}: {pieChartData[0].population.toFixed(1)}%
+                </Text>
+              </View>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <View style={{ width: 12, height: 12, borderRadius: 2, backgroundColor: '#F44336' }} />
+                <Text style={{ color: colors.text, fontSize: 12 }}>
+                  {pieChartData[1].name}: {pieChartData[1].population.toFixed(1)}%
+                </Text>
+              </View>
+            </View>
+          </View>
+        </View>
+
+        {/* Página 2: Gráfico de Barras */}
+        <View style={{ width: screenWidth, alignItems: 'center', justifyContent: 'center' }}>
+          <View style={[styles.chartContainer]}>
+            <Text style={[styles.chartTitle, { color: colors.text }]}>
+              Parcelas nos Próximos Meses
+            </Text>
+            <Text style={[styles.chartSubtitle, { color: colors.text }]}>
+              Total de parcelas a pagar por mês
+            </Text>
+            <BarChart
+              data={barChartData}
+              width={screenWidth - 40}
+              height={screenHeight / 2.5}
+              chartConfig={barChartConfig}
+              style={styles.chart} 
+              showValuesOnTopOfBars
+              fromZero
+              yAxisLabel="R$ "
+              yAxisSuffix=""
+              segments={4}
+              withHorizontalLabels={true}
+              withVerticalLabels={true}
+            />
+          </View>
+        </View>
       </ScrollView>
 
     </View>
@@ -259,6 +352,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     marginTop: 15,
+    padding: 10,
+    paddingHorizontal: 25,
   },
   navButton: {
     alignItems: 'center',
@@ -272,7 +367,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   content: {
-    padding: 20,
     flexGrow: 1,
     alignItems: 'center',
   },

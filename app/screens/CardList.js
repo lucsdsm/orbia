@@ -35,7 +35,7 @@ export default function CardList({ navigation }) {
                 style={[
                   styles.colorIndicator, 
                   { 
-                    backgroundColor: item.color,
+                    backgroundColor: item.cor || item.color,
                     width: `${percentualUtilizado}%`
                   }
                 ]} 

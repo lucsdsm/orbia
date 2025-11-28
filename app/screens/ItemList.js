@@ -64,7 +64,7 @@ const ItemList = React.memo(() => {
 
   const renderItem = useCallback((props) => {
     const { item } = props;
-    const cartaoData = item.cartao ? cartoes.find(c => c.id === item.cartao) : null;
+    const cartaoData = item.cartaoId ? cartoes.find(c => c.id === item.cartaoId) : (item.cartao ? cartoes.find(c => c.id === item.cartao) : null);
     
     return (
       <TouchableOpacity
@@ -79,14 +79,14 @@ const ItemList = React.memo(() => {
       })}>
       <View style={{ flex: 1 }}>
         {/* emoji */}
-        <Text style={[styles.descricao, { color: colors.text }]}>{item.emoji} {item.descricao}</Text>
+        <Text style={[styles.descricao, { color: colors.text }]}>{item.categoria || item.emoji} {item.nome || item.descricao}</Text>
 
         <View style={styles.valorRow}>
 
           {/* cartão */}
           {cartaoData && (
             <View style={{
-              backgroundColor: cartaoData.color || "gray",
+              backgroundColor: cartaoData.cor || cartaoData.color || "gray",
               paddingHorizontal: 8,
               paddingVertical: 4,
               borderRadius: 15,
@@ -106,10 +106,10 @@ const ItemList = React.memo(() => {
             <Text style={styles.emoji}>📌</Text>
           )}
 
-          {item.natureza === "despesa" && item.tipo === "parcelada" && item.mesPrimeiraParcela && item.anoPrimeiraParcela && item.parcelas && (
+          {item.natureza === "despesa" && item.tipo === "parcelada" && (item.mesPrimeiraParcela || item.mes_primeira_parcela) && (item.anoPrimeiraParcela || item.ano_primeira_parcela) && item.parcelas && (
             <ParcelProgress
-              mesPrimeiraParcela={item.mesPrimeiraParcela}
-              anoPrimeiraParcela={item.anoPrimeiraParcela}
+              mesPrimeiraParcela={item.mesPrimeiraParcela || item.mes_primeira_parcela}
+              anoPrimeiraParcela={item.anoPrimeiraParcela || item.ano_primeira_parcela}
               totalParcelas={item.parcelas}
               cor={colors.text}
             />

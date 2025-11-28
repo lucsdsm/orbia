@@ -62,15 +62,25 @@ const ItemByMonth = React.memo(() => {
   // Agrupa despesas parceladas por mês/ano final
   const itensPorMes = useMemo(() => {
     // Filtra apenas despesas parceladas
-    const despesasParceladas = itens.filter(
-      (item) => item.natureza === "despesa" && item.tipo === "parcelada" && item.mesPrimeiraParcela && item.anoPrimeiraParcela && item.parcelas
-    );
+    const despesasParceladas = itens.filter((item) => {
+      const mesPrimeiraParcela = item.mesPrimeiraParcela || item.mes_primeira_parcela;
+      const anoPrimeiraParcela = item.anoPrimeiraParcela || item.ano_primeira_parcela;
+      
+      return item.natureza === "despesa" && 
+             item.tipo === "parcelada" && 
+             mesPrimeiraParcela && 
+             anoPrimeiraParcela && 
+             item.parcelas;
+    });
 
     // Agrupa por mês/ano final
     const grupos = {};
 
     despesasParceladas.forEach((item) => {
-      const mesFinal = calcularMesFinal(item.mesPrimeiraParcela, item.anoPrimeiraParcela, item.parcelas);
+      const mesPrimeiraParcela = item.mesPrimeiraParcela || item.mes_primeira_parcela;
+      const anoPrimeiraParcela = item.anoPrimeiraParcela || item.ano_primeira_parcela;
+      
+      const mesFinal = calcularMesFinal(mesPrimeiraParcela, anoPrimeiraParcela, item.parcelas);
       if (!mesFinal) return;
 
       const chave = `${mesFinal.ano}-${String(mesFinal.mes).padStart(2, "0")}`;
@@ -96,8 +106,11 @@ const ItemByMonth = React.memo(() => {
         // Calcula o total das parcelas que vencem neste mês/ano
         let totalMes = 0;
         grupo.itens.forEach(item => {
+          const mesPrimeiraParcela = item.mesPrimeiraParcela || item.mes_primeira_parcela;
+          const anoPrimeiraParcela = item.anoPrimeiraParcela || item.ano_primeira_parcela;
+          
           // Descobre em qual parcela este mês/ano está
-          const parcelaIndex = (grupo.ano - item.anoPrimeiraParcela) * 12 + (grupo.mes - item.mesPrimeiraParcela) + 1;
+          const parcelaIndex = (grupo.ano - anoPrimeiraParcela) * 12 + (grupo.mes - mesPrimeiraParcela) + 1;
           if (parcelaIndex >= 1 && parcelaIndex <= item.parcelas) {
             totalMes += parseFloat(item.valor) || 0;
           }
@@ -118,7 +131,7 @@ const ItemByMonth = React.memo(() => {
 
   const renderItem = useCallback((props) => {
     const { item } = props;
-    const cartaoData = item.cartao ? cartoes.find(c => c.id === item.cartao) : null;
+    const cartaoData = item.cartaoId ? cartoes.find(c => c.id === item.cartaoId) : (item.cartao ? cartoes.find(c => c.id === item.cartao) : null);
     
     return (
       <TouchableOpacity
@@ -133,7 +146,7 @@ const ItemByMonth = React.memo(() => {
       })}>
       <View style={{ flex: 1 }}>
         <Text style={[styles.descricao, { color: colors.text }]}>
-          {item.emoji} {item.descricao}
+          {item.categoria || item.emoji} {item.nome || item.descricao}
         </Text>
 
         <View style={styles.valorRow}>
@@ -142,7 +155,7 @@ const ItemByMonth = React.memo(() => {
           {cartaoData && (
             <View
               style={{
-                backgroundColor: cartaoData.color || "gray",
+                backgroundColor: cartaoData.cor || cartaoData.color || "gray",
                 paddingHorizontal: 8,
                 paddingVertical: 4,
                 borderRadius: 15,
@@ -160,8 +173,8 @@ const ItemByMonth = React.memo(() => {
           </Text>
 
           <ParcelProgress
-            mesPrimeiraParcela={item.mesPrimeiraParcela}
-            anoPrimeiraParcela={item.anoPrimeiraParcela}
+            mesPrimeiraParcela={item.mesPrimeiraParcela || item.mes_primeira_parcela}
+            anoPrimeiraParcela={item.anoPrimeiraParcela || item.ano_primeira_parcela}
             totalParcelas={item.parcelas}
             cor={colors.text}
           />

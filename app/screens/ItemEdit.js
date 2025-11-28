@@ -15,11 +15,11 @@ export default function ItemEdit({ route, navigation }) {
   const { cartoes } = useCartoes();
   const { item, onEdit } = route.params;
 
-  const [descricao, setDescricao] = useState(item.descricao);
-  const [emoji, setEmoji] = useState(item.emoji);
+  const [descricao, setDescricao] = useState(item.nome || item.descricao);
+  const [emoji, setEmoji] = useState(item.categoria || item.emoji);
   const [valor, setValor] = useState(item.valor.toString());
   const [tipo, setTipo] = useState(item.tipo || "fixa");
-  const [cartao, setCartao] = useState(item.cartao || "");
+  const [cartao, setCartao] = useState(item.cartaoId || item.cartao || "");
   const [mesPrimeiraParcela, setMesPrimeiraParcela] = useState(item.mesPrimeiraParcela?.toString() || "");
   const [anoPrimeiraParcela, setAnoPrimeiraParcela] = useState(item.anoPrimeiraParcela?.toString() || "");
   const [parcelas, setParcelas] = useState(item.parcelas?.toString() || "");
@@ -50,11 +50,14 @@ export default function ItemEdit({ route, navigation }) {
     try {
       const itemEditado = {
         ...item,          
-        descricao,
-        emoji,
+        nome: descricao,
+        descricao: descricao, // mantém compatibilidade
+        categoria: emoji,
+        emoji: emoji, // mantém compatibilidade
         valor: parseFloat(valor),
         tipo,
-        cartao,
+        cartaoId: cartao,
+        cartao: cartao, // mantém compatibilidade
         mesPrimeiraParcela: parseInt(mesPrimeiraParcela) || 0,
         anoPrimeiraParcela: parseInt(anoPrimeiraParcela) || 0,
         parcelas: parseInt(parcelas) || 0,
@@ -104,7 +107,7 @@ export default function ItemEdit({ route, navigation }) {
   return (
     <View style={[styles.wrapper, { backgroundColor: colors.secondBackground }]}>
       <View style={[styles.container, { backgroundColor: colors.background }]}>
-        <Text style={[styles.title, { color: colors.text }]}>~ {item.descricao} </Text>
+        <Text style={[styles.title, { color: colors.text }]}>~ {item.nome || item.descricao} </Text>
 
         <TextInput
           style={[styles.input, { borderColor: colors.text, color: colors.text }]}

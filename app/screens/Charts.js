@@ -106,11 +106,14 @@ const Charts = React.memo(() => {
       itens
         .filter(item => item.tipo === 'parcelada' && item.natureza === 'despesa')
         .forEach(item => {
-          if (!item.mesPrimeiraParcela || !item.anoPrimeiraParcela || !item.parcelas) return;
+          const mesPrimeiraParcela = item.mesPrimeiraParcela || item.mes_primeira_parcela;
+          const anoPrimeiraParcela = item.anoPrimeiraParcela || item.ano_primeira_parcela;
+          
+          if (!mesPrimeiraParcela || !anoPrimeiraParcela || !item.parcelas) return;
           
           // Verifica se este mês/ano está no intervalo de parcelas
-          const mesInicio = item.mesPrimeiraParcela;
-          const anoInicio = item.anoPrimeiraParcela;
+          const mesInicio = mesPrimeiraParcela;
+          const anoInicio = anoPrimeiraParcela;
           
           const dataInicio = new Date(anoInicio, mesInicio - 1, 1);
           const dataFim = new Date(anoInicio, mesInicio - 1 + item.parcelas, 0);

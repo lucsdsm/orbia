@@ -9,9 +9,10 @@ export const useGastoPorCartao = (itens) => {
     const gastos = {};
     
     itens.forEach(item => {
-      if (item.cartao && item.natureza === 'despesa') {
+      const cartaoId = item.cartaoId || item.cartao;
+      if (cartaoId && item.natureza === 'despesa') {
         const valorConsiderar = calcularGastoItem(item);
-        gastos[item.cartao] = (gastos[item.cartao] || 0) + valorConsiderar;
+        gastos[cartaoId] = (gastos[cartaoId] || 0) + valorConsiderar;
       }
     });
     

@@ -25,13 +25,13 @@ const ItemByCard = React.memo(() => {
   // agrupa despesas parceladas por cartão
   const itensPorCartao = useMemo(() => {
     const despesasParceladas = itens.filter(
-      (item) => item.natureza === "despesa" && item.tipo === "parcelada" && item.cartao
+      (item) => item.natureza === "despesa" && item.tipo === "parcelada" && (item.cartaoId || item.cartao)
     );
 
     const grupos = {};
 
     despesasParceladas.forEach((item) => {
-      const cartaoId = item.cartao;
+      const cartaoId = item.cartaoId || item.cartao;
       
       if (!grupos[cartaoId]) {
         grupos[cartaoId] = {
@@ -55,10 +55,15 @@ const ItemByCard = React.memo(() => {
         const itensOrdenados = grupo.itens.slice().sort((a, b) => {
           // Calcula parcelas restantes para cada item
           const hoje = new Date();
-          const mesesPassadosA = (hoje.getFullYear() - a.anoPrimeiraParcela) * 12 + (hoje.getMonth() + 1 - a.mesPrimeiraParcela);
+          
+          const mesPrimeiraParcelaA = a.mesPrimeiraParcela || a.mes_primeira_parcela;
+          const anoPrimeiraParcelaA = a.anoPrimeiraParcela || a.ano_primeira_parcela;
+          const mesesPassadosA = (hoje.getFullYear() - anoPrimeiraParcelaA) * 12 + (hoje.getMonth() + 1 - mesPrimeiraParcelaA);
           const parcelasRestantesA = Math.max(0, parseInt(a.parcelas) - mesesPassadosA);
 
-          const mesesPassadosB = (hoje.getFullYear() - b.anoPrimeiraParcela) * 12 + (hoje.getMonth() + 1 - b.mesPrimeiraParcela);
+          const mesPrimeiraParcelaB = b.mesPrimeiraParcela || b.mes_primeira_parcela;
+          const anoPrimeiraParcelaB = b.anoPrimeiraParcela || b.ano_primeira_parcela;
+          const mesesPassadosB = (hoje.getFullYear() - anoPrimeiraParcelaB) * 12 + (hoje.getMonth() + 1 - mesPrimeiraParcelaB);
           const parcelasRestantesB = Math.max(0, parseInt(b.parcelas) - mesesPassadosB);
 
           return parcelasRestantesA - parcelasRestantesB;
@@ -68,7 +73,7 @@ const ItemByCard = React.memo(() => {
           title: cartaoInfo ? `${cartaoInfo.emoji} ${cartaoInfo.nome}` : grupo.cartao,
           cartao: grupo.cartao,
           total: grupo.total,
-          color: cartaoInfo?.color || "gray",
+          color: cartaoInfo?.cor || cartaoInfo?.color || "gray",
           data: itensOrdenados,
         };
       });
@@ -77,7 +82,7 @@ const ItemByCard = React.memo(() => {
   }, [itens, cartoes]);
 
   const renderItem = useCallback(({ item }) => {
-    const cartaoData = item.cartao ? cartoes.find(c => c.id === item.cartao) : null;
+    const cartaoData = item.cartaoId ? cartoes.find(c => c.id === item.cartaoId) : (item.cartao ? cartoes.find(c => c.id === item.cartao) : null);
     
     return (
       <TouchableOpacity
@@ -92,7 +97,7 @@ const ItemByCard = React.memo(() => {
         })}>
         <View style={{ flex: 1 }}>
           <Text style={[styles.descricao, { color: colors.text }]}>
-            {item.emoji} {item.descricao}
+            {item.categoria || item.emoji} {item.nome || item.descricao}
           </Text>
 
           <View style={styles.valorRow}>
@@ -100,10 +105,10 @@ const ItemByCard = React.memo(() => {
               R$ {formatCurrency(item.valor)}
             </Text>
 
-            {item.mesPrimeiraParcela && item.anoPrimeiraParcela && item.parcelas && (
+            {(item.mesPrimeiraParcela || item.mes_primeira_parcela) && (item.anoPrimeiraParcela || item.ano_primeira_parcela) && item.parcelas && (
               <ParcelProgress
-                mesPrimeiraParcela={item.mesPrimeiraParcela}
-                anoPrimeiraParcela={item.anoPrimeiraParcela}
+                mesPrimeiraParcela={item.mesPrimeiraParcela || item.mes_primeira_parcela}
+                anoPrimeiraParcela={item.anoPrimeiraParcela || item.ano_primeira_parcela}
                 totalParcelas={item.parcelas}
                 cor={colors.text}
               />

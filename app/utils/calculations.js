@@ -54,13 +54,15 @@ export const calcularGastoItem = (item) => {
   if (!item) return 0;
   
   const valor = parseFloat(item.valor) || 0;
+  const mesPrimeiraParcela = item.mesPrimeiraParcela || item.mes_primeira_parcela;
+  const anoPrimeiraParcela = item.anoPrimeiraParcela || item.ano_primeira_parcela;
   
-  if (item.tipo === 'parcelada' && item.parcelas && item.mesPrimeiraParcela && item.anoPrimeiraParcela) {
+  if (item.tipo === 'parcelada' && item.parcelas && mesPrimeiraParcela && anoPrimeiraParcela) {
     return calcularValorParcelasRestantes(
       valor,
       parseInt(item.parcelas, 10) || 0,
-      item.mesPrimeiraParcela,
-      item.anoPrimeiraParcela
+      mesPrimeiraParcela,
+      anoPrimeiraParcela
     );
   }
   

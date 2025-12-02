@@ -9,11 +9,10 @@ import Toast from "react-native-toast-message";
 import { MaterialIcons } from "@expo/vector-icons";
 
 import ParcelProgress from "../components/ParcelProgress";
-import { StorageService } from "../services/storage";
 
 const ItemList = React.memo(() => {
   const { colors } = useTheme();
-  const { itens, recarregarItens } = useItens();
+  const { itens, recarregarItens, deletarItem } = useItens();
   const { cartoes } = useCartoes();
   const navigation = useNavigation();
 
@@ -44,15 +43,19 @@ const ItemList = React.memo(() => {
 
   const removerItem = useCallback(async (id) => {
     try {
-      await StorageService.deleteItem(id);
-      await recarregarItens(); // recarrega a lista
-      
-      Toast.show({
-        type: "success",
-        text1: "Item removido!",
-        position: "top",
-        visibilityTime: 2000,
-      });
+      const resultado = await deletarItem(id);
+      if (resultado.success) {
+        await recarregarItens(); // recarrega a lista
+        
+        Toast.show({
+          type: "success",
+          text1: "Item removido!",
+          position: "top",
+          visibilityTime: 2000,
+        });
+      } else {
+        throw new Error('Erro ao remover');
+      }
     } catch (error) {
       Toast.show({
         type: "error",
@@ -60,7 +63,7 @@ const ItemList = React.memo(() => {
         position: "top",
       });
     }
-  }, [recarregarItens]);
+  }, [deletarItem, recarregarItens]);
 
   const renderItem = useCallback((props) => {
     const { item } = props;

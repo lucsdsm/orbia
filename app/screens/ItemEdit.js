@@ -3,16 +3,17 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-nativ
 import { Feather } from "@expo/vector-icons";
 import { useTheme } from "../contexts/ThemeContext";
 import { useCartoes } from "../contexts/CartoesContext";
+import { useItens } from "../contexts/ItensContext";
 import Toast from "react-native-toast-message";
 
 import CustomPicker from "../components/CustomPicker";
 
-import { StorageService } from "../services/storage";
 import { MONTHS } from "../constants";
 
 export default function ItemEdit({ route, navigation }) {
   const { colors } = useTheme();
   const { cartoes } = useCartoes();
+  const { editarItem, deletarItem } = useItens();
   const { item, onEdit } = route.params;
 
   const [descricao, setDescricao] = useState(item.nome || item.descricao);
@@ -63,16 +64,20 @@ export default function ItemEdit({ route, navigation }) {
         parcelas: parseInt(parcelas) || 0,
       };
 
-      await StorageService.updateItem(itemEditado.id, itemEditado);
+      const resultado = await editarItem(itemEditado.id, itemEditado);
 
-      if (onEdit) onEdit(itemEditado);
+      if (resultado.success) {
+        if (onEdit) onEdit(itemEditado);
 
-      Toast.show({
-        type: "success",
-        text1: "Item atualizado!",
-      });
+        Toast.show({
+          type: "success",
+          text1: "Item atualizado!",
+        });
 
-      navigation.goBack();
+        navigation.goBack();
+      } else {
+        throw new Error('Erro ao atualizar item');
+      }
     } 
     catch (error) {
       console.error(error);
@@ -226,14 +231,18 @@ export default function ItemEdit({ route, navigation }) {
             style={[styles.iconButton, { backgroundColor: "#F44336" }]}
             onPress={async () => {
               try {
-                await StorageService.deleteItem(item.id);
-                Toast.show({
-                  type: "error",
-                  text1: "Item excluído!",
-                  position: "top",
-                  visibilityTime: 2000,
-                });
-                navigation.goBack();
+                const resultado = await deletarItem(item.id);
+                if (resultado.success) {
+                  Toast.show({
+                    type: "error",
+                    text1: "Item excluído!",
+                    position: "top",
+                    visibilityTime: 2000,
+                  });
+                  navigation.goBack();
+                } else {
+                  throw new Error('Erro ao excluir');
+                }
               } catch (error) {
                 Toast.show({
                   type: "error",

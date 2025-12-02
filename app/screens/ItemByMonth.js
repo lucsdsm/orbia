@@ -8,13 +8,12 @@ import Toast from "react-native-toast-message";
 import { MaterialIcons } from "@expo/vector-icons";
 
 import ParcelProgress from "../components/ParcelProgress";
-import { StorageService } from "../services/storage";
 import { MONTHS } from "../constants";
 
 const ItemByMonth = React.memo(() => {
   const { colors } = useTheme();
   const navigation = useNavigation();
-  const { itens, recarregarItens } = useItens();
+  const { itens, recarregarItens, deletarItem } = useItens();
   const { cartoes } = useCartoes();
 
   useFocusEffect(
@@ -25,15 +24,19 @@ const ItemByMonth = React.memo(() => {
 
   const removerItem = useCallback(async (id) => {
     try {
-      await StorageService.deleteItem(id);
-      await recarregarItens();
-      
-      Toast.show({
-        type: "success",
-        text1: "Item removido!",
-        position: "top",
-        visibilityTime: 2000,
-      });
+      const resultado = await deletarItem(id);
+      if (resultado.success) {
+        await recarregarItens();
+        
+        Toast.show({
+          type: "success",
+          text1: "Item removido!",
+          position: "top",
+          visibilityTime: 2000,
+        });
+      } else {
+        throw new Error('Erro ao remover');
+      }
     } catch (error) {
       Toast.show({
         type: "error",
@@ -41,7 +44,7 @@ const ItemByMonth = React.memo(() => {
         position: "top",
       });
     }
-  }, [recarregarItens]);
+  }, [deletarItem, recarregarItens]);
 
   // Calcula o mês/ano final de uma parcela
   const calcularMesFinal = (mesPrimeiraParcela, anoPrimeiraParcela, totalParcelas) => {

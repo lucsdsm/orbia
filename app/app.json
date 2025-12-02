@@ -2,7 +2,7 @@
   "expo": {
     "name": "Orbia",
     "slug": "app",
-    "version": "1.0.1",
+    "version": "1.0.4",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -11,7 +11,9 @@
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
+    
     },
+    
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.lucsdsm.app",
@@ -52,7 +54,9 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "a2b39e16-f8ae-4ddd-95f1-7619f8b78201"
+        "projectId": "a2b39e16-f8ae-4ddd-95f1-7619f8b78201",
+        "supabaseUrl": "${EXPO_PUBLIC_SUPABASE_URL}",
+        "supabaseAnonKey": "${EXPO_PUBLIC_SUPABASE_ANON_KEY}"
       }
     },
     "owner": "lucsdsm"

@@ -1,53 +1,48 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, TextInput, StyleSheet, TouchableOpacity } from "react-native";
 import { useTheme } from "../contexts/ThemeContext";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
-import { saldoEmitter, SALDO_EVENTS } from "../events/saldoEvents";
+import { useSaldo } from "../contexts/SaldoContext";
 
 /**
  * Componente para exibição e edição do saldo.
 */
 export default function Balance({ onSaldoChange }) {
   const { colors } = useTheme();
+  const { saldo: saldoContext, atualizarSaldo, loading } = useSaldo();
   const [saldo, setSaldo] = useState("0.00");
   const [editando, setEditando] = useState(false);
 
-  // carrega o saldo ao montar o componente
+  // atualiza o estado local quando o saldo do contexto muda
   useEffect(() => {
-    carregarSaldo();
-  }, []);
+    if (!loading) {
+      const valorFormatado = saldoContext.toFixed(2);
+      setSaldo(valorFormatado);
+      if (onSaldoChange) {
+        onSaldoChange(saldoContext);
+      }
+    }
+  }, [saldoContext, loading]);
 
-  // recarrega o saldo quando a tela ganhar foco
+  // recarrega quando a tela ganhar foco
   useFocusEffect(
     React.useCallback(() => {
-      carregarSaldo();
-    }, [])
-  );
-
-  const carregarSaldo = async () => {
-    try {
-      const saldoSalvo = await AsyncStorage.getItem("@orbia:saldo");
-      if (saldoSalvo !== null) {
-        const valorSaldo = parseFloat(saldoSalvo);
-        setSaldo(valorSaldo.toFixed(2));
+      if (!loading) {
+        const valorFormatado = saldoContext.toFixed(2);
+        setSaldo(valorFormatado);
         if (onSaldoChange) {
-          onSaldoChange(valorSaldo);
+          onSaldoChange(saldoContext);
         }
       }
-    } catch (error) {
-      console.error("Erro ao carregar saldo:", error);
-    }
-  };
+    }, [saldoContext, loading])
+  );
 
   const salvarSaldo = async (valor) => {
     try {
-      await AsyncStorage.setItem("@orbia:saldo", valor.toString());
+      await atualizarSaldo(valor);
       if (onSaldoChange) {
         onSaldoChange(valor);
       }
-      // Emite evento de mudança de saldo
-      saldoEmitter.emit(SALDO_EVENTS.SALDO_CHANGED, valor);
     } catch (error) {
       console.error("Erro ao salvar saldo:", error);
     }

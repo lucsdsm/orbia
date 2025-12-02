@@ -262,8 +262,136 @@ export function ItensProvider({ children }) {
     carregarItens(userId);
   };
 
+  // Adicionar item (salva no Supabase se estiver online e autenticado)
+  const adicionarItem = async (item) => {
+    try {
+      const itemComId = {
+        ...item,
+        id: item.id || Date.now().toString(),
+      };
+
+      // Se estiver online e autenticado, salva no Supabase
+      if (userId && isOnline) {
+        const { data, error } = await supabase
+          .from('itens')
+          .insert([{
+            nome: item.descricao || item.nome,
+            valor: parseFloat(item.valor) || 0,
+            natureza: item.natureza,
+            tipo: item.tipo,
+            categoria: item.emoji || item.categoria || null,
+            cartao_id: item.cartao || item.cartaoId || null,
+            parcelas: item.parcelas || null,
+            mes_primeira_parcela: item.mesPrimeiraParcela || null,
+            ano_primeira_parcela: item.anoPrimeiraParcela || null,
+            user_id: userId,
+          }])
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        // Atualiza com o ID do Supabase
+        itemComId.id = data.id;
+      }
+
+      // Atualiza cache local
+      const novosItens = [itemComId, ...itens];
+      setItens(novosItens);
+      await AsyncStorage.setItem("itens", JSON.stringify(novosItens));
+
+      // Recarrega para sincronizar
+      if (userId && isOnline) {
+        await sincronizarComNuvem(userId);
+      }
+
+      return { success: true };
+    } catch (error) {
+      console.error('Erro ao adicionar item:', error);
+      return { success: false, error };
+    }
+  };
+
+  // Editar item (atualiza no Supabase se estiver online e autenticado)
+  const editarItem = async (id, itemAtualizado) => {
+    try {
+      // Se estiver online e autenticado, atualiza no Supabase
+      if (userId && isOnline) {
+        const { error } = await supabase
+          .from('itens')
+          .update({
+            nome: itemAtualizado.descricao || itemAtualizado.nome,
+            valor: parseFloat(itemAtualizado.valor) || 0,
+            natureza: itemAtualizado.natureza,
+            tipo: itemAtualizado.tipo,
+            categoria: itemAtualizado.emoji || itemAtualizado.categoria || null,
+            cartao_id: itemAtualizado.cartao || itemAtualizado.cartaoId || null,
+            parcelas: itemAtualizado.parcelas || null,
+            mes_primeira_parcela: itemAtualizado.mesPrimeiraParcela || null,
+            ano_primeira_parcela: itemAtualizado.anoPrimeiraParcela || null,
+          })
+          .eq('id', id)
+          .eq('user_id', userId);
+
+        if (error) throw error;
+      }
+
+      // Atualiza cache local
+      const itensAtualizados = itens.map(item => 
+        item.id === id ? { ...item, ...itemAtualizado } : item
+      );
+      setItens(itensAtualizados);
+      await AsyncStorage.setItem("itens", JSON.stringify(itensAtualizados));
+
+      // Recarrega para sincronizar
+      if (userId && isOnline) {
+        await sincronizarComNuvem(userId);
+      }
+
+      return { success: true };
+    } catch (error) {
+      console.error('Erro ao editar item:', error);
+      return { success: false, error };
+    }
+  };
+
+  // Deletar item (remove do Supabase se estiver online e autenticado)
+  const deletarItem = async (id) => {
+    try {
+      // Se estiver online e autenticado, deleta do Supabase
+      if (userId && isOnline) {
+        const { error } = await supabase
+          .from('itens')
+          .delete()
+          .eq('id', id)
+          .eq('user_id', userId);
+
+        if (error) throw error;
+      }
+
+      // Atualiza cache local
+      const itensFiltrados = itens.filter(item => item.id !== id);
+      setItens(itensFiltrados);
+      await AsyncStorage.setItem("itens", JSON.stringify(itensFiltrados));
+
+      return { success: true };
+    } catch (error) {
+      console.error('Erro ao deletar item:', error);
+      return { success: false, error };
+    }
+  };
+
   return (
-    <ItensContext.Provider value={{ itens, loading, recarregarItens, isOnline, userId }}>
+    <ItensContext.Provider value={{ 
+      itens, 
+      loading, 
+      recarregarItens, 
+      isOnline, 
+      userId,
+      adicionarItem,
+      editarItem,
+      deletarItem,
+    }}>
       {children}
     </ItensContext.Provider>
   );

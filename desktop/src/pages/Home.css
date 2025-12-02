@@ -1,0 +1,179 @@
+.home-container {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.home-header {
+  margin-bottom: 2rem;
+}
+
+.home-header h1 {
+  font-size: 2rem;
+  color: #e5e7eb;
+  margin-bottom: 0.5rem;
+}
+
+.home-header p {
+  color: #9ca3af;
+  font-size: 1.125rem;
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.info-card {
+  background: #0a0a0a;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  cursor: pointer;
+}
+
+.info-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+  border-color: #820AD1;
+}
+
+.card-header {
+  background: #820AD1;
+  padding: 1.25rem;
+}
+
+.card-header h2 {
+  color: white;
+  font-size: 1.25rem;
+  margin: 0;
+}
+
+.card-content {
+  padding: 1.5rem;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+}
+
+.balance-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #2a2a2a;
+}
+
+.balance-item:last-child {
+  border-bottom: none;
+}
+
+.balance-item.total {
+  margin-top: 0.5rem;
+  padding-top: 1rem;
+  border-top: 2px solid #2a2a2a;
+}
+
+.balance-item .label {
+  font-weight: 600;
+  color: #9ca3af;
+}
+
+.balance-item .value {
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.balance-item .value.receita {
+  color: #10b981;
+}
+
+.balance-item .value.despesa {
+  color: #ef4444;
+}
+
+.balance-item .value.positive {
+  color: #10b981;
+}
+
+.balance-item .value.negative {
+  color: #ef4444;
+}
+
+.superavit-display {
+  text-align: center;
+  padding: 1rem 0;
+}
+
+.saldo-display {
+  text-align: center;
+  padding: 1rem 0;
+}
+
+.saldo-value {
+  display: block;
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: #e5e7eb;
+}
+
+.saldo-value.positive {
+  color: #10b981;
+}
+
+.saldo-value.negative {
+  color: #ef4444;
+}
+
+.saldo-desc {
+  color: #6b7280;
+  font-size: 1rem;
+  margin: 0;
+}
+
+.superavit-value {
+  display: block;
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.superavit-value.positive {
+  color: #10b981;
+}
+
+.superavit-value.negative {
+  color: #ef4444;
+}
+
+.superavit-desc {
+  color: #6b7280;
+  font-size: 1rem;
+  margin: 0;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #2a2a2a;
+}
+
+.summary-item:last-child {
+  border-bottom: none;
+}
+
+.summary-label {
+  color: #9ca3af;
+  font-size: 0.875rem;
+}
+
+.summary-value {
+  font-weight: 600;
+  color: #e5e7eb;
+  font-size: 1.125rem;
+}

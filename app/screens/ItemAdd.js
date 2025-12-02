@@ -3,16 +3,17 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-nativ
 import { Feather } from "@expo/vector-icons";
 import { useTheme } from "../contexts/ThemeContext";
 import { useCartoes } from "../contexts/CartoesContext";
+import { useItens } from "../contexts/ItensContext";
 
 import Toast from "react-native-toast-message";
 import CustomPicker from "../components/CustomPicker";
 
-import { StorageService } from "../services/storage";
 import { MONTHS } from "../constants";
 
 export default function ItemAdd({ route, navigation }) {
   const { colors } = useTheme();
   const { cartoes } = useCartoes();
+  const { adicionarItem } = useItens();
   const { natureza } = route.params; 
 
   const [descricao, setDescricao] = useState("");
@@ -64,18 +65,22 @@ export default function ItemAdd({ route, navigation }) {
         parcelas: parseInt(parcelas) || 0,
       };
 
-      await StorageService.saveItem(novoItem);
+      const resultado = await adicionarItem(novoItem);
 
-      Toast.show({
-        type: "success",
-        text1: "Item salvo com sucesso!",
-        position: "top",
-        visibilityTime: 3000,
-      });
+      if (resultado.success) {
+        Toast.show({
+          type: "success",
+          text1: "Item salvo com sucesso!",
+          position: "top",
+          visibilityTime: 3000,
+        });
 
-      setTimeout(() => {
-        navigation.goBack();
-      }, 300);
+        setTimeout(() => {
+          navigation.goBack();
+        }, 300);
+      } else {
+        throw new Error('Erro ao salvar item');
+      }
     }
     catch (error) {
       Toast.show({

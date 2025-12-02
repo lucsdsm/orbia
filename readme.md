@@ -72,35 +72,10 @@ npx expo start
 - **Totais por cartão**: Soma de parcelas restantes agrupadas por cartão
 - **Totais por mês**: Soma de itens agrupados por período com parcelas ativas
 
-## 📝 Notas de Versão
-
-### v1.0.3 (Atual)
-- 
-
-### v1.0.2 
-- ✨Widget de notificação com resumo financeiro
-
-### v1.0.1
-- ✨ Sistema completo de gerenciamento de cartões personalizados
-- ✨ Barras de progresso de utilização de limite
-- ✨ Dropdown customizado substituindo picker nativo
-- ✨ Cálculo inteligente de parcelas restantes
-- 🐛 Correção de bugs na exibição de etiquetas de cartão
-- 🎨 Melhorias visuais e de UX
-
-### v1.0.0
-- 🎉 Lançamento inicial do Orbia
-- ✅ Gestão de receitas e despesas
-- ✅ Suporte a despesas parceladas
-- ✅ Temas claro e escuro
-- ✅ Backup e restauração de dados
-
----
-
 <br>
 <p align="center">
   Desenvolvido por <strong>lucsdsm</strong> <br>
-  Versão: <strong>1.0.3</strong> 
+  Versão: <strong>1.0.4</strong> 
 </p>
 
 

@@ -10,6 +10,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { ItensProvider, useItens } from "./contexts/ItensContext";
 import { CartoesProvider } from "./contexts/CartoesContext";
+import { SaldoProvider } from "./contexts/SaldoContext";
 
 import Toast from "react-native-toast-message";
 
@@ -74,11 +75,13 @@ export default function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <CartoesProvider>
-          <ItensProvider>
-            <AppContent />
-          </ItensProvider>
-        </CartoesProvider>
+        <SaldoProvider>
+          <CartoesProvider>
+            <ItensProvider>
+              <AppContent />
+            </ItensProvider>
+          </CartoesProvider>
+        </SaldoProvider>
       </AuthProvider>
     </ThemeProvider>
   );

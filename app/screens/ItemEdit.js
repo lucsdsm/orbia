@@ -37,7 +37,7 @@ export default function ItemEdit({ route, navigation }) {
       return;
     }
 
-    if (tipo === "parcelada" && (!cartao || !mesPrimeiraParcela || !anoPrimeiraParcela || !parcelas)) {
+    if (tipo === "parcelada" && (!mesPrimeiraParcela || !anoPrimeiraParcela || !parcelas)) {
       Toast.show({
         type: "error",
         text1: "Campos obrigatórios!",
@@ -176,18 +176,23 @@ export default function ItemEdit({ route, navigation }) {
           onSubmitEditing={valorSubmit}
         />
 
-        {tipo === "parcelada" && (
-          <>
-            <CustomPicker
-              options={cartoes.map(c => ({
+        {item.natureza === "despesa" && cartoes.length > 0 && (
+          <CustomPicker
+            options={[
+              { label: "Nenhum cartão", value: "" },
+              ...cartoes.map(c => ({
                 label: `${c.emoji} ${c.nome}`,
                 value: c.id
-              }))}
-              selectedValue={cartao}
-              onValueChange={(itemValue) => setCartao(itemValue)}
-              placeholder="Selecione um cartão"
-            />
+              }))
+            ]}
+            selectedValue={cartao}
+            onValueChange={(itemValue) => setCartao(itemValue)}
+            placeholder="Cartão (opcional)"
+          />
+        )}
 
+        {tipo === "parcelada" && (
+          <>
             {item.natureza === "despesa" && (
               <>
                 <CustomPicker

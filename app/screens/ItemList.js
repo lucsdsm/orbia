@@ -1,5 +1,5 @@
 import React, { useMemo, useCallback, useEffect } from "react";
-import { View, Text, FlatList, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Dimensions } from "react-native";
 
 import { useTheme } from "../contexts/ThemeContext";
 import { useItens } from "../contexts/ItensContext";
@@ -7,6 +7,10 @@ import { useCartoes } from "../contexts/CartoesContext";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import Toast from "react-native-toast-message";
 import { MaterialIcons } from "@expo/vector-icons";
+
+const { width } = Dimensions.get('window');
+const numColumns = 2;
+const itemWidth = (width - 60 - 10) / numColumns; // padding + gap
 
 import ParcelProgress from "../components/ParcelProgress";
 
@@ -72,54 +76,57 @@ const ItemList = React.memo(() => {
     return (
       <TouchableOpacity
         activeOpacity={0.8}
-        style={[styles.item, { backgroundColor: colors.card, borderLeftColor: item.natureza === "receita" ? "#4CAF50" : "#F44336" }]}
+        style={[
+          styles.item, 
+          { 
+            backgroundColor: colors.card, 
+            borderTopColor: item.natureza === "receita" ? "#4CAF50" : "#F44336",
+            width: itemWidth,
+          }
+        ]}
         onPress={() => navigation.navigate("ItemEdit", {
-        item,
-        onEdit: async (itemEditado) => {
-          await StorageService.updateItem(itemEditado.id, itemEditado);
-          await recarregarItens();
-        }
-      })}>
-      <View style={{ flex: 1 }}>
-        {/* emoji */}
-        <Text style={[styles.descricao, { color: colors.text }]}>{item.categoria || item.emoji} {item.nome || item.descricao}</Text>
+          item,
+          onEdit: async (itemEditado) => {
+            await StorageService.updateItem(itemEditado.id, itemEditado);
+            await recarregarItens();
+          }
+        })}>
+        <View style={styles.itemContent}>
+          {/* Emoji e Cartão no topo */}
+          <View style={styles.topRow}>
+            <Text style={[styles.emoji, { fontSize: 28 }]}>
+              {item.categoria || item.emoji || (item.natureza === "receita" ? "💰" : "💸")}
+            </Text>
+            {cartaoData && (
+              <View style={[styles.cartaoTag, { backgroundColor: cartaoData.cor || cartaoData.color || "gray" }]}>
+                <Text style={styles.cartaoEmoji}>{cartaoData.emoji || "💳"}</Text>
+              </View>
+            )}
+          </View>
 
-        <View style={styles.valorRow}>
+          {/* Descrição */}
+          <Text style={[styles.descricao, { color: colors.text }]} numberOfLines={2}>
+            {item.nome || item.descricao}
+          </Text>
 
-          {/* cartão */}
-          {cartaoData && (
-            <View style={{
-              backgroundColor: cartaoData.cor || cartaoData.color || "gray",
-              paddingHorizontal: 8,
-              paddingVertical: 4,
-              borderRadius: 15,
-              marginLeft: 8,
-            }}>
-              <Text style={{ color: "#FFFFFF", fontSize: 11, fontWeight: "600" }}>
-                {cartaoData.emoji || "💳"}
-              </Text>
-            </View>
-          )}
-
-          <Text style={[styles.valor, { color: colors.text }]}>
+          {/* Valor */}
+          <Text style={[styles.valor, { color: item.natureza === "receita" ? "#4CAF50" : "#F44336" }]}>
             {item.natureza === "receita" ? "+" : "-"} R$ {item.valor.toFixed(2)}
           </Text>
 
-          {item.natureza === "despesa" && item.tipo === "fixa" && (
-            <Text style={styles.emoji}>📌</Text>
-          )}
-
-          {item.natureza === "despesa" && item.tipo === "parcelada" && (item.mesPrimeiraParcela || item.mes_primeira_parcela) && (item.anoPrimeiraParcela || item.ano_primeira_parcela) && item.parcelas && (
-            <ParcelProgress
-              mesPrimeiraParcela={item.mesPrimeiraParcela || item.mes_primeira_parcela}
-              anoPrimeiraParcela={item.anoPrimeiraParcela || item.ano_primeira_parcela}
-              totalParcelas={item.parcelas}
-              cor={colors.text}
-            />
-          )}
+          {/* Indicadores */}
+          <View style={styles.indicators}>
+            {item.natureza === "despesa" && item.tipo === "fixa" && (
+              <Text style={styles.indicatorEmoji}>📌</Text>
+            )}
+            {item.natureza === "despesa" && item.tipo === "parcelada" && item.parcelas && (
+              <Text style={[styles.parcelaText, { color: colors.textSecondary }]}>
+                {item.parcelas}x
+              </Text>
+            )}
+          </View>
         </View>
-      </View>
-    </TouchableOpacity>
+      </TouchableOpacity>
     );
   }, [colors, navigation, recarregarItens, cartoes]);
 
@@ -138,7 +145,9 @@ const ItemList = React.memo(() => {
             data={itensOrdenados}
             keyExtractor={keyExtractor}
             renderItem={renderItem}
+            numColumns={numColumns}
             contentContainerStyle={styles.listContent}
+            columnWrapperStyle={styles.columnWrapper}
             initialNumToRender={10}
             maxToRenderPerBatch={10}
             windowSize={5}
@@ -155,43 +164,69 @@ export default ItemList;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    
   },
   listContent: {
     padding: 20,
-    paddingLeft: 30,
-    paddingRight: 30,
-    
+    paddingBottom: 40,
+  },
+  columnWrapper: {
+    justifyContent: 'space-between',
+    marginBottom: 10,
   },
   item: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    height: 80,
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 10,
-    borderLeftWidth: 5,
+    borderRadius: 12,
+    borderTopWidth: 4,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 3,
     elevation: 2,
+    aspectRatio: 1, // Mantém formato quadrado
+  },
+  itemContent: {
+    flex: 1,
+    padding: 12,
+    justifyContent: 'space-between',
+  },
+  topRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  emoji: {
+    fontSize: 28,
+  },
+  cartaoTag: {
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+    borderRadius: 10,
+  },
+  cartaoEmoji: {
+    fontSize: 14,
   },
   descricao: {
-    fontWeight: "bold",
-  },
-  valorRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginTop: 7,
+    fontWeight: "600",
+    fontSize: 13,
+    marginTop: 8,
+    lineHeight: 18,
   },
   valor: {
     fontWeight: "bold",
+    fontSize: 16,
+    marginTop: 4,
   },
-  emoji: {
+  indicators: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 6,
+  },
+  indicatorEmoji: {
     fontSize: 14,
+  },
+  parcelaText: {
+    fontSize: 11,
+    fontWeight: '600',
   },
   vazioContainer: {
     flex: 1,

@@ -30,9 +30,17 @@ export const StorageService = {
     return data ? JSON.parse(data) : [];
   },
 
+  async getCartoes() {
+    return this.getCards();
+  },
+
   async saveCard(card) {
     const cards = await this.getCards();
     await AsyncStorage.setItem("cartoes", JSON.stringify([...cards, card]));
+  },
+
+  async saveCartoes(cartoes) {
+    await AsyncStorage.setItem("cartoes", JSON.stringify(cartoes));
   },
 
   async updateCard(id, updatedCard) {

@@ -39,7 +39,7 @@ export default function ItemAdd({ route, navigation }) {
     }
 
     if (natureza === "despesa" && tipo === "parcelada") {
-      if (!mesPrimeiraParcela || !anoPrimeiraParcela || !parcelas || !cartao) {
+      if (!mesPrimeiraParcela || !anoPrimeiraParcela || !parcelas) {
         Toast.show({
           type: "error",
           text1: "Campos obrigatórios!",
@@ -178,16 +178,29 @@ export default function ItemAdd({ route, navigation }) {
           onSubmitEditing={valorSubmit}
         />
 
-        {tipo === "parcelada" && (
+        {natureza === "despesa" && cartoes.length > 0 && (
           <CustomPicker
-            options={cartoes.map(c => ({
-              label: `${c.emoji} ${c.nome}`,
-              value: c.id
-            }))}
+            options={[
+              { label: "Nenhum cartão", value: "" },
+              ...cartoes.map(c => ({
+                label: `${c.emoji} ${c.nome}`,
+                value: c.id
+              }))
+            ]}
             selectedValue={cartao}
             onValueChange={(itemValue) => setCartao(itemValue)}
-            placeholder="Selecione um cartão (*)"
+            placeholder="Cartão (opcional)"
           />
+        )}
+
+        {tipo === "parcelada" && (
+          <>
+            {cartoes.length === 0 && (
+              <Text style={[styles.warningText, { color: "#FF9800" }]}>
+                Adicione um cartão para criar despesas parceladas
+              </Text>
+            )}
+          </>
         )}
 
         {natureza === "despesa" && tipo === "parcelada" && (
@@ -287,5 +300,12 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 13,
     fontWeight: '600',
+  },
+  warningText: {
+    fontSize: 13,
+    fontWeight: '500',
+    marginHorizontal: 20,
+    marginBottom: 10,
+    textAlign: 'center',
   },
 });

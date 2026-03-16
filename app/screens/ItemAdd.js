@@ -14,19 +14,19 @@ export default function ItemAdd({ route, navigation }) {
   const { colors } = useTheme();
   const { cartoes } = useCartoes();
   const { adicionarItem } = useItens();
-  const { natureza } = route.params; 
+  const { natureza } = route.params;
 
   const [descricao, setDescricao] = useState("");
   const [emoji, setEmoji] = useState("");
   const [valor, setValor] = useState("");
   const [tipo, setTipo] = useState("fixa");
-  const [cartao, setCartao] = useState(""); 
+  const [cartao, setCartao] = useState("");
 
-  const [mesPrimeiraParcela, setMesPrimeiraParcela] = useState(""); 
-  const [anoPrimeiraParcela, setAnoPrimeiraParcela] = useState(""); 
+  const [mesPrimeiraParcela, setMesPrimeiraParcela] = useState("");
+  const [anoPrimeiraParcela, setAnoPrimeiraParcela] = useState("");
   const [parcelas, setParcelas] = useState("");
-  
-  const handleSalvar = async () => { 
+
+  const handleSalvar = async () => {
     if (!descricao || !valor) {
       Toast.show({
         type: "error",
@@ -107,11 +107,11 @@ export default function ItemAdd({ route, navigation }) {
     setValor(valorNumerico.toFixed(2));
   };
 
-  // gera anos (atual até 3 anos no futuro)
+  // gera anos (ano anterior, atual e até 1 ano no futuro)
   const anoAtual = new Date().getFullYear();
   const anos = Array.from({ length: 3 }, (_, i) => ({
-    label: (anoAtual + i).toString(),
-    value: anoAtual + i
+    label: (anoAtual - 1 + i).toString(),
+    value: anoAtual - 1 + i
   }));
 
   return (
@@ -155,10 +155,10 @@ export default function ItemAdd({ route, navigation }) {
                 });
                 return;
               }
-              
+
               setTipo(itemValue);
               if (itemValue === "parcelada" && cartoes.length > 0) {
-                setCartao(""); 
+                setCartao("");
               } else {
                 setCartao("");
               }

@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     minHeight: 70,
     padding: 15,
-    borderRadius: 10,
+    borderRadius: 5,
     marginBottom: 10,
     borderLeftWidth: 5,
     borderLeftColor: "#F44336",

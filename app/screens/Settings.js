@@ -99,7 +99,7 @@ const Settings = React.memo(() => {
                 saldo: saldo ? parseFloat(saldo) : 0,
                 cartoes: cartoes ? JSON.parse(cartoes) : [],
                 exportadoEm: new Date().toISOString(),
-                versao: "1.0.4",
+                versao: "1.0.5",
             };
 
             const jsonString = JSON.stringify(dados, null, 2);
@@ -348,7 +348,7 @@ const Settings = React.memo(() => {
 
                 <View style={styles.info}>
                     <Text style={[styles.infoText, { color: colors.text, opacity: 0.6 }]}>
-                        Orbia v1.0.4
+                        Orbia v1.0.5
                     </Text>
                     <Text style={[styles.infoText, { color: colors.text, opacity: 0.6 }]}>
                         by lucsdsm

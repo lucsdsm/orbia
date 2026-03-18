@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   item: {
-    borderRadius: 12,
+    borderRadius: 5,
     borderTopWidth: 4,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },

@@ -42,11 +42,11 @@ export function ThemeProvider({ children }) {
     const theme = {
         isDark,
         colors: {
-            background: isDark ? "#121212" : "#ffffffff",
+            background: isDark ? "#000000" : "#ffffffff",
             text: isDark ? "#ffffff" : "#000000",
-            secondBackground: isDark ? "#474747ff" : "#f0f0f0",
+            secondBackground: isDark ? "rgb(20, 20, 20)" : "#f0f0f0",
             secondText: isDark ? "#444444ff" : "#bbbbbbff",
-            card: isDark ? "#1e1e1e" : "#ffffff",
+            card: isDark ? "#111111" : "#ffffff",
             textSecondary: isDark ? "#999999" : "#666666",
             border: isDark ? "#333333" : "#dddddd",
             primary: isDark ? "#820AD1" : "#820AD1",

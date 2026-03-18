@@ -1,15 +1,22 @@
-import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, Dimensions, TouchableOpacity, ScrollView } from 'react-native';
+import React, { useState, useMemo, useCallback, useRef } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Dimensions,
+  TouchableOpacity,
+  ScrollView,
+} from 'react-native';
 import { PieChart, BarChart } from 'react-native-chart-kit';
 import { useTheme } from '../contexts/ThemeContext';
 import { useItens } from '../contexts/ItensContext';
 import { useCartoes } from '../contexts/CartoesContext';
 import { useFocusEffect } from '@react-navigation/native';
-import { MaterialIcons } from '@expo/vector-icons';
-import { calcularGastoItem } from '../utils/calculations';
 
 const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
+
+const radius = 6;
 
 const Charts = React.memo(() => {
   const { colors } = useTheme();
@@ -24,326 +31,271 @@ const Charts = React.memo(() => {
     }, [recarregarItens])
   );
 
-  // Animação removida para evitar piscar durante o scroll horizontal
-
-  // Calcula receitas e despesas totais
   const { totalReceitas, totalDespesas } = useMemo(() => {
     let receitas = 0;
     let despesas = 0;
-
     if (Array.isArray(itens)) {
       itens.forEach((item) => {
         const valor = Number(item.valor) || 0;
-        if (item.natureza === 'receita') {
-          receitas += valor;
-        } else if (item.natureza === 'despesa') {
-          despesas += valor;
-        }
+        if (item.natureza === 'receita') receitas += valor;
+        else if (item.natureza === 'despesa') despesas += valor;
       });
     }
-
     return { totalReceitas: receitas, totalDespesas: despesas };
   }, [itens]);
 
-  // Dimensões do donut minimalista
-  const pieWidth = screenWidth - 40;
-  const pieHeight = 220;
+  const saldo = totalReceitas - totalDespesas;
+  const pctGasto = totalReceitas > 0
+    ? Math.min(Math.round((totalDespesas / totalReceitas) * 1000) / 10, 100)
+    : 0;
+  const pctDisponivel = Math.max(Math.round((100 - pctGasto) * 10) / 10, 0);
+
+  const pieWidth = screenWidth - 48;
+  const pieHeight = 200;
   const pieDiameter = Math.min(pieWidth, pieHeight);
-  const innerRadius = Math.round(pieDiameter * 0.6); // 60% = buraco grande, apenas bordas visíveis
-  // Calcula padding dinâmico para centralizar o gráfico em qualquer tela
-  const dynamicPaddingLeft = Math.round((pieWidth - pieDiameter) / 2) + 15.5;
+  const innerRadius = Math.round(pieDiameter * 0.62);
+  const dynamicPaddingLeft = Math.round((pieWidth - pieDiameter) / 2) + 9.0;
 
-  // Dados do gráfico de pizza (Receitas vs Despesas)
-  const pieChartData = useMemo(() => {
-    const total = totalReceitas || 1; // Evita divisão por zero
+  const PIE_INCOME = colors.text;           // cor para "disponível"
+  const PIE_EXPENSE = colors.text + '30';   // mesma cor mas com opacidade
 
-    // Arredondar os valores o gráfico ficar mais legível
-    const percentualGasto = Math.round((totalDespesas / total) * 1000) / 10;
-    const percentualRestante = Math.max(0, Math.round((100 - percentualGasto) * 10) / 10);
+  const pieChartData = useMemo(() => [
+    {
+      name: 'Disponível',
+      population: Math.max(pctDisponivel, 0),
+      color: PIE_INCOME,
+      legendFontColor: colors.text,
+      legendFontSize: 12,
+    },
+    {
+      name: 'Gasto',
+      population: Math.min(pctGasto, 100),
+      color: PIE_EXPENSE,
+      legendFontColor: colors.text,
+      legendFontSize: 12,
+    },
+  ], [pctDisponivel, pctGasto, colors.text]);
 
-    return [
-      {
-        name: 'Disponível',
-        population: Math.max(percentualRestante, 0),
-        color: '#4CAF50',
-        legendFontColor: colors.text,
-        legendFontSize: 12,
-      },
-      {
-        name: 'Gasto',
-        population: Math.min(percentualGasto, 100),
-        color: '#F44336',
-        legendFontColor: colors.text,
-        legendFontSize: 12,
-      },
-    ];
-  }, [totalReceitas, totalDespesas, colors.text]);
-
-  // Dados do gráfico de barras (Evolução mensal de parcelas)
   const barChartData = useMemo(() => {
     const hoje = new Date();
     const anoAtual = hoje.getFullYear();
     const mesAtual = hoje.getMonth() + 1;
 
-    // Gera próximos 6 meses
     const meses = [];
     for (let i = 0; i < 6; i++) {
       let mes = mesAtual + i;
       let ano = anoAtual;
-      
-      if (mes > 12) {
-        mes = mes - 12;
-        ano = ano + 1;
-      }
-      
+      if (mes > 12) { mes -= 12; ano += 1; }
       meses.push({ mes, ano });
     }
 
-    // Calcula total de parcelas por mês
     const totaisPorMes = meses.map(({ mes, ano }) => {
       let total = 0;
-      
       itens
-        .filter(item => item.tipo === 'parcelada' && item.natureza === 'despesa')
-        .forEach(item => {
-          const mesPrimeiraParcela = item.mesPrimeiraParcela || item.mes_primeira_parcela;
-          const anoPrimeiraParcela = item.anoPrimeiraParcela || item.ano_primeira_parcela;
-          
-          if (!mesPrimeiraParcela || !anoPrimeiraParcela || !item.parcelas) return;
-          
-          // Verifica se este mês/ano está no intervalo de parcelas
-          const mesInicio = mesPrimeiraParcela;
-          const anoInicio = anoPrimeiraParcela;
-          
-          const dataInicio = new Date(anoInicio, mesInicio - 1, 1);
-          const dataFim = new Date(anoInicio, mesInicio - 1 + item.parcelas, 0);
-          const dataVerificar = new Date(ano, mes - 1, 1);
-          
-          if (dataVerificar >= dataInicio && dataVerificar <= dataFim) {
+        .filter((item) => item.tipo === 'parcelada' && item.natureza === 'despesa')
+        .forEach((item) => {
+          const mesI = item.mesPrimeiraParcela || item.mes_primeira_parcela;
+          const anoI = item.anoPrimeiraParcela || item.ano_primeira_parcela;
+          if (!mesI || !anoI || !item.parcelas) return;
+          const dataInicio = new Date(anoI, mesI - 1, 1);
+          const dataFim = new Date(anoI, mesI - 1 + item.parcelas, 0);
+          const dataCheck = new Date(ano, mes - 1, 1);
+          if (dataCheck >= dataInicio && dataCheck <= dataFim)
             total += parseFloat(item.valor) || 0;
-          }
         });
-      
       return total;
     });
 
-    const labels = meses.map(({ mes }) => {
-      const nomesMeses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-      return nomesMeses[mes - 1];
-    });
-
+    const nomesMeses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
     return {
-      labels,
-      datasets: [
-        {
-          data: totaisPorMes.map(v => Math.round(Math.max(v, 0) * 100) / 100),
-        },
-      ],
+      labels: meses.map(({ mes }) => nomesMeses[mes - 1]),
+      datasets: [{ data: totaisPorMes.map((v) => Math.round(Math.max(v, 0) * 100) / 100) }],
     };
   }, [itens]);
 
-  const charts = [
-    {
-      id: 0,
-      title: 'Receitas vs Despesas',
-      icon: 'pie-chart',
-    },
-    {
-      id: 1,
-      title: 'Evolução Mensal',
-      icon: 'bar-chart',
-    },
-  ];
-
-  const chartConfig = {
-    backgroundColor: colors.background,
-    backgroundGradientFrom: colors.card,
-    backgroundGradientTo: colors.card,
-    color: (opacity = 1) => `rgba(130, 10, 209, ${opacity})`,
-    labelColor: (opacity = 1) => colors.text,
-    barPercentage: 0.7,
-    decimalPlaces: 0,
-    propsForLabels: {
-      fontSize: 12,
-    },
-  };
-
-  // Config minimalista para barras (roxa vibrante, sem linhas horizontais)
-  const barChartConfig = {
-    backgroundColor: colors.background,
+  const pieConfig = {
+    backgroundColor: 'transparent',
     backgroundGradientFrom: colors.background,
     backgroundGradientTo: colors.background,
-    color: (opacity = 1) => `rgba(138, 43, 226, ${opacity})`, // Roxo vibrante (BlueViolet)
-    labelColor: (opacity = 1) => colors.text,
-    barPercentage: 0.6,
+    color: (opacity = 1) => colors.text,
+    labelColor: () => colors.text,
     decimalPlaces: 0,
-    // Estilo dos valores ACIMA das barras (R$ 150, R$ 200, etc.)
-    propsForLabels: {
-      fontSize: 15,
-      fontWeight: 'bold',
-      fill: '#8A2BE2', // Roxo vibrante para destacar
-    },
-    propsForBackgroundLines: {
-      strokeWidth: 0, // Remove linhas horizontais
-    },
-    fillShadowGradient: '#8A2BE2', // Roxo vibrante
+  };
+
+  const barConfig = {
+    backgroundColor: 'transparent',
+    backgroundGradientFrom: colors.background,
+    backgroundGradientTo: colors.background,
+    color: (opacity = 1) => `${colors.text}${Math.round(opacity * 255).toString(16).padStart(2, '0')}`,
+    labelColor: () => colors.text,
+    barPercentage: 0.45,
+    decimalPlaces: 0,
+    propsForLabels: { fontSize: 11, fontWeight: '500' },
+    propsForBackgroundLines: { strokeWidth: 0 },
+    fillShadowGradient: colors.text,
     fillShadowGradientOpacity: 1,
-    barRadius: 8, // Cantos arredondados no topo
-    // Estilo dos rótulos ABAIXO das barras (Jan, Fev, Mar, etc.)
-    propsForVerticalLabels: {
-      fontSize: 11,
-      fontWeight: 'normal',
-      fill: colors.text, // Cor do tema
-    },
+    propsForVerticalLabels: { fontSize: 12, fontWeight: '400', fill: colors.text },
+    barRadius: radius,
   };
 
-  // Função para detectar mudança de página no scroll
-  const handleScrollEnd = (event) => {
-    const scrollPosition = event.nativeEvent.contentOffset.x;
-    const pageWidth = screenWidth;
-    const currentPage = Math.round(scrollPosition / pageWidth);
-    if (currentPage !== activeChart) {
-      setActiveChart(currentPage);
-    }
+  const handleScrollEnd = (e) => {
+    const page = Math.round(e.nativeEvent.contentOffset.x / screenWidth);
+    if (page !== activeChart) setActiveChart(page);
   };
 
-  // Função para trocar gráfico via botões (com scroll automático)
-  const handleChartChange = (chartIndex) => {
-    setActiveChart(chartIndex);
-    scrollViewRef.current?.scrollTo({
-      x: chartIndex * screenWidth,
-      animated: true,
-    });
+  const handleChartChange = (index) => {
+    setActiveChart(index);
+    scrollViewRef.current?.scrollTo({ x: index * screenWidth, animated: true });
   };
+
+  const tabs = [
+    { id: 0, label: 'Receitas vs Despesas' },
+    { id: 1, label: 'Evolução Mensal' },
+  ];
+
+  const formatCurrency = (value) =>
+    value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      {/* Navegação de gráficos */}
-      <View style={[styles.navigation, { backgroundColor: colors.background }]}>
-        {charts.map((chart) => (
-          <TouchableOpacity
-            key={chart.id}
-            style={[
-              styles.navButton,
-              activeChart === chart.id && { borderBottomColor: '#820AD1', borderBottomWidth: 3 },
-            ]}
-            onPress={() => handleChartChange(chart.id)}
-            activeOpacity={0.7}
-          >
-            <MaterialIcons
-              name={chart.icon}
-              size={24}
-              color={activeChart === chart.id ? '#820AD1' : colors.text}
-            />
-            <Text
-              style={[
-                styles.navButtonText,
-                {
-                  color: activeChart === chart.id ? '#820AD1' : colors.text,
-                  fontWeight: activeChart === chart.id ? 'bold' : 'normal',
-                },
-              ]}
+
+      <View style={[styles.tabBar, { borderBottomColor: colors.text + '15' }]}>
+        {tabs.map((tab) => {
+          const active = activeChart === tab.id;
+          return (
+            <TouchableOpacity
+              key={tab.id}
+              style={styles.tab}
+              onPress={() => handleChartChange(tab.id)}
+              activeOpacity={0.6}
             >
-              {chart.title}
-            </Text>
-          </TouchableOpacity>
-        ))}
+              <Text style={[styles.tabText, { color: active ? colors.text : colors.text + '45' }]}>
+                {tab.label}
+              </Text>
+              {active && (
+                <View style={[styles.tabIndicator, { backgroundColor: colors.text }]} />
+              )}
+            </TouchableOpacity>
+          );
+        })}
       </View>
 
-      {/* Gráfico ativo */}
       <ScrollView
         ref={scrollViewRef}
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
         onMomentumScrollEnd={handleScrollEnd}
-        contentContainerStyle={[styles.content, { justifyContent: 'center'}]}
+        contentContainerStyle={styles.scrollContent}
       >
-        {/* Página 1: Gráfico de Pizza */}
-        <View style={{ width: screenWidth, alignItems: 'center', justifyContent: 'center' }}>
-          <View style={[styles.chartContainer]}>
-            <Text style={[styles.chartTitle, { color: colors.text }]}>Proporção de Receitas e Despesas</Text>
-            <Text style={[styles.chartSubtitle, { color: colors.text }]}>Receitas: R$ {totalReceitas.toFixed(2)} | Despesas: R$ {totalDespesas.toFixed(2)}</Text>
 
-            {/* Área ampla (largura da tela - padding) para o PieChart, com overflow oculto para mostrar só o centro circular */}
-            <View style={{ width: pieWidth, height: pieHeight, alignItems: 'center', justifyContent: 'center', overflow: 'hidden', position: 'relative' }}>
-              {/* PieChart usa a largura total disponível (pieWidth) para evitar corte à esquerda */}
+        {/* donut */}
+        <View style={[styles.page, { width: screenWidth }]}>
+          {/* totais em cards simples */}
+          <View style={styles.statsRow}>
+            <StatCard
+              label="Receitas"
+              value={formatCurrency(totalReceitas)}
+              accent={colors.text}
+              colors={colors}
+            />
+            <View style={[styles.statDivider, { backgroundColor: colors.text + '15' }]} />
+            <StatCard
+              label="Despesas"
+              value={formatCurrency(totalDespesas)}
+              accent={colors.text + '70'}
+              colors={colors}
+            />
+          </View>
+
+          {/* donut */}
+          <View style={styles.donutWrapper}>
+            <View style={{ width: pieWidth, height: pieHeight, overflow: 'hidden', position: 'relative', alignItems: 'center', justifyContent: 'center' }}>
               <PieChart
                 data={pieChartData}
                 width={pieWidth}
                 height={pieHeight}
-                chartConfig={chartConfig}
+                chartConfig={pieConfig}
                 accessor="population"
                 backgroundColor="transparent"
                 paddingLeft={dynamicPaddingLeft}
                 hasLegend={false}
                 style={{ alignSelf: 'center' }}
               />
-
-              {/* Centro branco (donut) posicionado no centro do container amplo */}
+              {/* buraco do donut */}
               <View
                 style={{
                   position: 'absolute',
-                  top: '50%',
-                  left: '50%',
-                  width: innerRadius,
-                  height: innerRadius,
+                  top: '50%', left: '50%',
+                  width: innerRadius, height: innerRadius,
                   borderRadius: innerRadius / 2,
                   backgroundColor: colors.background,
                   marginTop: -innerRadius / 2,
                   marginLeft: -innerRadius / 2,
+                  alignItems: 'center',
+                  justifyContent: 'center',
                 }}
-              />
-            </View>
-
-            {/* Legendas customizadas abaixo do gráfico */}
-            <View style={{ flexDirection: 'row', marginTop: 20, justifyContent: 'center', gap: 30 }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                <View style={{ width: 12, height: 12, borderRadius: 2, backgroundColor: '#4CAF50' }} />
-                <Text style={{ color: colors.text, fontSize: 12 }}>
-                  {pieChartData[0].name}: {pieChartData[0].population.toFixed(1)}%
+              >
+                {/* percentual central */}
+                <Text style={[styles.donutPct, { color: colors.text }]}>
+                  {pctGasto.toFixed(0)}%
                 </Text>
-              </View>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                <View style={{ width: 12, height: 12, borderRadius: 2, backgroundColor: '#F44336' }} />
-                <Text style={{ color: colors.text, fontSize: 12 }}>
-                  {pieChartData[1].name}: {pieChartData[1].population.toFixed(1)}%
-                </Text>
+                <Text style={[styles.donutLabel, { color: colors.text + '60' }]}>gasto</Text>
               </View>
             </View>
           </View>
+
+          {/* legenda */}
+          <View style={styles.legendRow}>
+            <LegendItem color={PIE_INCOME} label="Disponível" value={`${pctDisponivel.toFixed(1)}%`} colors={colors} />
+            <LegendItem color={PIE_EXPENSE} label="Gasto" value={`${pctGasto.toFixed(1)}%`} colors={colors} />
+          </View>
+
+          {/* saldo */}
+          <View style={[styles.saldoContainer, { borderColor: colors.text + '15' }]}>
+            <Text style={[styles.saldoLabel, { color: colors.text + '55' }]}>Saldo</Text>
+            <Text style={[styles.saldoValue, { color: colors.text }]}>{formatCurrency(saldo)}</Text>
+          </View>
         </View>
 
-        {/* Página 2: Gráfico de Barras */}
-        <View style={{ width: screenWidth, alignItems: 'center', justifyContent: 'center' }}>
-          <View style={[styles.chartContainer]}>
-            <Text style={[styles.chartTitle, { color: colors.text }]}>
-              Parcelas nos Próximos Meses
-            </Text>
-            <Text style={[styles.chartSubtitle, { color: colors.text }]}>
-              Total de parcelas a pagar por mês
-            </Text>
-            <BarChart
-              data={barChartData}
-              width={screenWidth - 40}
-              height={screenHeight / 2.5}
-              chartConfig={barChartConfig}
-              style={styles.chart} 
-              showValuesOnTopOfBars
-              fromZero
-              yAxisLabel="R$ "
-              yAxisSuffix=""
-              segments={4}
-              withHorizontalLabels={true}
-              withVerticalLabels={true}
-            />
+        {/* evolução mensal */}
+        <View style={[styles.page, { width: screenWidth, justifyContent: 'center', paddingBottom: 60 }]}>
+      
+          <Text style={[styles.pageSubtitle, { color: colors.text + '55', alignSelf: 'center', marginBottom: 32 }]}>
+            Próximos 6 meses
+          </Text>
+          
+          <View style={styles.valuesList}>
+            {barChartData.labels.map((label, index) => (
+              <View key={index} style={styles.valueItem}>
+                <Text style={[styles.valueLabel, { color: colors.text + '40' }]}>{label}</Text>
+                <Text style={[styles.valueAmount, { color: colors.text }]}>
+                  {formatCurrency(barChartData.datasets[0].data[index])}
+                </Text>
+              </View>
+            ))}
           </View>
         </View>
       </ScrollView>
-
     </View>
   );
 });
+
+const StatCard = ({ label, value, accent, colors }) => (
+  <View style={styles.statCard}>
+    <View style={[styles.statDot, { backgroundColor: accent }]} />
+    <Text style={[styles.statLabel, { color: colors.text + '55' }]}>{label}</Text>
+    <Text style={[styles.statValue, { color: colors.text }]}>{value}</Text>
+  </View>
+);
+
+const LegendItem = ({ color, label, value, colors }) => (
+  <View style={styles.legendItem}>
+    <View style={[styles.legendSwatch, { backgroundColor: color }]} />
+    <Text style={[styles.legendText, { color: colors.text + '80' }]}>{label}</Text>
+    <Text style={[styles.legendValue, { color: colors.text }]}>{value}</Text>
+  </View>
+);
 
 export default Charts;
 
@@ -351,56 +303,169 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  navigation: {
+
+  tabBar: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginTop: 15,
-    padding: 10,
-    paddingHorizontal: 25,
-  },
-  navButton: {
-    alignItems: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    flex: 1,
-  },
-  navButtonText: {
-    fontSize: 11,
-    marginTop: 4,
-    textAlign: 'center',
-  },
-  content: {
-    flexGrow: 1,
-    alignItems: 'center',
-  },
-  chartContainer: {
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-    paddingVertical: 20, 
-    width: '100%',
-  },
-  chartTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  chartSubtitle: {
-    fontSize: 14,
-    marginBottom: 20,
-    textAlign: 'center',
-    opacity: 0.7,
-  },
-  chart: {
     marginTop: 16,
-    alignSelf: 'center',
-    borderRadius: 12,
+    marginHorizontal: 24,
+    borderBottomWidth: 1,
   },
-  emptyText: {
-    textAlign: 'center',
+  tab: {
+    flex: 1,
+    alignItems: 'center',
+    paddingBottom: 12,
+    paddingTop: 4,
+    position: 'relative',
+  },
+  tabText: {
+    fontSize: 13,
+    letterSpacing: 0.2,
+    fontWeight: '500',
+  },
+  tabIndicator: {
+    position: 'absolute',
+    bottom: -1,
+    height: 2,
+    width: '60%',
+    borderRadius: 2,
+  },
+
+  scrollContent: {
+    alignItems: 'flex-start',
+  },
+  page: {
+    paddingHorizontal: 24,
+    paddingTop: 28,
+    alignItems: 'center',
+  },
+
+  statsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+    marginBottom: 28,
+  },
+  statCard: {
+    flex: 1,
+    alignItems: 'center',
+    gap: 4,
+  },
+  statDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    marginBottom: 4,
+  },
+  statLabel: {
+    fontSize: 11,
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
+  },
+  statValue: {
+    fontSize: 18,
+    fontWeight: '600',
+    letterSpacing: -0.5,
+  },
+  statDivider: {
+    width: 1,
+    height: 36,
+    marginHorizontal: 12,
+  },
+
+  donutWrapper: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  donutPct: {
+    fontSize: 28,
+    fontWeight: '700',
+    letterSpacing: -1,
+  },
+  donutLabel: {
+    fontSize: 11,
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
+    marginTop: -2,
+  },
+
+  legendRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 32,
+    marginTop: 24,
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  legendSwatch: {
+    width: 8,
+    height: 8,
+    borderRadius: 2,
+  },
+  legendText: {
+    fontSize: 12,
+  },
+  legendValue: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+
+  saldoContainer: {
+    marginTop: 24,
+    width: '100%',
+    borderTopWidth: 1,
+    paddingTop: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  saldoLabel: {
+    fontSize: 12,
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
+  },
+  saldoValue: {
+    fontSize: 20,
+    fontWeight: '700',
+    letterSpacing: -0.5,
+  },
+
+  pageTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    letterSpacing: -0.5,
+    alignSelf: 'flex-start',
+  },
+  pageSubtitle: {
+    fontSize: 13,
+    alignSelf: 'flex-start',
+    marginTop: 4,
+    letterSpacing: 0.2,
+  },
+
+  valuesList: {
+    width: '100%',
+    paddingHorizontal: 20,
+    gap: 16,
+  },
+  valueItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'baseline',
+    paddingVertical: 8,
+    borderBottomWidth: 0.5,
+    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+  },
+  valueLabel: {
     fontSize: 16,
-    marginTop: 40,
-    opacity: 0.6,
+    fontWeight: '400',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  valueAmount: {
+    fontSize: 20,
+    fontWeight: '600',
   },
 });
-

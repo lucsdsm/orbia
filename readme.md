@@ -9,21 +9,21 @@ Aplicativo de controle financeiro pessoal minimalista e intuitivo, desenvolvido 
 ## ✨ Funcionalidades
 
 ### Gestão Financeira
-- ✅ Adicionar, editar e remover **receitas** e **despesas**
-- ✅ Categorizar despesas como **fixas** ou **parceladas**
-- ✅ **Gerenciamento completo de cartões**: Criar, editar e excluir cartões personalizados
-- ✅ Vincular despesas a **cartões de crédito** personalizados
-- ✅ Definir **limite de crédito** para cada cartão
-- ✅ Acompanhar progresso de **parcelas** com indicador visual
-- ✅ Saldo editável com persistência automática
+- Adicionar, editar e remover **receitas** e **despesas**
+- Categorizar despesas como **fixas** ou **parceladas**
+- **Gerenciamento completo de cartões**: Criar, editar e excluir cartões personalizados
+- Vincular despesas a **cartões de crédito** personalizados
+- Definir **limite de crédito** para cada cartão
+- Acompanhar progresso de **parcelas** com indicador visual
+- Saldo editável com persistência automática
 
 ### Visualizações
-- ✅ **Início**: Saldo, Superávite e Previsão de Saldo
-- ✅ **Itens**: Lista completa de receitas e despesas com badges de cartão
-- ✅ **Por Mês**: Agrupamento por mês/ano com totais e parcelas restantes
-- ✅ **Por Cartão**: Agrupamento por cartão com barra de utilização de limite
-- ✅ **Cartões**: Lista de cartões com visualização de limite utilizado
-- ✅ **Configurações**: Backup, importação e gerenciamento de dados
+- **Início**: Saldo, Superávite e Previsão de Saldo
+- **Itens**: Lista completa de receitas e despesas com badges de cartão
+- **Por Mês**: Agrupamento por mês/ano com totais e parcelas restantes
+- **Por Cartão**: Agrupamento por cartão com barra de utilização de limite
+- **Cartões**: Lista de cartões com visualização de limite utilizado
+- **Configurações**: Backup, importação e gerenciamento de dados
 
 ## 🛠️ Tecnologias
 
@@ -75,7 +75,7 @@ npx expo start
 <br>
 <p align="center">
   Desenvolvido por <strong>lucsdsm</strong> <br>
-  Versão: <strong>1.0.4</strong> 
+  Versão: <strong>1.0.5</strong> 
 </p>
 
 

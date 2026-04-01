@@ -2,10 +2,6 @@
 
 Aplicativo de controle financeiro pessoal minimalista e intuitivo, desenvolvido em React Native com Expo.
 
-<p align="center">
-  <img src="https://i.imgur.com/XxMxaJ7.png" alt="Orbia App" />
-</p>
-
 ## ✨ Funcionalidades
 
 ### Gestão Financeira

@@ -82,6 +82,10 @@ export const CartoesProvider = ({ children }) => {
         adicionarCartao,
         editarCartao,
         deletarCartao,
+        // Aliases para compatibilidade com telas legadas
+        addCartao: adicionarCartao,
+        updateCartao: editarCartao,
+        deleteCartao: deletarCartao,
       }}
     >
       {children}
